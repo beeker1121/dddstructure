@@ -6,7 +6,7 @@ type Database interface {
 	GetByID(id uint) (*Accounting, error)
 }
 
-// Merchant defines the merchant.
+// Accounting defines an accounting entry.
 type Accounting struct {
 	ID         uint
 	MerchantID uint

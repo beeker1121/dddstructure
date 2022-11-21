@@ -46,7 +46,7 @@ func (c *Core) Create(params *CreateParams) (*Merchant, error) {
 	// Map to core type.
 	corem := &Merchant{
 		ID:    m.ID,
-		Name:  m.Email,
+		Name:  m.Name,
 		Email: m.Email,
 	}
 

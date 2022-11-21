@@ -19,12 +19,10 @@ func New(c *core.Core) *Service {
 
 // Accounting defines an accounting entry.
 type Accounting struct {
-	ID           uint
-	MerchantID   uint
-	MerchantName string
-	UserID       uint
-	UserName     string
-	AmountDue    uint
+	ID         uint
+	MerchantID uint
+	UserID     uint
+	AmountDue  uint
 }
 
 // CreateParams defines the Create parameters.
@@ -48,26 +46,12 @@ func (s *Service) Create(params *CreateParams) (*Accounting, error) {
 		return nil, err
 	}
 
-	// Get the merchant information.
-	m, err := s.c.Merchant.GetByID(params.MerchantID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get the user information.
-	u, err := s.c.User.GetByID(params.UserID)
-	if err != nil {
-		return nil, err
-	}
-
 	// Map to accounting type.
 	servicea := &Accounting{
-		ID:           a.ID,
-		MerchantID:   a.MerchantID,
-		MerchantName: m.Name,
-		UserID:       a.UserID,
-		UserName:     u.Name,
-		AmountDue:    a.AmountDue,
+		ID:         a.ID,
+		MerchantID: a.MerchantID,
+		UserID:     a.UserID,
+		AmountDue:  a.AmountDue,
 	}
 
 	return servicea, nil
@@ -81,36 +65,22 @@ func (s *Service) GetByID(id uint) (*Accounting, error) {
 		return nil, err
 	}
 
-	// Get the merchant information.
-	m, err := s.c.Merchant.GetByID(a.MerchantID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get the user information.
-	u, err := s.c.User.GetByID(a.UserID)
-	if err != nil {
-		return nil, err
-	}
-
 	// Map to service type.
 	servicea := &Accounting{
-		ID:           a.ID,
-		MerchantID:   a.MerchantID,
-		MerchantName: m.Name,
-		UserID:       a.UserID,
-		UserName:     u.Name,
-		AmountDue:    a.AmountDue,
+		ID:         a.ID,
+		MerchantID: a.MerchantID,
+		UserID:     a.UserID,
+		AmountDue:  a.AmountDue,
 	}
 
 	return servicea, nil
 }
 
 // GetAllByMerchantID gets all accounting entries for the given merchant ID.
-func (s *Service) GetAllByMerchantID(id uint) ([]*Accounting, error) {
-	// Get accounting entries by merchant ID.
-	a, err := s.c.Accounting.GetAllByMerchantID(id)
-	if err != nil {
-		return nil, err
-	}
-}
+// func (s *Service) GetAllByMerchantID(id uint) ([]*Accounting, error) {
+// 	// Get accounting entries by merchant ID.
+// 	a, err := s.c.Accounting.GetAllByMerchantID(id)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// }

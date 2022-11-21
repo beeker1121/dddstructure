@@ -46,7 +46,7 @@ func (c *Core) Create(params *CreateParams) (*User, error) {
 	// Map to core type.
 	coreu := &User{
 		ID:    u.ID,
-		Name:  u.Email,
+		Name:  u.Name,
 		Email: u.Email,
 	}
 
