@@ -56,17 +56,17 @@ func (c *Core) Create(params *CreateParams) (*User, error) {
 // GetByID gets a user by the given ID.
 func (c *Core) GetByID(id uint) (*User, error) {
 	// Get user by ID.
-	m, err := c.s.User.GetByID(id)
+	u, err := c.s.User.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
 
 	// Map to core type.
-	corem := &User{
-		ID:    m.ID,
-		Name:  m.Name,
-		Email: m.Email,
+	coreu := &User{
+		ID:    u.ID,
+		Name:  u.Name,
+		Email: u.Email,
 	}
 
-	return corem, nil
+	return coreu, nil
 }
