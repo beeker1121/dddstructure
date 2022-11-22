@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"dddstructure/service"
-	"dddstructure/service/accounting"
 	"dddstructure/service/core"
 	"dddstructure/service/merchant"
 	"dddstructure/storage/mysql"
@@ -51,7 +50,7 @@ func main() {
 	}
 	fmt.Printf("[+] Got merchant: %+v\n", *m)
 
-	/* --- Create a new accounting entry --- */
+	/* --- Handle billing --- */
 
 	// Get the user for this merchant.
 	fmt.Println("[+] Getting user for merchant...")
@@ -61,20 +60,11 @@ func main() {
 	}
 	fmt.Printf("[+] Got user: %+v\n", *u)
 
-	// Create a new accounting entry.
-	fmt.Printf("[+] Creating a new accounting entry for merchant '%v' and user '%v'...\n", m.ID, u.ID)
-	a, err := serv.Accounting.Create(&accounting.CreateParams{
-		ID:         1,
-		MerchantID: m.ID,
-		UserID:     u.ID,
-		AmountDue:  100,
-	})
-	if err != nil {
+	// Add amount owed via billing service.
+	fmt.Println("[+] Adding amount owed via billing service...")
+	if err := serv.Billing.AddAmountDue(m.ID, u.ID, 100); err != nil {
 		panic(err)
 	}
-	fmt.Printf("[+] Created accounting entry: %+v\n", *a)
-
-	/* --- Handle billing --- */
 
 	// Get billing information for all merchants.
 	fmt.Println("[+] Getting billing information for all merchants...")
@@ -95,7 +85,7 @@ func main() {
 
 	// Getting accounting entry for the merchant we created.
 	fmt.Printf("[+] Getting accounting entry for merchant '%v'...\n", m.ID)
-	a, err = serv.Accounting.GetByID(a.ID)
+	a, err := serv.Accounting.GetByID(1)
 	if err != nil {
 		panic(err)
 	}

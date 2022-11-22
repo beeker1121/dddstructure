@@ -8,7 +8,7 @@ import (
 	"dddstructure/storage/billing"
 )
 
-var billingMap = map[uint]*billing.MerchantAmountsDue{1: &billing.MerchantAmountsDue{
+var billingMap = map[uint]*billing.MerchantAmountDue{1: &billing.MerchantAmountDue{
 	ID:           1,
 	MerchantID:   1,
 	MerchantName: "John Doe",
@@ -28,7 +28,7 @@ func New(db *sql.DB) *Database {
 }
 
 // GetMerchantAmountsDue gets all merchant amounts due.
-func (db *Database) GetMerchantAmountsDue() ([]*billing.MerchantAmountsDue, error) {
+func (db *Database) GetMerchantAmountsDue() ([]*billing.MerchantAmountDue, error) {
 	// Would call custom SQL query here to JOIN accounting, merchant, and user
 	// tables. The only entry in billingMap mocks this.
 	//
@@ -44,5 +44,5 @@ func (db *Database) GetMerchantAmountsDue() ([]*billing.MerchantAmountsDue, erro
 
 	fmt.Println("Got billing entry from MySQL database...")
 
-	return []*billing.MerchantAmountsDue{m}, nil
+	return []*billing.MerchantAmountDue{m}, nil
 }

@@ -17,7 +17,7 @@ func New(s *storage.Storage) *Core {
 }
 
 // MerchantAmountsDue defines defines the merchant amounts due.
-type MerchantAmountsDue struct {
+type MerchantAmountDue struct {
 	ID           uint
 	MerchantID   uint
 	MerchantName string
@@ -25,16 +25,16 @@ type MerchantAmountsDue struct {
 }
 
 // GetMerchantAmountsDue gets the merchant amounts due.
-func (c *Core) GetMerchantAmountsDue() ([]*MerchantAmountsDue, error) {
+func (c *Core) GetMerchantAmountsDue() ([]*MerchantAmountDue, error) {
 	// Get account entry by ID.
 	mad, err := c.s.Billing.GetMerchantAmountsDue()
 	if err != nil {
 		return nil, err
 	}
 
-	var coremad []*MerchantAmountsDue
+	var coremad []*MerchantAmountDue
 	for _, v := range mad {
-		mapped := &MerchantAmountsDue{
+		mapped := &MerchantAmountDue{
 			ID:           v.ID,
 			MerchantID:   v.MerchantID,
 			MerchantName: v.MerchantName,
