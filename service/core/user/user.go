@@ -33,6 +33,11 @@ type CreateParams struct {
 
 // Create creates a new user.
 func (c *Core) Create(params *CreateParams) (*User, error) {
+	// Handle creating an ID if one is not present.
+	if params.ID == 0 {
+		params.ID = 12345
+	}
+
 	// Get user by ID.
 	u, err := c.s.User.Create(&user.CreateParams{
 		ID:    params.ID,

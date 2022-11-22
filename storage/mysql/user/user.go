@@ -45,7 +45,7 @@ func (db *Database) GetByID(id uint) (*user.User, error) {
 		return nil, errors.New("could not find merchant")
 	}
 
-	fmt.Println("Got merchant from MySQL database...")
+	fmt.Println("Got user from MySQL database...")
 
 	return u, nil
 }

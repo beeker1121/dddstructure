@@ -64,5 +64,7 @@ func (db *Database) UpdateByID(id uint, params *accounting.UpdateParams) (*accou
 	a.AmountDue = params.AmountDue
 	accountingMap[id] = a
 
+	fmt.Printf("Updated accounting entry '%v'...\n", a.ID)
+
 	return a, nil
 }
