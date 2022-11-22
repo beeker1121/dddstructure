@@ -39,7 +39,7 @@ func (db *Database) Create(params *accounting.CreateParams) (*accounting.Account
 	return a, nil
 }
 
-// GetByID gets a merchant by the given ID.
+// GetByID gets an accounting entry by the given ID.
 func (db *Database) GetByID(id uint) (*accounting.Accounting, error) {
 	a, ok := accountingMap[id]
 	if !ok {
@@ -47,6 +47,22 @@ func (db *Database) GetByID(id uint) (*accounting.Accounting, error) {
 	}
 
 	fmt.Println("Got accounting entry from MySQL database...")
+
+	return a, nil
+}
+
+// UpdateByID updates the given accounting entry by ID.
+func (db *Database) UpdateByID(id uint, params *accounting.UpdateParams) (*accounting.Accounting, error) {
+	a, ok := accountingMap[id]
+	if !ok {
+		return nil, errors.New("could not find accounting entry for update")
+	}
+
+	// Update the accounting entry.
+	a.MerchantID = params.MerchantID
+	a.UserID = params.UserID
+	a.AmountDue = params.AmountDue
+	accountingMap[id] = a
 
 	return a, nil
 }

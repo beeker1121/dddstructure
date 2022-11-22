@@ -4,6 +4,7 @@ package accounting
 type Database interface {
 	Create(params *CreateParams) (*Accounting, error)
 	GetByID(id uint) (*Accounting, error)
+	UpdateByID(id uint, params *UpdateParams) (*Accounting, error)
 }
 
 // Accounting defines an accounting entry.
@@ -17,6 +18,13 @@ type Accounting struct {
 // CreateParams defines the create parameters.
 type CreateParams struct {
 	ID         uint
+	MerchantID uint
+	UserID     uint
+	AmountDue  uint
+}
+
+// UpdateParams defines the create parameters.
+type UpdateParams struct {
 	MerchantID uint
 	UserID     uint
 	AmountDue  uint

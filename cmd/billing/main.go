@@ -84,23 +84,20 @@ func main() {
 	}
 	for _, v := range b {
 		fmt.Printf("[+] Got billing information for merchant: %+v\n", *v)
+
+		// Add amount paid.
+		fmt.Println("[+] Adding 100 as amount paid...")
+		err = serv.Billing.AddAmountPaid(v.ID, 100)
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	// // Mark as paid.
-	// fmt.Println("[+] Marking as paid...")
-	// err = serv.Billing.AddPayment(billing.AddPaymentParams{
-	// 	MerchantID: m.ID,
-	// 	UserID:     u.ID,
-	// 	Amount:     100,
-	// })
-
-	// // Get billing information for all merchants.
-	// fmt.Println("[+] Getting billing information for all merchants...")
-	// b, err = serv.Billing.GetMerchantAmountsDue()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// for _, v := range b {
-	// 	fmt.Printf("[+] Got billing information for merchant: %+v\n", *v)
-	// }
+	// Getting accounting entry for the merchant we created.
+	fmt.Printf("[+] Getting accounting entry for merchant '%v'...\n", m.ID)
+	a, err = serv.Accounting.GetByID(a.ID)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("[+] Got accounting entry: %+v\n", *a)
 }

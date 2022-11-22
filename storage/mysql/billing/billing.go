@@ -36,7 +36,7 @@ func (db *Database) GetMerchantAmountsDue() ([]*billing.MerchantAmountsDue, erro
 	// and setting data to and from the database. If we need to create a
 	// separate storage implementation that does a JOIN on multiple tables, ie
 	// just SELECT and JOIN... this does not implement any business logic and
-	// is deemed ok to do.
+	// can work within the 'storage' domain.
 	m, ok := billingMap[1]
 	if !ok {
 		return nil, errors.New("could not find billing entry")

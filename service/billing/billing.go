@@ -2,6 +2,7 @@ package billing
 
 import (
 	"dddstructure/service/core"
+	"dddstructure/service/core/accounting"
 )
 
 // Service defines the user service.
@@ -44,4 +45,26 @@ func (s *Service) GetMerchantAmountsDue() ([]*MerchantAmountsDue, error) {
 	}
 
 	return servicemad, nil
+}
+
+// AddAmountPaid deducts the given amount from the amount due for the given
+// merchant.
+func (s *Service) AddAmountPaid(accountingID, amount uint) error {
+	// Get the accounting entry.
+	a, err := s.c.Accounting.GetByID(accountingID)
+	if err != nil {
+		return err
+	}
+
+	// Modify the amount due.
+	a.AmountDue -= amount
+
+	// Update the accounting entry.
+	s.c.Accounting.UpdateByID(accountingID, &accounting.UpdateParams{
+		MerchantID: a.MerchantID,
+		UserID:     a.UserID,
+		AmountDue:  a.AmountDue,
+	})
+
+	return nil
 }
