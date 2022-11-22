@@ -20,6 +20,14 @@ Merchant creation at the true business logic level though is handled within the 
 
 This allows us to have business logic level services use core level services, and get around possible cyclical dependencies.
 
+## Billing Example
+
+Accounting is a database table, and hence has a storage level package for it. However, when handling billing... this will need to take in merchant, user, and accounting data - this should not be handled by the accounting top level service.
+
+Instead we can branch this idea out into its own packages - billing. So at the storage level, we will have a new billing package. Even though there is no billing table, this billing storage package will handle doing the custom JOIN query we need to grab merchant, user, and account data and placing it into one struct.
+
+The top level billing service will then use the other core services to handle billing (ie on payment we will want to call `service.Billing.AddAmountPaid`, and this service in part will call `core.Accounting.Update`).
+
 # Flow
 
 Storage implements interfaces to make it easy to use whatever backend database, or mix of them, we want to implement.
