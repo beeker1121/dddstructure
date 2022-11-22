@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"dddstructure/storage/user"
@@ -24,26 +25,27 @@ func New(db *sql.DB) *Database {
 
 // Create creates a new user.
 func (db *Database) Create(params *user.CreateParams) (*user.User, error) {
-	m := &user.User{
+	u := &user.User{
 		ID:    params.ID,
 		Name:  params.Name,
 		Email: params.Email,
 	}
 
-	userMap[m.ID] = m
+	userMap[u.ID] = u
 
 	fmt.Println("Created user and added to MySQL database...")
 
-	return m, nil
+	return u, nil
 }
 
 // GetByID gets a user by the given ID.
 func (db *Database) GetByID(id uint) (*user.User, error) {
-	u := &user.User{
-		ID:    1,
-		Name:  "John Doe",
-		Email: "johndoe@gmail.com",
+	u, ok := userMap[id]
+	if !ok {
+		return nil, errors.New("could not find merchant")
 	}
+
+	fmt.Println("Got merchant from MySQL database...")
 
 	return u, nil
 }

@@ -2,6 +2,7 @@ package storage
 
 import (
 	"dddstructure/storage/accounting"
+	"dddstructure/storage/billing"
 	"dddstructure/storage/merchant"
 	"dddstructure/storage/user"
 )
@@ -11,6 +12,7 @@ type Storage struct {
 	Merchant   merchant.Database
 	User       user.Database
 	Accounting accounting.Database
+	Billing    billing.Database
 }
 
 // New returns a new storage.

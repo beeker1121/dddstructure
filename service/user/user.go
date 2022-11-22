@@ -56,17 +56,17 @@ func (s *Service) Create(params *CreateParams) (*User, error) {
 // GetByID gets a user by the given ID.
 func (s *Service) GetByID(id uint) (*User, error) {
 	// Get user by ID.
-	m, err := s.c.User.GetByID(id)
+	u, err := s.c.User.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
 
 	// Map to service type.
-	servicem := &User{
-		ID:    m.ID,
-		Name:  m.Name,
-		Email: m.Email,
+	serviceu := &User{
+		ID:    u.ID,
+		Name:  u.Name,
+		Email: u.Email,
 	}
 
-	return servicem, nil
+	return serviceu, nil
 }

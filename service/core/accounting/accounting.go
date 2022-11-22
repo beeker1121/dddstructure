@@ -17,7 +17,7 @@ func New(s *storage.Storage) *Core {
 	}
 }
 
-// Accounting defines a merchant.
+// Accounting defines an accounting entry.
 type Accounting struct {
 	ID         uint
 	MerchantID uint
