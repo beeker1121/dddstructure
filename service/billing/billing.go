@@ -25,11 +25,17 @@ func (s *Service) HandleMerchantBilling() error {
 		return err
 	}
 	for _, v := range mad {
+		// Get the accounting entry.
+		a, err := s.c.Accounting.GetByID(v.ID)
+		if err != nil {
+			return err
+		}
+
 		// Add amount paid.
 		_, err = s.c.Accounting.UpdateByID(v.ID, &accounting.UpdateParams{
 			MerchantID: v.MerchantID,
 			UserID:     1,
-			AmountDue:  0,
+			AmountDue:  a.AmountDue - v.AmountDue,
 		})
 		if err != nil {
 			return err
