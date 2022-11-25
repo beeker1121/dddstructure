@@ -17,6 +17,28 @@ func New(c *core.Core) *Service {
 	}
 }
 
+// HandleMerchantBilling handles billing all merchants.
+func (s *Service) HandleMerchantBilling() error {
+	// Get billing information for all merchants.
+	mad, err := s.c.Billing.GetMerchantAmountsDue()
+	if err != nil {
+		return err
+	}
+	for _, v := range mad {
+		// Add amount paid.
+		_, err = s.c.Accounting.UpdateByID(v.ID, &accounting.UpdateParams{
+			MerchantID: v.MerchantID,
+			UserID:     1,
+			AmountDue:  0,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // MerchantAmountsDue defines defines the merchant amounts due.
 type MerchantAmountDue struct {
 	ID           uint

@@ -5,6 +5,9 @@ import (
 	"dddstructure/storage/merchant"
 )
 
+// idIncrementer handles incrementing the user IDs.
+var idIncrementer uint = 1
+
 // Core defines the core merchant service.
 type Core struct {
 	s *storage.Storage
@@ -33,6 +36,12 @@ type CreateParams struct {
 
 // Create creates a new merchant.
 func (c *Core) Create(params *CreateParams) (*Merchant, error) {
+	// Handle creating an ID if one is not present.
+	if params.ID == 0 {
+		params.ID = idIncrementer
+		idIncrementer++
+	}
+
 	// Create a merchant.
 	m, err := c.s.Merchant.Create(&merchant.CreateParams{
 		ID:    params.ID,

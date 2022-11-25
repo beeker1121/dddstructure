@@ -5,6 +5,9 @@ import (
 	"dddstructure/storage/user"
 )
 
+// idIncrementer handles incrementing the user IDs.
+var idIncrementer uint = 1
+
 // Core defines the core user service.
 type Core struct {
 	s *storage.Storage
@@ -35,7 +38,8 @@ type CreateParams struct {
 func (c *Core) Create(params *CreateParams) (*User, error) {
 	// Handle creating an ID if one is not present.
 	if params.ID == 0 {
-		params.ID = 12345
+		params.ID = idIncrementer
+		idIncrementer++
 	}
 
 	// Get user by ID.
