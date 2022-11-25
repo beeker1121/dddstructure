@@ -2,7 +2,6 @@ package billing
 
 import (
 	"dddstructure/service/core"
-	"dddstructure/service/core/accounting"
 )
 
 // Service defines the user service.
@@ -25,19 +24,7 @@ func (s *Service) HandleMerchantBilling() error {
 		return err
 	}
 	for _, v := range mad {
-		// Get the accounting entry.
-		a, err := s.c.Accounting.GetByID(v.ID)
-		if err != nil {
-			return err
-		}
-
-		// Add amount paid.
-		_, err = s.c.Accounting.UpdateByID(v.ID, &accounting.UpdateParams{
-			MerchantID: v.MerchantID,
-			UserID:     1,
-			AmountDue:  a.AmountDue - v.AmountDue,
-		})
-		if err != nil {
+		if err := s.c.Billing.AddAmountPaid(v.ID, 100); err != nil {
 			return err
 		}
 	}
@@ -78,21 +65,9 @@ func (s *Service) GetMerchantAmountsDue() ([]*MerchantAmountDue, error) {
 // AddAmountPaid deducts the given amount from the amount due for the given
 // merchant.
 func (s *Service) AddAmountPaid(accountingID, amount uint) error {
-	// Get the accounting entry.
-	a, err := s.c.Accounting.GetByID(accountingID)
-	if err != nil {
+	if err := s.c.Billing.AddAmountPaid(accountingID, amount); err != nil {
 		return err
 	}
-
-	// Modify the amount due.
-	a.AmountDue -= amount
-
-	// Update the accounting entry.
-	s.c.Accounting.UpdateByID(accountingID, &accounting.UpdateParams{
-		MerchantID: a.MerchantID,
-		UserID:     a.UserID,
-		AmountDue:  a.AmountDue,
-	})
 
 	return nil
 }
@@ -100,14 +75,7 @@ func (s *Service) AddAmountPaid(accountingID, amount uint) error {
 // AddAmountDue creates a new core accounting entry for the given merchant and
 // user with the given amount.
 func (s *Service) AddAmountDue(merchantID, userID, amount uint) error {
-	// Create a new accounting entry.
-	_, err := s.c.Accounting.Create(&accounting.CreateParams{
-		ID:         1,
-		MerchantID: merchantID,
-		UserID:     userID,
-		AmountDue:  amount,
-	})
-	if err != nil {
+	if err := s.c.Billing.AddAmountDue(merchantID, userID, amount); err != nil {
 		return err
 	}
 

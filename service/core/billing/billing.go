@@ -2,6 +2,7 @@ package billing
 
 import (
 	"dddstructure/storage"
+	"dddstructure/storage/accounting"
 )
 
 // Core defines the core accounting service.
@@ -44,4 +45,43 @@ func (c *Core) GetMerchantAmountsDue() ([]*MerchantAmountDue, error) {
 	}
 
 	return coremad, nil
+}
+
+// AddAmountPaid deducts the given amount from the amount due for the given
+// merchant.
+func (c *Core) AddAmountPaid(accountingID, amount uint) error {
+	// Get the accounting entry.
+	a, err := c.s.Accounting.GetByID(accountingID)
+	if err != nil {
+		return err
+	}
+
+	// Modify the amount due.
+	a.AmountDue -= amount
+
+	// Update the accounting entry.
+	c.s.Accounting.UpdateByID(accountingID, &accounting.UpdateParams{
+		MerchantID: a.MerchantID,
+		UserID:     a.UserID,
+		AmountDue:  a.AmountDue,
+	})
+
+	return nil
+}
+
+// AddAmountDue creates a new core accounting entry for the given merchant and
+// user with the given amount.
+func (c *Core) AddAmountDue(merchantID, userID, amount uint) error {
+	// Create a new accounting entry.
+	_, err := c.s.Accounting.Create(&accounting.CreateParams{
+		ID:         1,
+		MerchantID: merchantID,
+		UserID:     userID,
+		AmountDue:  amount,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
