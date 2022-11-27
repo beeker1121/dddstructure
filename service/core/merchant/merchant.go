@@ -5,7 +5,7 @@ import (
 	"dddstructure/storage/merchant"
 )
 
-// idIncrementer handles incrementing the user IDs.
+// idIncrementer handles incrementing the merchant IDs.
 var idIncrementer uint = 1
 
 // Core defines the core merchant service.
@@ -25,6 +25,15 @@ type Merchant struct {
 	ID    uint
 	Name  string
 	Email string
+}
+
+// HasPermission checks if the merchant has the given permission.
+func (m *Merchant) HasPermission(permission string) bool {
+	if permission == "transactionModifiesInvoice" {
+		return true
+	}
+
+	return false
 }
 
 // CreateParams defines the Create parameters.
