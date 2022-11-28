@@ -94,4 +94,6 @@ func (s *Service) Pay(id uint) (*Invoice, error) {
 	// need to call the core level processors service to actually process
 	// the transaction - but a core level service should not import other
 	// core level services.
+
+	return nil, nil
 }
