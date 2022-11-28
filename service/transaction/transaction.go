@@ -54,9 +54,8 @@ func (s *Service) Process(params *ProcessParams) (*Transaction, error) {
 		return nil, err
 	}
 
-	// Map to core processor service.
-
-	// Process and get response.
+	// Use a 'processor' core service here to
+	// process the transaction.
 
 	// Create params for new core transaction.
 	createParams := &transaction.CreateParams{

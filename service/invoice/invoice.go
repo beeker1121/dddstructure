@@ -80,3 +80,18 @@ func (s *Service) GetByID(id uint) (*Invoice, error) {
 
 	return servicei, nil
 }
+
+// Pay handles paying an invoice.
+func (s *Service) Pay(id uint) (*Invoice, error) {
+	// Need to call top level transaction.Process() service... yet
+	// transaction.Process() is a 'top level' service, just like this
+	// Pay() method is, and a top level service should not import
+	// another top level service - the top level service should only
+	// import core services.
+	//
+	// If we were to move transaction.Process() to a 'core level' service,
+	// then that brings in another issue, since transaction.Process() will
+	// need to call the core level processors service to actually process
+	// the transaction - but a core level service should not import other
+	// core level services.
+}
