@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"dddstructure/service"
-	"dddstructure/service/core"
 	"dddstructure/storage/mysql"
 )
 
@@ -18,14 +17,10 @@ func main() {
 	fmt.Println("[+] Creating new MySQL storage implementation...")
 	store := mysql.New(&sql.DB{})
 
-	// Create a new core service.
-	fmt.Println("[+] Creating new core service...")
-	coreserv := core.New(store)
-
 	// Create a new service.
 	fmt.Println("[+] Creating new service...")
-	serv := service.New(coreserv)
+	serv := service.New(store)
 
 	/* --- Create merchant --- */
-	serv.Merchant.GetByID(1)
+	serv.Invoice.GetByID(1)
 }

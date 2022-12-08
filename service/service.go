@@ -1,27 +1,21 @@
 package service
 
 import (
-	"dddstructure/service/accounting"
-	"dddstructure/service/billing"
-	"dddstructure/service/core"
-	"dddstructure/service/merchant"
-	"dddstructure/service/user"
+	"dddstructure/service/invoice"
+	"dddstructure/service/transaction"
+	"dddstructure/storage"
 )
 
 // Service defines the main business logic service.
 type Service struct {
-	Merchant   *merchant.Service
-	User       *user.Service
-	Accounting *accounting.Service
-	Billing    *billing.Service
+	Invoice     *invoice.Service
+	Transaction *transaction.Service
 }
 
 // New creates a new service.
-func New(c *core.Core) *Service {
+func New(s *storage.Storage) *Service {
 	return &Service{
-		Merchant:   merchant.New(c),
-		User:       user.New(c),
-		Accounting: accounting.New(c),
-		Billing:    billing.New(c),
+		Invoice:     invoice.New(s),
+		Transaction: transaction.New(s),
 	}
 }

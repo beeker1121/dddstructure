@@ -1,19 +1,19 @@
 package invoice
 
 import (
-	"dddstructure/service/core"
-	"dddstructure/service/core/invoice"
+	"dddstructure/storage"
+	"dddstructure/storage/invoice"
 )
 
 // Service defines the invoice service.
 type Service struct {
-	c *core.Core
+	s *storage.Storage
 }
 
 // New creates a new service.
-func New(c *core.Core) *Service {
+func New(s *storage.Storage) *Service {
 	return &Service{
-		c: c,
+		s: s,
 	}
 }
 
@@ -38,7 +38,7 @@ type CreateParams struct {
 // Create creates a new invoice.
 func (s *Service) Create(params *CreateParams) (*Invoice, error) {
 	// Create an invoice.
-	i, err := s.c.Invoice.Create(&invoice.CreateParams{
+	i, err := s.s.Invoice.Create(&invoice.CreateParams{
 		ID:         params.ID,
 		BillTo:     params.BillTo,
 		PayTo:      params.PayTo,
@@ -64,7 +64,7 @@ func (s *Service) Create(params *CreateParams) (*Invoice, error) {
 // GetByID gets an invoice by the given ID.
 func (s *Service) GetByID(id uint) (*Invoice, error) {
 	// Get invoice by ID.
-	i, err := s.c.Invoice.GetByID(id)
+	i, err := s.s.Invoice.GetByID(id)
 	if err != nil {
 		return nil, err
 	}

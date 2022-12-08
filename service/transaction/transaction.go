@@ -1,19 +1,19 @@
 package transaction
 
 import (
-	"dddstructure/service/core"
-	"dddstructure/service/core/transaction"
+	"dddstructure/storage"
+	"dddstructure/storage/transaction"
 )
 
 // Service defines the transaction service.
 type Service struct {
-	c *core.Core
+	s *storage.Storage
 }
 
 // New creates a new service.
-func New(c *core.Core) *Service {
+func New(s *storage.Storage) *Service {
 	return &Service{
-		c: c,
+		s: s,
 	}
 }
 
@@ -48,11 +48,11 @@ type ProcessParams struct {
 
 // Process handles processing a transaction.
 func (s *Service) Process(params *ProcessParams) (*Transaction, error) {
-	// Get merchant.
-	m, err := s.c.Merchant.GetByID(1)
-	if err != nil {
-		return nil, err
-	}
+	// // Get merchant.
+	// m, err := s.s.Merchant.GetByID(1)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// Use a 'processor' core service here to
 	// process the transaction.
@@ -77,28 +77,45 @@ func (s *Service) Process(params *ProcessParams) (*Transaction, error) {
 	}
 
 	// Save new transaction.
-	coret, err := s.c.Transaction.Create(createParams)
+	coret, err := s.s.Transaction.Create(createParams)
 	if err != nil {
 		return nil, err
 	}
 
-	// Handle updating invoices.
-	if m.HasPermission("transactionModifiesInvoice") {
-		// Get the invoice.
-		i, err := s.c.Invoice.GetByID(1)
-		if err != nil {
+	// // Handle updating invoices.
+	// if m.HasPermission("transactionModifiesInvoice") {
+	// 	// Get the invoice.
+	// 	i, err := s.s.Invoice.GetByID(1)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+
+	// 	switch coret.Type {
+	// 	case "capture":
+	// 		// Update invoice using core service.
+	// 		i.AmountDue -= params.Amount
+	// 		i.AmountPaid += params.Amount
+
+	// 		if err := s.s.Invoice.Update(i); err != nil {
+	// 			return nil, err
+	// 		}
+	// 	}
+	// }
+
+	// Get the invoice.
+	i, err := s.s.Invoice.GetByID(1)
+	if err != nil {
+		return nil, err
+	}
+
+	switch coret.Type {
+	case "capture":
+		// Update invoice using core service.
+		i.AmountDue -= params.Amount
+		i.AmountPaid += params.Amount
+
+		if err := s.s.Invoice.Update(i); err != nil {
 			return nil, err
-		}
-
-		switch coret.Type {
-		case "capture":
-			// Update invoice using core service.
-			i.AmountDue -= params.Amount
-			i.AmountPaid += params.Amount
-
-			if err := s.c.Invoice.Update(i); err != nil {
-				return nil, err
-			}
 		}
 	}
 
