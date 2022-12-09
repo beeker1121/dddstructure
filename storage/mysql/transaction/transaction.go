@@ -24,20 +24,21 @@ func New(db *sql.DB) *Database {
 }
 
 // Create creates a new transaction.
-func (db *Database) Create(params *transaction.CreateParams) (*transaction.Transaction, error) {
-	t := &transaction.Transaction{
-		ID:             params.ID,
-		MerchantID:     params.MerchantID,
-		Type:           params.Type,
-		CardType:       params.CardType,
-		AmountCaptured: params.AmountCaptured,
+func (db *Database) Create(t *transaction.Transaction) (*transaction.Transaction, error) {
+	trans := &transaction.Transaction{
+		ID:             t.ID,
+		MerchantID:     t.MerchantID,
+		Type:           t.Type,
+		CardType:       t.CardType,
+		AmountCaptured: t.AmountCaptured,
+		InvoiceID:      t.InvoiceID,
 	}
 
-	transactionMap[t.ID] = t
+	transactionMap[trans.ID] = trans
 
 	fmt.Println("Created transaction and added to MySQL database...")
 
-	return t, nil
+	return trans, nil
 }
 
 // GetByID gets a transaction by the given ID.

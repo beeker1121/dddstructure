@@ -1,9 +1,14 @@
 package transaction
 
 import (
+	"dddstructure/dep"
+	"dddstructure/proto"
 	"dddstructure/storage"
 	"dddstructure/storage/transaction"
 )
+
+// idCounter handles increasing the ID.
+var idCounter uint = 0
 
 // Service defines the transaction service.
 type Service struct {
@@ -17,115 +22,41 @@ func New(s *storage.Storage) *Service {
 	}
 }
 
-// Transaction defines a transaction.
-type Transaction struct {
-	ID             uint
-	MerchantID     uint
-	Type           string
-	CardType       string
-	AmountCaptured uint
-}
-
-// PaymentMethod defines a payment method.
-type PaymentMethod struct {
-	Card *Card
-}
-
-// Card defines a card.
-type Card struct {
-	Number         string
-	ExpirationDate string
-}
-
-// ProcessParams defines the Process parameters.
-type ProcessParams struct {
-	ID            uint
-	MerchantID    uint
-	Type          string
-	PaymentMethod PaymentMethod
-	Amount        uint
-}
-
 // Process handles processing a transaction.
-func (s *Service) Process(params *ProcessParams) (*Transaction, error) {
-	// // Get merchant.
-	// m, err := s.s.Merchant.GetByID(1)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// Use a 'processor' core service here to
-	// process the transaction.
-
-	// Create params for new core transaction.
-	createParams := &transaction.CreateParams{
-		ID:         params.ID,
-		MerchantID: params.MerchantID,
-		Type:       params.Type,
-	}
-
-	// Fake processing transaction.
-	if params.PaymentMethod.Card != nil {
-		createParams.CardType = "visa"
-	}
-	var responseCode uint = 100
-	switch responseCode {
-	case 100:
-		if params.Type == "capture" {
-			createParams.AmountCaptured = params.Amount
-		}
+func (s *Service) Process(t *proto.Transaction) (*proto.Transaction, error) {
+	// Handle ID.
+	if t.ID == 0 {
+		t.ID = idCounter
+		idCounter++
 	}
 
 	// Save new transaction.
-	coret, err := s.s.Transaction.Create(createParams)
+	_, err := s.s.Transaction.Create(&transaction.Transaction{
+		ID:             t.ID,
+		MerchantID:     t.MerchantID,
+		Type:           t.Type,
+		CardType:       t.CardType,
+		AmountCaptured: t.AmountCaptured,
+		InvoiceID:      t.InvoiceID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	// // Handle updating invoices.
-	// if m.HasPermission("transactionModifiesInvoice") {
-	// 	// Get the invoice.
-	// 	i, err := s.s.Invoice.GetByID(1)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-
-	// 	switch coret.Type {
-	// 	case "capture":
-	// 		// Update invoice using core service.
-	// 		i.AmountDue -= params.Amount
-	// 		i.AmountPaid += params.Amount
-
-	// 		if err := s.s.Invoice.Update(i); err != nil {
-	// 			return nil, err
-	// 		}
-	// 	}
-	// }
-
-	// Get the invoice.
-	i, err := s.s.Invoice.GetByID(1)
-	if err != nil {
-		return nil, err
-	}
-
-	switch coret.Type {
-	case "capture":
-		// Update invoice using core service.
-		i.AmountDue -= params.Amount
-		i.AmountPaid += params.Amount
-
-		if err := s.s.Invoice.Update(i); err != nil {
+	// Update an invoice.
+	if t.Type == "refund" {
+		// Get the invoice.
+		i, err := dep.Invoice.GetByID(t.InvoiceID)
+		if err != nil {
 			return nil, err
 		}
-	}
 
-	// Fake map response to transaction.
-	t := &Transaction{
-		ID:             coret.ID,
-		MerchantID:     coret.MerchantID,
-		Type:           coret.Type,
-		CardType:       coret.CardType,
-		AmountCaptured: coret.AmountCaptured,
+		// Change amounts and status.
+		i.AmountDue += t.AmountCaptured
+		i.AmountPaid -= t.AmountCaptured
+		i.Status = "pending"
+
+		dep.Invoice.Update(i)
 	}
 
 	return t, nil

@@ -13,4 +13,5 @@ type Transaction struct {
 	Type           string
 	CardType       string
 	AmountCaptured uint
+	InvoiceID      uint
 }

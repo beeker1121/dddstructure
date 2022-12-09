@@ -24,20 +24,22 @@ func New(db *sql.DB) *Database {
 }
 
 // Create creates a new invoice.
-func (db *Database) Create(params *invoice.CreateParams) (*invoice.Invoice, error) {
-	i := &invoice.Invoice{
-		ID:         params.ID,
-		BillTo:     params.BillTo,
-		PayTo:      params.PayTo,
-		AmountDue:  params.AmountDue,
-		AmountPaid: params.AmountPaid,
+func (db *Database) Create(i *invoice.Invoice) (*invoice.Invoice, error) {
+	inv := &invoice.Invoice{
+		ID:         i.ID,
+		MerchantID: i.MerchantID,
+		BillTo:     i.BillTo,
+		PayTo:      i.PayTo,
+		AmountDue:  i.AmountDue,
+		AmountPaid: i.AmountPaid,
+		Status:     i.Status,
 	}
 
-	invoiceMap[i.ID] = i
+	invoiceMap[inv.ID] = inv
 
 	fmt.Println("Created invoice and added to MySQL database...")
 
-	return i, nil
+	return inv, nil
 }
 
 // GetByID gets an invoice by the given ID.
