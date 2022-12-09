@@ -78,7 +78,7 @@ func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 }
 
 func (s *Service) Update(i *proto.Invoice) error {
-	return s.s.Invoice.Update(&invoice.Invoice{
+	err := s.s.Invoice.Update(&invoice.Invoice{
 		ID:         i.ID,
 		BillTo:     i.BillTo,
 		PayTo:      i.PayTo,
@@ -86,6 +86,23 @@ func (s *Service) Update(i *proto.Invoice) error {
 		AmountPaid: i.AmountPaid,
 		Status:     i.Status,
 	})
+	if err != nil {
+		return err
+	}
+
+	// Pay the invoice using dependencies package.
+	_, err = dep.Transaction.Process(&proto.Transaction{
+		MerchantID:     1,
+		Type:           "refund",
+		CardType:       "visa",
+		AmountCaptured: 100,
+		InvoiceID:      0,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Pay handles paying an invoice.
