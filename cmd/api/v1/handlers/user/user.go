@@ -1,4 +1,4 @@
-package merchant
+package user
 
 import (
 	"fmt"
@@ -11,20 +11,20 @@ import (
 	"github.com/beeker1121/httprouter"
 )
 
-type Merchant struct {
-	ID    uint   `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+type User struct {
+	ID            uint   `json:"id"`
+	AccountTypeID uint   `json:"account_type_id"`
+	Username      string `json:"username"`
 }
 
 func New(ac *apictx.Context, router *httprouter.Router) {
 	// Handle the routes.
-	router.GET("/api/v1/merchant/:id", HandleGetMerchant(ac))
+	router.GET("/api/v1/user/:id", HandleGetUser(ac))
 }
 
-func HandleGetMerchant(ac *apictx.Context) http.HandlerFunc {
+func HandleGetUser(ac *apictx.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Get the merchant ID.
+		// Get the user ID.
 		var id uint
 		idu64, err := strconv.ParseUint(httprouter.GetParam(r, "id"), 10, 32)
 		if err != nil {
@@ -33,22 +33,22 @@ func HandleGetMerchant(ac *apictx.Context) http.HandlerFunc {
 		}
 		id = uint(idu64)
 
-		// Get the merchant.
-		servm, err := ac.Service.Merchant.GetByID(id)
+		// Get the user.
+		servu, err := ac.Service.User.GetByID(id)
 		if err != nil {
 			w.Write([]byte(err.Error()))
 			return
 		}
 
-		// Map to API merchant response.
-		m := &Merchant{
-			ID:    servm.ID,
-			Name:  servm.Name,
-			Email: servm.Email,
+		// Map to API user response.
+		u := &User{
+			ID:            servu.ID,
+			AccountTypeID: servu.AccountTypeID,
+			Username:      servu.Username,
 		}
 
 		// Respond with JSON.
-		if err := response.JSON(w, true, m); err != nil {
+		if err := response.JSON(w, true, u); err != nil {
 			fmt.Printf("error in handler: %v\n", err)
 		}
 	}

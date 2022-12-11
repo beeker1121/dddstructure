@@ -41,8 +41,9 @@ func (s *Service) Create(u *proto.User) (*proto.User, error) {
 
 	// Map to service type.
 	serviceu := &proto.User{
-		ID:       use.ID,
-		Username: use.Username,
+		ID:            use.ID,
+		AccountTypeID: use.AccountTypeID,
+		Username:      use.Username,
 	}
 
 	return serviceu, nil
