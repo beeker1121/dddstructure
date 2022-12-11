@@ -24,8 +24,6 @@ With this 'dependency' idea implemented, we can call top level service methods w
 
 This basically gives us the ability to keep services separated into their own packages, whill still being able to essnetially cyclically import top level services.
 
-Full credit to @borosr, @hajnalandor, @PumpkinSeed, @brianvoe, and @jschweihs for their ideas on how to implement this structure.
-
 ## Billing Example
 
 **This will be implemented soon**
@@ -68,3 +66,13 @@ Got invoice from MySQL database...
 Got invoice from MySQL database...
 [+] Invoice after transaction refund: {ID:1 MerchantID:1 BillTo:Bill Smith PayTo:John Doe AmountDue:100 AmountPaid:0 Status:pending}
 ```
+
+# Thanks
+
+Full credit to the following people for their ideas and help on how to implement this structure.
+
+**borosr** ([https://github.com/borosr](https://github.com/borosr))  
+**hajnalandor** ([https://github.com/hajnalandor](https://github.com/hajnalandor))  
+**PumpkinSeed** ([https://github.com/PumpkinSeed](https://github.com/PumpkinSeed))  
+**brianvoe** ([https://github.com/brianvoe](https://github.com/brianvoe))  
+**jschweihs** ([https://github.com/jschweihs](https://github.com/jschweihs))
