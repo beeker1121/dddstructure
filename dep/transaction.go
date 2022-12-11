@@ -6,6 +6,6 @@ var (
 	Transaction comm.Transaction
 )
 
-func RegisterTransaction(i comm.Transaction) {
-	Transaction = i
+func RegisterTransaction(t comm.Transaction) {
+	Transaction = t
 }

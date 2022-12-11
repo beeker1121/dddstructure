@@ -8,7 +8,7 @@ import (
 )
 
 // idCounter handles increasing the ID.
-var idCounter uint = 0
+var idCounter uint = 1
 
 // Service defines the transaction service.
 type Service struct {

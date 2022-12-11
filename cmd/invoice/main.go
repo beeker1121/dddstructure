@@ -22,14 +22,22 @@ func main() {
 	serv := service.New(store)
 
 	// Register dependencies.
+	dep.RegisterMerchant(serv.Merchant)
+	dep.RegisterUser(serv.User)
 	dep.RegisterInvoice(serv.Invoice)
 	dep.RegisterTransaction(serv.Transaction)
 
+	// Create a merchant.
+	m, err := serv.Merchant.Create(&proto.Merchant{
+		Name:  "John Doe",
+		Email: "johndoe@gmail.com",
+	})
+
 	// Create an invoice.
 	i, err := serv.Invoice.Create(&proto.Invoice{
-		MerchantID: 1,
-		BillTo:     "John Doe",
-		PayTo:      "Bill Smith",
+		MerchantID: m.ID,
+		BillTo:     "Bill Smith",
+		PayTo:      m.Name,
 		AmountDue:  100,
 		AmountPaid: 0,
 		Status:     "pending",
@@ -48,7 +56,7 @@ func main() {
 
 	// Process a transaction, will call invoice.Update service.
 	t, err := serv.Transaction.Process(&proto.Transaction{
-		MerchantID:     1,
+		MerchantID:     i.MerchantID,
 		Type:           "refund",
 		CardType:       "visa",
 		AmountCaptured: 100,

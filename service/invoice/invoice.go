@@ -8,7 +8,7 @@ import (
 )
 
 // idCounter handles increasing the ID.
-var idCounter uint = 0
+var idCounter uint = 1
 
 // Service defines the invoice service.
 type Service struct {
@@ -33,6 +33,7 @@ func (s *Service) Create(i *proto.Invoice) (*proto.Invoice, error) {
 	// Create an invoice.
 	inv, err := s.s.Invoice.Create(&invoice.Invoice{
 		ID:         i.ID,
+		MerchantID: i.MerchantID,
 		BillTo:     i.BillTo,
 		PayTo:      i.PayTo,
 		AmountDue:  i.AmountDue,
@@ -46,6 +47,7 @@ func (s *Service) Create(i *proto.Invoice) (*proto.Invoice, error) {
 	// Map to service type.
 	servicei := &proto.Invoice{
 		ID:         inv.ID,
+		MerchantID: inv.MerchantID,
 		BillTo:     inv.BillTo,
 		PayTo:      inv.PayTo,
 		AmountDue:  inv.AmountDue,
@@ -67,6 +69,7 @@ func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 	// Map to service type.
 	servicei := &proto.Invoice{
 		ID:         i.ID,
+		MerchantID: i.MerchantID,
 		BillTo:     i.BillTo,
 		PayTo:      i.PayTo,
 		AmountDue:  i.AmountDue,
@@ -80,6 +83,7 @@ func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 func (s *Service) Update(i *proto.Invoice) error {
 	return s.s.Invoice.Update(&invoice.Invoice{
 		ID:         i.ID,
+		MerchantID: i.MerchantID,
 		BillTo:     i.BillTo,
 		PayTo:      i.PayTo,
 		AmountDue:  i.AmountDue,
@@ -90,18 +94,6 @@ func (s *Service) Update(i *proto.Invoice) error {
 
 // Pay handles paying an invoice.
 func (s *Service) Pay(id uint) (*proto.Invoice, error) {
-	// Need to call top level transaction.Process() service... yet
-	// transaction.Process() is a 'top level' service, just like this
-	// Pay() method is, and a top level service should not import
-	// another top level service - the top level service should only
-	// import core services.
-	//
-	// If we were to move transaction.Process() to a 'core level' service,
-	// then that brings in another issue, since transaction.Process() will
-	// need to call the core level processors service to actually process
-	// the transaction - but a core level service should not import other
-	// core level services.
-
 	// Get the invoice.
 	inv, err := s.GetByID(id)
 	if err != nil {
@@ -109,7 +101,7 @@ func (s *Service) Pay(id uint) (*proto.Invoice, error) {
 	}
 
 	// Pay the invoice using dependencies package.
-	_, err = dep.Transaction.Process(&proto.Transaction{
+	t, err := dep.Transaction.Process(&proto.Transaction{
 		MerchantID:     inv.MerchantID,
 		Type:           "capture",
 		CardType:       "visa",
@@ -121,8 +113,8 @@ func (s *Service) Pay(id uint) (*proto.Invoice, error) {
 	}
 
 	// Update the invoice.
-	inv.AmountPaid = inv.AmountDue
-	inv.AmountDue -= inv.AmountDue
+	inv.AmountPaid = t.AmountCaptured
+	inv.AmountDue -= t.AmountCaptured
 	inv.Status = "paid"
 	err = s.Update(inv)
 	if err != nil {
