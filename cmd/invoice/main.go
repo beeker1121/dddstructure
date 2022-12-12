@@ -13,7 +13,7 @@ import (
 func main() {
 	fmt.Println("running...")
 
-	// Create a new mysql storage implementation.
+	// Create a new MySQL storage implementation.
 	fmt.Println("[+] Creating new MySQL storage implementation...")
 	store := mysql.New(&sql.DB{})
 

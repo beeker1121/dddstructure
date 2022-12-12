@@ -30,6 +30,11 @@ func (s *Service) Create(i *proto.Invoice) (*proto.Invoice, error) {
 		idCounter++
 	}
 
+	// Handle status.
+	if i.Status == "" {
+		i.Status = "pending"
+	}
+
 	// Create an invoice.
 	inv, err := s.s.Invoice.Create(&invoice.Invoice{
 		ID:         i.ID,
