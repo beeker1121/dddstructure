@@ -46,6 +46,16 @@ Finally, an API command-line program then can just create a new storage backend,
 
 Each package along the way only cares about what it needs to - if the API wants to accept a different request and response JSON object for instance when creating a merchant, it can create these types and simple map to and from the main services.
 
+# Concerns
+
+### 1. Infinite Recursion
+
+It's possible with this structure that service method A can call dependency method B, while the service that implements dependency method B calls dependency method A, which is implement by service method A. When this happens, the program will be in an infinite recursion loop. It can be argued this goes into developer competency, as infinite recursion remains an issue even with flat packages (function A calls function B and vice versa).
+
+### 2. Splitting Into Microservices
+
+Compared to a true DDD implementation, it may be more difficult to decouple services from one another to split them into microservices.
+
 # Sample cmd/invoice/main.go Output
 
 ```sh
