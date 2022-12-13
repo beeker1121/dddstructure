@@ -24,7 +24,7 @@ func TestProcess(t *testing.T) {
 	dep.RegisterTransaction(serv.Transaction)
 
 	// Create a merchant.
-	m, err := serv.Merchant.Create(&proto.Merchant{
+	m, err := dep.Merchant.Create(&proto.Merchant{
 		Name:  "John Doe",
 		Email: "johndoe@fluidpay.com",
 	})
