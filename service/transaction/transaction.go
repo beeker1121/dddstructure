@@ -56,7 +56,10 @@ func (s *Service) Process(t *proto.Transaction) (*proto.Transaction, error) {
 		i.AmountPaid -= t.AmountCaptured
 		i.Status = "pending"
 
-		dep.Invoice.Update(i)
+		// Update the invoice.
+		if err := dep.Invoice.Update(i); err != nil {
+			return nil, err
+		}
 	}
 
 	return t, nil
