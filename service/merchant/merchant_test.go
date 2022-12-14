@@ -1,4 +1,4 @@
-package merchant
+package merchant_test
 
 import (
 	"database/sql"
@@ -41,19 +41,5 @@ func TestCreate(t *testing.T) {
 	}
 	if m.Email != "johndoe@fluidpay.com" {
 		t.Errorf("Expected merchant email to be '%s', got '%s'", "johndoe@fluidpay.com", m.Email)
-	}
-
-	// Get user that was created.
-	u, err := dep.User.GetByID(1)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Check user.
-	if u.ID != 1 {
-		t.Errorf("Expected user ID to be '%d', got '%d'", 1, u.ID)
-	}
-	if u.AccountTypeID != m.ID {
-		t.Errorf("Expected user account type ID to be '%d', got '%d'", m.ID, u.AccountTypeID)
 	}
 }
