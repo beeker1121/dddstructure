@@ -3,6 +3,7 @@ package service
 import (
 	"dddstructure/service/invoice"
 	"dddstructure/service/merchant"
+	"dddstructure/service/processor"
 	"dddstructure/service/transaction"
 	"dddstructure/service/user"
 	"dddstructure/storage"
@@ -13,6 +14,7 @@ type Service struct {
 	Merchant    *merchant.Service
 	User        *user.Service
 	Invoice     *invoice.Service
+	Processor   *processor.Service
 	Transaction *transaction.Service
 }
 
@@ -22,6 +24,7 @@ func New(s *storage.Storage) *Service {
 		Merchant:    merchant.New(s),
 		User:        user.New(s),
 		Invoice:     invoice.New(s),
+		Processor:   processor.New(s),
 		Transaction: transaction.New(s),
 	}
 }

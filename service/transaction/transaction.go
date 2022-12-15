@@ -30,6 +30,14 @@ func (s *Service) Process(t *proto.Transaction) (*proto.Transaction, error) {
 		idCounter++
 	}
 
+	// Get the processor.
+	p := dep.Processor.GetProcessor(t)
+
+	// Process the transaction.
+	if err := p.Process(t); err != nil {
+		return nil, err
+	}
+
 	// Save new transaction.
 	_, err := s.s.Transaction.Create(&transaction.Transaction{
 		ID:             t.ID,

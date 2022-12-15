@@ -25,6 +25,7 @@ func main() {
 	dep.RegisterMerchant(serv.Merchant)
 	dep.RegisterUser(serv.User)
 	dep.RegisterInvoice(serv.Invoice)
+	dep.RegisterProcessor(serv.Processor)
 	dep.RegisterTransaction(serv.Transaction)
 
 	// Create a merchant.
