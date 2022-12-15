@@ -6,9 +6,6 @@ import (
 	"dddstructure/storage"
 )
 
-// idCounter handles increasing the ID.
-// var idCounter uint = 1
-
 // Service defines the user service.
 type Service struct {
 	s *storage.Storage
