@@ -21,6 +21,7 @@ func TestPay(t *testing.T) {
 	dep.RegisterMerchant(serv.Merchant)
 	dep.RegisterUser(serv.User)
 	dep.RegisterInvoice(serv.Invoice)
+	dep.RegisterProcessor(serv.Processor)
 	dep.RegisterTransaction(serv.Transaction)
 
 	// Create a merchant.
@@ -34,11 +35,12 @@ func TestPay(t *testing.T) {
 
 	// Create an invoice.
 	i, err := serv.Invoice.Create(&proto.Invoice{
-		MerchantID: m.ID,
-		BillTo:     "Joe Smith",
-		PayTo:      m.Name,
-		AmountDue:  100,
-		AmountPaid: 0,
+		MerchantID:    m.ID,
+		ProcessorType: "achcom",
+		BillTo:        "Joe Smith",
+		PayTo:         m.Name,
+		AmountDue:     100,
+		AmountPaid:    0,
 	})
 	if err != nil {
 		t.Fatal(err)

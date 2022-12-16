@@ -21,6 +21,7 @@ func TestProcess(t *testing.T) {
 	dep.RegisterMerchant(serv.Merchant)
 	dep.RegisterUser(serv.User)
 	dep.RegisterInvoice(serv.Invoice)
+	dep.RegisterProcessor(serv.Processor)
 	dep.RegisterTransaction(serv.Transaction)
 
 	// Create a merchant.
@@ -36,6 +37,7 @@ func TestProcess(t *testing.T) {
 	tx, err := serv.Transaction.Process(&proto.Transaction{
 		MerchantID:     m.ID,
 		Type:           "sale",
+		ProcessorType:  "achcom",
 		CardType:       "visa",
 		AmountCaptured: 100,
 	})
