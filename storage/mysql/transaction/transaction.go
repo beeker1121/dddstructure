@@ -29,6 +29,7 @@ func (db *Database) Create(t *transaction.Transaction) (*transaction.Transaction
 		ID:             t.ID,
 		MerchantID:     t.MerchantID,
 		Type:           t.Type,
+		ProcessorType:  t.ProcessorType,
 		CardType:       t.CardType,
 		AmountCaptured: t.AmountCaptured,
 		InvoiceID:      t.InvoiceID,

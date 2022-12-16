@@ -4,6 +4,7 @@ import (
 	"dddstructure/proto"
 	"dddstructure/service/processor/achcom"
 	"dddstructure/storage"
+	"errors"
 )
 
 // Service defines the user service.
@@ -18,12 +19,11 @@ func New(s *storage.Storage) *Service {
 	}
 }
 
-func (s *Service) GetProcessor(t *proto.Transaction) proto.Processor {
-	procid := "achcom"
-	if procid == "achcom" {
+func (s *Service) GetProcessor(t *proto.Transaction) (proto.Processor, error) {
+	if t.ProcessorType == "achcom" {
 		proc := &achcom.ACHCom{}
-		return proc
+		return proc, nil
 	}
 
-	return nil
+	return nil, errors.New("Could not find processor type")
 }

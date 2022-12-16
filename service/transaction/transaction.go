@@ -31,7 +31,10 @@ func (s *Service) Process(t *proto.Transaction) (*proto.Transaction, error) {
 	}
 
 	// Get the processor.
-	p := dep.Processor.GetProcessor(t)
+	p, err := dep.Processor.GetProcessor(t)
+	if err != nil {
+		return nil, err
+	}
 
 	// Process the transaction.
 	if err := p.Process(t); err != nil {
@@ -39,10 +42,11 @@ func (s *Service) Process(t *proto.Transaction) (*proto.Transaction, error) {
 	}
 
 	// Save new transaction.
-	_, err := s.s.Transaction.Create(&transaction.Transaction{
+	_, err = s.s.Transaction.Create(&transaction.Transaction{
 		ID:             t.ID,
 		MerchantID:     t.MerchantID,
 		Type:           t.Type,
+		ProcessorType:  t.ProcessorType,
 		CardType:       t.CardType,
 		AmountCaptured: t.AmountCaptured,
 		InvoiceID:      t.InvoiceID,
