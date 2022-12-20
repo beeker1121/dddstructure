@@ -1,9 +1,13 @@
 package user
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+
 	"dddstructure/proto"
 	"dddstructure/storage"
-	"dddstructure/storage/user"
 )
 
 // idCounter handles increasing the ID.
@@ -23,46 +27,57 @@ func New(s *storage.Storage) *Service {
 
 // Create creates a new user.
 func (s *Service) Create(u *proto.User) (*proto.User, error) {
-	// Handle ID.
-	if u.ID == 0 {
-		u.ID = idCounter
-		idCounter++
-	}
-
-	// Create a user.
-	use, err := s.s.User.Create(&user.User{
-		ID:            u.ID,
-		AccountTypeID: u.AccountTypeID,
-		Username:      u.Username,
-	})
+	// Marshal the user to JSON.
+	userJSON, err := json.Marshal(u)
 	if err != nil {
 		return nil, err
 	}
 
-	// Map to service type.
-	serviceu := &proto.User{
-		ID:            use.ID,
-		AccountTypeID: use.AccountTypeID,
-		Username:      use.Username,
+	// Call user microservice.
+	fmt.Println("Calling user.Create microservice...")
+	req, err := http.NewRequest("POST", "http://localhost:8081/rest/user", bytes.NewBuffer(userJSON))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Unmarshal the user.
+	var resu proto.User
+	if err := json.NewDecoder(resp.Body).Decode(&resu); err != nil {
+		return nil, err
 	}
 
-	return serviceu, nil
+	return &resu, nil
 }
 
 // GetByID gets a user by the given ID.
 func (s *Service) GetByID(id uint) (*proto.User, error) {
-	// Get user by ID.
-	u, err := s.s.User.GetByID(id)
+	// Call user microservice.
+	fmt.Println("Calling user.GetByID microservice...")
+	req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:8081/rest/user/%d", id), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// Map to service type.
-	serviceu := &proto.User{
-		ID:            u.ID,
-		AccountTypeID: u.AccountTypeID,
-		Username:      u.Username,
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Unmarshal the user.
+	var resu proto.User
+	if err := json.NewDecoder(resp.Body).Decode(&resu); err != nil {
+		return nil, err
 	}
 
-	return serviceu, nil
+	return &resu, nil
 }

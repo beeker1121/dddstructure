@@ -1,3 +1,15 @@
+# Quick Start
+
+Start the user microservice server.
+
+`go run cmd/microservice/user/main.go`
+
+This will launch the server on port `8081`.
+
+Now you can run the example invoice program.
+
+`go run cmd/invoice/main.go`
+
 # Structure
 
 This explains the structure.
