@@ -21,8 +21,8 @@ type Service struct {
 // New creates a new service.
 func New(s *storage.Storage) *Service {
 	return &Service{
-		Merchant:    merchant.New(s),
-		User:        user.New(s),
+		Merchant:    merchant.New(),
+		User:        user.New(),
 		Invoice:     invoice.New(s),
 		Processor:   processor.New(s),
 		Transaction: transaction.New(s),

@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"time"
 
-	msctx "dddstructure/cmd/microservice/user/context"
-	"dddstructure/cmd/microservice/user/rest"
-	"dddstructure/cmd/microservice/user/service"
-	"dddstructure/cmd/microservice/user/storage"
-	"dddstructure/storage/mysql/user"
+	msctx "dddstructure/cmd/microservice/merchant/context"
+	"dddstructure/cmd/microservice/merchant/rest"
+	"dddstructure/cmd/microservice/merchant/service"
+	"dddstructure/cmd/microservice/merchant/storage"
+	"dddstructure/dep"
+	"dddstructure/storage/mysql/merchant"
 
 	"github.com/beeker1121/httprouter"
 )
@@ -22,15 +23,17 @@ func main() {
 	db := &sql.DB{}
 
 	// Create a new user MySQL storage implementation.
-	userdb := user.New(db)
+	merchantdb := merchant.New(db)
 
 	// Create a new storage implementation.
 	store := &storage.Storage{
-		User: userdb,
+		Merchant: merchantdb,
 	}
 
 	// Create a new service.
 	serv := service.New(store)
+
+	dep.RegisterUser(serv.User)
 
 	// Create a new router.
 	router := httprouter.New()
@@ -43,14 +46,14 @@ func main() {
 
 	// Create a new HTTP server.
 	server := &http.Server{
-		Addr:           ":8081",
+		Addr:           ":8082",
 		Handler:        router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	fmt.Println("Running user microservice server...")
+	fmt.Println("Running merchant microservice server...")
 
 	// Start the HTTP server.
 	if err := server.ListenAndServe(); err != nil {

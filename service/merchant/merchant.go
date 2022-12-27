@@ -1,14 +1,14 @@
 package merchant
 
 import (
-	"dddstructure/dep"
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+
 	"dddstructure/proto"
 	"dddstructure/storage"
-	"dddstructure/storage/merchant"
 )
-
-// idCounter handles increasing the ID.
-var idCounter uint = 1
 
 // Service defines the merchant service.
 type Service struct {
@@ -16,63 +16,63 @@ type Service struct {
 }
 
 // New creates a new service.
-func New(s *storage.Storage) *Service {
-	return &Service{
-		s: s,
-	}
+func New() *Service {
+	return &Service{}
 }
 
 // Create creates a new merchant.
 func (s *Service) Create(m *proto.Merchant) (*proto.Merchant, error) {
-	// Handle ID.
-	if m.ID == 0 {
-		m.ID = idCounter
-		idCounter++
-	}
-
-	// Create a merchant.
-	merch, err := s.s.Merchant.Create(&merchant.Merchant{
-		ID:    m.ID,
-		Name:  m.Name,
-		Email: m.Email,
-	})
+	// Marshal the merchant to JSON.
+	merchantJSON, err := json.Marshal(m)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create a user.
-	_, err = dep.User.Create(&proto.User{
-		AccountTypeID: merch.ID,
-		Username:      "johndoe",
-	})
+	// Call merchant microservice.
+	fmt.Println("Calling merchant.Create microservice...")
+	req, err := http.NewRequest("POST", "http://localhost:8082/rest/merchant", bytes.NewBuffer(merchantJSON))
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Content-Type", "application/json")
 
-	// Map to service type.
-	servicem := &proto.Merchant{
-		ID:    merch.ID,
-		Name:  merch.Name,
-		Email: merch.Email,
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Unmarshal the merchant.
+	var resm proto.Merchant
+	if err := json.NewDecoder(resp.Body).Decode(&resm); err != nil {
+		return nil, err
 	}
 
-	return servicem, nil
+	return &resm, nil
 }
 
 // GetByID gets a merchant by the given ID.
 func (s *Service) GetByID(id uint) (*proto.Merchant, error) {
-	// Get merchant by ID.
-	m, err := s.s.Merchant.GetByID(id)
+	// Call merchant microservice.
+	fmt.Println("Calling merchant.GetByID microservice...")
+	req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:8082/rest/merchant/%d", id), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// Map to service type.
-	servicem := &proto.Merchant{
-		ID:    m.ID,
-		Name:  m.Name,
-		Email: m.Email,
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Unmarshal the merchant.
+	var resm proto.Merchant
+	if err := json.NewDecoder(resp.Body).Decode(&resm); err != nil {
+		return nil, err
 	}
 
-	return servicem, nil
+	return &resm, nil
 }

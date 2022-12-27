@@ -35,6 +35,9 @@ func main() {
 		Name:  "John Doe",
 		Email: "johndoe@gmail.com",
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	// Create an invoice.
 	fmt.Println("[+] Creating invoice...")
