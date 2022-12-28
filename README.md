@@ -4,7 +4,13 @@ Start the user microservice server.
 
 `go run cmd/microservice/user/main.go`
 
-This will launch the server on port `8081`.
+This will launch on port `8081`.
+
+Start the merchant microservice server.
+
+`go run cmd/microservice/merchant/main.go`
+
+This will launch on port `8082`.
 
 Now you can run the example invoice program.
 
