@@ -10,6 +10,7 @@ import (
 	v1 "dddstructure/cmd/api/v1"
 	"dddstructure/dep"
 	"dddstructure/service"
+	"dddstructure/service/interfaces"
 	"dddstructure/storage/mysql"
 
 	"github.com/beeker1121/httprouter"
@@ -25,6 +26,15 @@ func main() {
 	// Create a new service.
 	fmt.Println("[+] Creating new service...")
 	serv := service.New(store)
+
+	// Create services interface.
+	servi := interfaces.NewService(interfaces.NewServiceParams{
+		Merchant: serv.Merchant,
+		Invoice:  serv.Invoice,
+	})
+
+	// Set services interface to all services.
+	serv.SetServices(servi)
 
 	// Register dependencies.
 	dep.RegisterMerchant(serv.Merchant)

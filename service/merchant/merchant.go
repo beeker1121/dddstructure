@@ -3,6 +3,7 @@ package merchant
 import (
 	"dddstructure/dep"
 	"dddstructure/proto"
+	"dddstructure/service/interfaces"
 	"dddstructure/storage"
 	"dddstructure/storage/merchant"
 )
@@ -12,14 +13,19 @@ var idCounter uint = 1
 
 // Service defines the merchant service.
 type Service struct {
-	s *storage.Storage
+	storage  *storage.Storage
+	services *interfaces.Service
 }
 
 // New creates a new service.
 func New(s *storage.Storage) *Service {
 	return &Service{
-		s: s,
+		storage: s,
 	}
+}
+
+func (s *Service) SetServices(services *interfaces.Service) {
+	s.services = services
 }
 
 // Create creates a new merchant.
@@ -31,7 +37,7 @@ func (s *Service) Create(m *proto.Merchant) (*proto.Merchant, error) {
 	}
 
 	// Create a merchant.
-	merch, err := s.s.Merchant.Create(&merchant.Merchant{
+	merch, err := s.storage.Merchant.Create(&merchant.Merchant{
 		ID:    m.ID,
 		Name:  m.Name,
 		Email: m.Email,
@@ -62,7 +68,7 @@ func (s *Service) Create(m *proto.Merchant) (*proto.Merchant, error) {
 // GetByID gets a merchant by the given ID.
 func (s *Service) GetByID(id uint) (*proto.Merchant, error) {
 	// Get merchant by ID.
-	m, err := s.s.Merchant.GetByID(id)
+	m, err := s.storage.Merchant.GetByID(id)
 	if err != nil {
 		return nil, err
 	}

@@ -3,6 +3,7 @@ package invoice
 import (
 	"dddstructure/dep"
 	"dddstructure/proto"
+	"dddstructure/service/interfaces"
 	"dddstructure/storage"
 	"dddstructure/storage/invoice"
 )
@@ -12,13 +13,18 @@ var idCounter uint = 1
 
 // Service defines the invoice service.
 type Service struct {
-	s *storage.Storage
+	storage  *storage.Storage
+	services *interfaces.Service
+}
+
+func (s *Service) SetServices(services *interfaces.Service) {
+	s.services = services
 }
 
 // New creates a new service.
 func New(s *storage.Storage) *Service {
 	return &Service{
-		s: s,
+		storage: s,
 	}
 }
 
@@ -36,7 +42,7 @@ func (s *Service) Create(i *proto.Invoice) (*proto.Invoice, error) {
 	}
 
 	// Create an invoice.
-	inv, err := s.s.Invoice.Create(&invoice.Invoice{
+	inv, err := s.storage.Invoice.Create(&invoice.Invoice{
 		ID:         i.ID,
 		MerchantID: i.MerchantID,
 		BillTo:     i.BillTo,
@@ -66,7 +72,7 @@ func (s *Service) Create(i *proto.Invoice) (*proto.Invoice, error) {
 // GetByID gets an invoice by the given ID.
 func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 	// Get invoice by ID.
-	i, err := s.s.Invoice.GetByID(id)
+	i, err := s.storage.Invoice.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +92,7 @@ func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 }
 
 func (s *Service) Update(i *proto.Invoice) error {
-	return s.s.Invoice.Update(&invoice.Invoice{
+	return s.storage.Invoice.Update(&invoice.Invoice{
 		ID:         i.ID,
 		MerchantID: i.MerchantID,
 		BillTo:     i.BillTo,

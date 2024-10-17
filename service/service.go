@@ -1,6 +1,7 @@
 package service
 
 import (
+	"dddstructure/service/interfaces"
 	"dddstructure/service/invoice"
 	"dddstructure/service/merchant"
 	"dddstructure/service/transaction"
@@ -14,6 +15,11 @@ type Service struct {
 	User        *user.Service
 	Invoice     *invoice.Service
 	Transaction *transaction.Service
+}
+
+func (s *Service) SetServices(services *interfaces.Service) {
+	s.Merchant.SetServices(services)
+	s.Invoice.SetServices(services)
 }
 
 // New creates a new service.
