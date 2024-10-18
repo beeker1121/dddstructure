@@ -2,6 +2,7 @@ package user
 
 import (
 	"dddstructure/proto"
+	"dddstructure/service/interfaces"
 	"dddstructure/storage"
 	"dddstructure/storage/user"
 )
@@ -11,13 +12,18 @@ var idCounter uint = 1
 
 // Service defines the user service.
 type Service struct {
-	s *storage.Storage
+	storage  *storage.Storage
+	services *interfaces.Service
+}
+
+func (s *Service) SetServices(services *interfaces.Service) {
+	s.services = services
 }
 
 // New creates a new service.
 func New(s *storage.Storage) *Service {
 	return &Service{
-		s: s,
+		storage: s,
 	}
 }
 
@@ -30,7 +36,7 @@ func (s *Service) Create(u *proto.User) (*proto.User, error) {
 	}
 
 	// Create a user.
-	use, err := s.s.User.Create(&user.User{
+	use, err := s.storage.User.Create(&user.User{
 		ID:            u.ID,
 		AccountTypeID: u.AccountTypeID,
 		Username:      u.Username,
@@ -52,7 +58,7 @@ func (s *Service) Create(u *proto.User) (*proto.User, error) {
 // GetByID gets a user by the given ID.
 func (s *Service) GetByID(id uint) (*proto.User, error) {
 	// Get user by ID.
-	u, err := s.s.User.GetByID(id)
+	u, err := s.storage.User.GetByID(id)
 	if err != nil {
 		return nil, err
 	}

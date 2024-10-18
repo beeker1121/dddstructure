@@ -1,7 +1,6 @@
 package invoice
 
 import (
-	"dddstructure/dep"
 	"dddstructure/proto"
 	"dddstructure/service/interfaces"
 	"dddstructure/storage"
@@ -112,7 +111,7 @@ func (s *Service) Pay(id uint) (*proto.Invoice, error) {
 	}
 
 	// Pay the invoice using dependencies package.
-	t, err := dep.Transaction.Process(&proto.Transaction{
+	t, err := s.services.Transaction.Process(&proto.Transaction{
 		MerchantID:     inv.MerchantID,
 		Type:           "capture",
 		CardType:       "visa",

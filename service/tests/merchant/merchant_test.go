@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"testing"
 
-	"dddstructure/dep"
 	"dddstructure/proto"
 	"dddstructure/service"
 	"dddstructure/storage/mysql"

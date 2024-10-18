@@ -1,7 +1,6 @@
 package merchant
 
 import (
-	"dddstructure/dep"
 	"dddstructure/proto"
 	"dddstructure/service/interfaces"
 	"dddstructure/storage"
@@ -47,7 +46,7 @@ func (s *Service) Create(m *proto.Merchant) (*proto.Merchant, error) {
 	}
 
 	// Create a user.
-	_, err = dep.User.Create(&proto.User{
+	_, err = s.services.User.Create(&proto.User{
 		AccountTypeID: merch.ID,
 		Username:      "johndoe",
 	})

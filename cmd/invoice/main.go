@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"dddstructure/dep"
 	"dddstructure/proto"
 	"dddstructure/service"
 	"dddstructure/storage/mysql"
@@ -20,12 +19,6 @@ func main() {
 	// Create a new service.
 	fmt.Println("[+] Creating new service...")
 	serv := service.New(store)
-
-	// Register dependencies.
-	dep.RegisterMerchant(serv.Merchant)
-	dep.RegisterUser(serv.User)
-	dep.RegisterInvoice(serv.Invoice)
-	dep.RegisterTransaction(serv.Transaction)
 
 	// Create a merchant.
 	m, err := serv.Merchant.Create(&proto.Merchant{
