@@ -112,7 +112,7 @@ func (s *Service) Pay(id uint) (*proto.Invoice, error) {
 		return nil, err
 	}
 
-	// Pay the invoice using dependencies package.
+	// Pay the invoice using the transaction service.
 	t, err := s.services.Transaction.Process(&proto.Transaction{
 		MerchantID:     inv.MerchantID,
 		Type:           "capture",
