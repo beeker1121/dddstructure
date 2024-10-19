@@ -17,6 +17,12 @@ type Service struct {
 	Transaction *transaction.Service
 }
 
+// SetServices sets the services interface for all individual services.
+//
+// This is done so each individual service has access to all other top level
+// services in the app. One service will be able to call the function of
+// another service and vice versa, and this method gets around cyclical imports
+// within Go.
 func (s *Service) SetServices(services *interfaces.Service) {
 	s.Merchant.SetServices(services)
 	s.User.SetServices(services)

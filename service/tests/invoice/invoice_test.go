@@ -16,12 +16,6 @@ func TestPay(t *testing.T) {
 	// Create a new service.
 	serv := service.New(store)
 
-	// Register dependencies.
-	dep.RegisterMerchant(serv.Merchant)
-	dep.RegisterUser(serv.User)
-	dep.RegisterInvoice(serv.Invoice)
-	dep.RegisterTransaction(serv.Transaction)
-
 	// Create a merchant.
 	m, err := serv.Merchant.Create(&proto.Merchant{
 		Name:  "John Doe",

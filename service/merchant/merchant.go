@@ -23,6 +23,7 @@ func New(s *storage.Storage) *Service {
 	}
 }
 
+// SetServices sets the services interface.
 func (s *Service) SetServices(services *interfaces.Service) {
 	s.services = services
 }

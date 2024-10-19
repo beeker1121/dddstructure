@@ -11,6 +11,7 @@ type Service struct {
 	Transaction Transaction
 }
 
+// NewServiceParams defines the new service params.
 type NewServiceParams struct {
 	Merchant    Merchant
 	User        User
@@ -28,16 +29,19 @@ func NewService(params NewServiceParams) *Service {
 	}
 }
 
+// Merchant defines the merchant service.
 type Merchant interface {
 	Create(m *proto.Merchant) (*proto.Merchant, error)
 	GetByID(id uint) (*proto.Merchant, error)
 }
 
+// User defines the user service.
 type User interface {
 	Create(u *proto.User) (*proto.User, error)
 	GetByID(id uint) (*proto.User, error)
 }
 
+// Invoice defines the invoice service.
 type Invoice interface {
 	Create(i *proto.Invoice) (*proto.Invoice, error)
 	GetByID(id uint) (*proto.Invoice, error)
@@ -45,6 +49,7 @@ type Invoice interface {
 	Pay(id uint) (*proto.Invoice, error)
 }
 
+// Transaction defines the transaction service.
 type Transaction interface {
 	Process(t *proto.Transaction) (*proto.Transaction, error)
 }

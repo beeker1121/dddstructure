@@ -16,6 +16,7 @@ type Service struct {
 	services *interfaces.Service
 }
 
+// SetServices sets the services interface.
 func (s *Service) SetServices(services *interfaces.Service) {
 	s.services = services
 }
@@ -90,6 +91,7 @@ func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 	return servicei, nil
 }
 
+// Update handles updating an invoice.
 func (s *Service) Update(i *proto.Invoice) error {
 	return s.storage.Invoice.Update(&invoice.Invoice{
 		ID:         i.ID,

@@ -16,6 +16,7 @@ type Service struct {
 	services *interfaces.Service
 }
 
+// SetServices sets the services interface.
 func (s *Service) SetServices(services *interfaces.Service) {
 	s.services = services
 }
