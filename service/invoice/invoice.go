@@ -115,7 +115,7 @@ func (s *Service) Pay(id uint) (*proto.Invoice, error) {
 	// Pay the invoice using the transaction service.
 	t, err := s.services.Transaction.Process(&proto.TransactionProcessParams{
 		UserID:    inv.UserID,
-		Type:      "capture",
+		Type:      "sale",
 		CardType:  "visa",
 		Amount:    inv.AmountDue,
 		InvoiceID: id,

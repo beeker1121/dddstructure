@@ -8,6 +8,7 @@ type Transaction struct {
 	CardType       string
 	AmountCaptured uint
 	InvoiceID      uint
+	Status         string
 }
 
 // TransactionProcessParams defines the transaction process parameters.

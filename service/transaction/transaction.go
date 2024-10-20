@@ -44,6 +44,7 @@ func (s *Service) Process(t *proto.TransactionProcessParams) (*proto.Transaction
 		CardType:       t.CardType,
 		AmountCaptured: t.Amount,
 		InvoiceID:      t.InvoiceID,
+		Status:         "approved",
 	})
 	if err != nil {
 		return nil, err
@@ -72,6 +73,7 @@ func (s *Service) Process(t *proto.TransactionProcessParams) (*proto.Transaction
 		CardType:       st.CardType,
 		AmountCaptured: st.AmountCaptured,
 		InvoiceID:      st.InvoiceID,
+		Status:         st.Status,
 	}
 
 	return ret, nil

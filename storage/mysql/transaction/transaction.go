@@ -32,6 +32,7 @@ func (db *Database) Create(t *transaction.Transaction) (*transaction.Transaction
 		CardType:       t.CardType,
 		AmountCaptured: t.AmountCaptured,
 		InvoiceID:      t.InvoiceID,
+		Status:         t.Status,
 	}
 
 	transactionMap[trans.ID] = trans
