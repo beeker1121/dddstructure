@@ -27,7 +27,7 @@ func New(db *sql.DB) *Database {
 func (db *Database) Create(t *transaction.Transaction) (*transaction.Transaction, error) {
 	trans := &transaction.Transaction{
 		ID:             t.ID,
-		MerchantID:     t.MerchantID,
+		UserID:         t.UserID,
 		Type:           t.Type,
 		CardType:       t.CardType,
 		AmountCaptured: t.AmountCaptured,

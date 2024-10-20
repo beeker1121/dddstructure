@@ -39,7 +39,7 @@ func (s *Service) Process(t *proto.Transaction) (*proto.Transaction, error) {
 	// Save new transaction.
 	_, err := s.storage.Transaction.Create(&transaction.Transaction{
 		ID:             t.ID,
-		MerchantID:     t.MerchantID,
+		UserID:         t.UserID,
 		Type:           t.Type,
 		CardType:       t.CardType,
 		AmountCaptured: t.AmountCaptured,

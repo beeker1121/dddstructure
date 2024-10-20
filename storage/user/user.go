@@ -8,7 +8,7 @@ type Database interface {
 
 // User defines a user.
 type User struct {
-	ID            uint
-	AccountTypeID uint
-	Username      string
+	ID       uint
+	Username string
+	Email    string
 }

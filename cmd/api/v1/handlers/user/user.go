@@ -12,9 +12,9 @@ import (
 )
 
 type User struct {
-	ID            uint   `json:"id"`
-	AccountTypeID uint   `json:"account_type_id"`
-	Username      string `json:"username"`
+	ID       uint   `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }
 
 func New(ac *apictx.Context, router *httprouter.Router) {
@@ -42,9 +42,9 @@ func HandleGetUser(ac *apictx.Context) http.HandlerFunc {
 
 		// Map to API user response.
 		u := &User{
-			ID:            servu.ID,
-			AccountTypeID: servu.AccountTypeID,
-			Username:      servu.Username,
+			ID:       servu.ID,
+			Username: servu.Username,
+			Email:    servu.Email,
 		}
 
 		// Respond with JSON.

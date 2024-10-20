@@ -38,9 +38,9 @@ func (s *Service) Create(u *proto.User) (*proto.User, error) {
 
 	// Create a user.
 	use, err := s.storage.User.Create(&user.User{
-		ID:            u.ID,
-		AccountTypeID: u.AccountTypeID,
-		Username:      u.Username,
+		ID:       u.ID,
+		Username: u.Username,
+		Email:    u.Email,
 	})
 	if err != nil {
 		return nil, err
@@ -48,9 +48,9 @@ func (s *Service) Create(u *proto.User) (*proto.User, error) {
 
 	// Map to service type.
 	serviceu := &proto.User{
-		ID:            use.ID,
-		AccountTypeID: use.AccountTypeID,
-		Username:      use.Username,
+		ID:       use.ID,
+		Username: use.Username,
+		Email:    u.Email,
 	}
 
 	return serviceu, nil
@@ -66,9 +66,9 @@ func (s *Service) GetByID(id uint) (*proto.User, error) {
 
 	// Map to service type.
 	serviceu := &proto.User{
-		ID:            u.ID,
-		AccountTypeID: u.AccountTypeID,
-		Username:      u.Username,
+		ID:       u.ID,
+		Username: u.Username,
+		Email:    u.Email,
 	}
 
 	return serviceu, nil

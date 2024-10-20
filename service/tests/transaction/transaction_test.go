@@ -16,10 +16,10 @@ func TestProcess(t *testing.T) {
 	// Create a new service.
 	serv := service.New(store)
 
-	// Create a merchant.
-	m, err := serv.Merchant.Create(&proto.Merchant{
-		Name:  "John Doe",
-		Email: "johndoe@fluidpay.com",
+	// Create a user.
+	u, err := serv.User.Create(&proto.User{
+		Username: "johndoe",
+		Email:    "johndoe@fluidpay.com",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -27,7 +27,7 @@ func TestProcess(t *testing.T) {
 
 	// Process a transaction.
 	tx, err := serv.Transaction.Process(&proto.Transaction{
-		MerchantID:     m.ID,
+		UserID:         u.ID,
 		Type:           "sale",
 		CardType:       "visa",
 		AmountCaptured: 100,
@@ -40,8 +40,8 @@ func TestProcess(t *testing.T) {
 	if tx.ID != 1 {
 		t.Errorf("Expected transaction ID to be '%d', got '%d'", 1, tx.ID)
 	}
-	if tx.MerchantID != m.ID {
-		t.Errorf("Expected transaction merchant ID to be '%d', got '%d'", m.ID, tx.MerchantID)
+	if tx.UserID != u.ID {
+		t.Errorf("Expected transaction merchant ID to be '%d', got '%d'", u.ID, tx.UserID)
 	}
 	if tx.Type != "sale" {
 		t.Errorf("Expected transaction type to be '%s', got '%s'", "sale", tx.Type)

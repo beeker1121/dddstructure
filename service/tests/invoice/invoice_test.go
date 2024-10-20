@@ -16,10 +16,10 @@ func TestPay(t *testing.T) {
 	// Create a new service.
 	serv := service.New(store)
 
-	// Create a merchant.
-	m, err := serv.Merchant.Create(&proto.Merchant{
-		Name:  "John Doe",
-		Email: "johndoe@fluidpay.com",
+	// Create a user.
+	u, err := serv.User.Create(&proto.User{
+		Username: "johndoe",
+		Email:    "johndoe@fluidpay.com",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -27,9 +27,9 @@ func TestPay(t *testing.T) {
 
 	// Create an invoice.
 	i, err := serv.Invoice.Create(&proto.Invoice{
-		MerchantID: m.ID,
+		UserID:     u.ID,
 		BillTo:     "Joe Smith",
-		PayTo:      m.Name,
+		PayTo:      "John Doe",
 		AmountDue:  100,
 		AmountPaid: 0,
 	})

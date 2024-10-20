@@ -9,7 +9,7 @@ type Database interface {
 // Transaction defines the transaction.
 type Transaction struct {
 	ID             uint
-	MerchantID     uint
+	UserID         uint
 	Type           string
 	CardType       string
 	AmountCaptured uint

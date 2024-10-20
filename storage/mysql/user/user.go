@@ -26,9 +26,9 @@ func New(db *sql.DB) *Database {
 // Create creates a new user.
 func (db *Database) Create(u *user.User) (*user.User, error) {
 	use := &user.User{
-		ID:            u.ID,
-		AccountTypeID: u.AccountTypeID,
-		Username:      u.Username,
+		ID:       u.ID,
+		Username: u.Username,
+		Email:    u.Email,
 	}
 
 	userMap[use.ID] = use

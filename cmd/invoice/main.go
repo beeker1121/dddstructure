@@ -20,17 +20,20 @@ func main() {
 	fmt.Println("[+] Creating new service...")
 	serv := service.New(store)
 
-	// Create a merchant.
-	m, err := serv.Merchant.Create(&proto.Merchant{
-		Name:  "John Doe",
-		Email: "johndoe@gmail.com",
+	// Create a user.
+	u, err := serv.User.Create(&proto.User{
+		Username: "johndoe",
+		Email:    "johndoe@gmail.com",
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	// Create an invoice.
 	i, err := serv.Invoice.Create(&proto.Invoice{
-		MerchantID: m.ID,
+		UserID:     u.ID,
 		BillTo:     "Bill Smith",
-		PayTo:      m.Name,
+		PayTo:      "John Doe",
 		AmountDue:  100,
 		AmountPaid: 0,
 		Status:     "pending",
@@ -49,7 +52,7 @@ func main() {
 
 	// Process a transaction, will call invoice.Update service.
 	t, err := serv.Transaction.Process(&proto.Transaction{
-		MerchantID:     i.MerchantID,
+		UserID:         i.UserID,
 		Type:           "refund",
 		CardType:       "visa",
 		AmountCaptured: 100,

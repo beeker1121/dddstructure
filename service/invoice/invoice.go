@@ -44,7 +44,7 @@ func (s *Service) Create(i *proto.Invoice) (*proto.Invoice, error) {
 	// Create an invoice.
 	inv, err := s.storage.Invoice.Create(&invoice.Invoice{
 		ID:         i.ID,
-		MerchantID: i.MerchantID,
+		UserID:     i.UserID,
 		BillTo:     i.BillTo,
 		PayTo:      i.PayTo,
 		AmountDue:  i.AmountDue,
@@ -58,7 +58,7 @@ func (s *Service) Create(i *proto.Invoice) (*proto.Invoice, error) {
 	// Map to service type.
 	servicei := &proto.Invoice{
 		ID:         inv.ID,
-		MerchantID: inv.MerchantID,
+		UserID:     inv.UserID,
 		BillTo:     inv.BillTo,
 		PayTo:      inv.PayTo,
 		AmountDue:  inv.AmountDue,
@@ -80,7 +80,7 @@ func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 	// Map to service type.
 	servicei := &proto.Invoice{
 		ID:         i.ID,
-		MerchantID: i.MerchantID,
+		UserID:     i.UserID,
 		BillTo:     i.BillTo,
 		PayTo:      i.PayTo,
 		AmountDue:  i.AmountDue,
@@ -95,7 +95,7 @@ func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 func (s *Service) Update(i *proto.Invoice) error {
 	return s.storage.Invoice.Update(&invoice.Invoice{
 		ID:         i.ID,
-		MerchantID: i.MerchantID,
+		UserID:     i.UserID,
 		BillTo:     i.BillTo,
 		PayTo:      i.PayTo,
 		AmountDue:  i.AmountDue,
@@ -114,7 +114,7 @@ func (s *Service) Pay(id uint) (*proto.Invoice, error) {
 
 	// Pay the invoice using the transaction service.
 	t, err := s.services.Transaction.Process(&proto.Transaction{
-		MerchantID:     inv.MerchantID,
+		UserID:         inv.UserID,
 		Type:           "capture",
 		CardType:       "visa",
 		AmountCaptured: inv.AmountDue,

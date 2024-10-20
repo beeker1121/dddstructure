@@ -27,7 +27,7 @@ func New(db *sql.DB) *Database {
 func (db *Database) Create(i *invoice.Invoice) (*invoice.Invoice, error) {
 	inv := &invoice.Invoice{
 		ID:         i.ID,
-		MerchantID: i.MerchantID,
+		UserID:     i.UserID,
 		BillTo:     i.BillTo,
 		PayTo:      i.PayTo,
 		AmountDue:  i.AmountDue,

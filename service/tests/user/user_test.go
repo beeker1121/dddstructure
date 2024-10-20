@@ -16,30 +16,21 @@ func TestCreate(t *testing.T) {
 	// Create a new service.
 	serv := service.New(store)
 
-	// Create a merchant.
-	m, err := serv.Merchant.Create(&proto.Merchant{
-		Name:  "John Doe",
-		Email: "johndoe@fluidpay.com",
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	// Create a user.
 	u, err := serv.User.Create(&proto.User{
-		AccountTypeID: m.ID,
-		Username:      "johndoe",
+		Username: "johndoe",
+		Email:    "johndoe@fluidpay.com",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Check user.
-	if u.ID != 2 {
+	if u.ID != 1 {
 		t.Errorf("Expected user ID to be '%d', got '%d'", 2, u.ID)
 	}
-	if u.AccountTypeID != m.ID {
-		t.Errorf("Expected user account type ID to be '%d', got '%d'", m.ID, u.AccountTypeID)
+	if u.Email != "johndoe@fluidpay.com" {
+		t.Errorf("Expected user email to be '%s', got '%s'", "johndoe@fluidpay.com", u.Email)
 	}
 	if u.Username != "johndoe" {
 		t.Errorf("Expected user username to be '%s', got '%s'", "johndoe", u.Username)
