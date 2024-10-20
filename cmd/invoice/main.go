@@ -51,12 +51,12 @@ func main() {
 	fmt.Printf("[+] Paid invoice: %+v\n", *i)
 
 	// Process a transaction, will call invoice.Update service.
-	t, err := serv.Transaction.Process(&proto.Transaction{
-		UserID:         i.UserID,
-		Type:           "refund",
-		CardType:       "visa",
-		AmountCaptured: 100,
-		InvoiceID:      i.ID,
+	t, err := serv.Transaction.Process(&proto.TransactionProcessParams{
+		UserID:    i.UserID,
+		Type:      "refund",
+		CardType:  "visa",
+		Amount:    100,
+		InvoiceID: i.ID,
 	})
 	if err != nil {
 		panic(err)

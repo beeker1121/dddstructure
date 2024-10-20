@@ -9,3 +9,13 @@ type Transaction struct {
 	AmountCaptured uint
 	InvoiceID      uint
 }
+
+// TransactionProcessParams defines the transaction process parameters.
+type TransactionProcessParams struct {
+	ID        uint
+	UserID    uint
+	Type      string
+	CardType  string
+	Amount    uint
+	InvoiceID uint
+}

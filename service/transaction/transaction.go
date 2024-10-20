@@ -29,7 +29,7 @@ func New(s *storage.Storage) *Service {
 }
 
 // Process handles processing a transaction.
-func (s *Service) Process(t *proto.Transaction) (*proto.Transaction, error) {
+func (s *Service) Process(t *proto.TransactionProcessParams) (*proto.Transaction, error) {
 	// Handle ID.
 	if t.ID == 0 {
 		t.ID = idCounter
@@ -37,12 +37,12 @@ func (s *Service) Process(t *proto.Transaction) (*proto.Transaction, error) {
 	}
 
 	// Save new transaction.
-	_, err := s.storage.Transaction.Create(&transaction.Transaction{
+	st, err := s.storage.Transaction.Create(&transaction.Transaction{
 		ID:             t.ID,
 		UserID:         t.UserID,
 		Type:           t.Type,
 		CardType:       t.CardType,
-		AmountCaptured: t.AmountCaptured,
+		AmountCaptured: t.Amount,
 		InvoiceID:      t.InvoiceID,
 	})
 	if err != nil {
@@ -58,12 +58,21 @@ func (s *Service) Process(t *proto.Transaction) (*proto.Transaction, error) {
 		}
 
 		// Change amounts and status.
-		i.AmountDue += t.AmountCaptured
-		i.AmountPaid -= t.AmountCaptured
+		i.AmountDue += st.AmountCaptured
+		i.AmountPaid -= st.AmountCaptured
 		i.Status = "pending"
 
 		s.services.Invoice.Update(i)
 	}
 
-	return t, nil
+	ret := &proto.Transaction{
+		ID:             st.ID,
+		UserID:         st.UserID,
+		Type:           st.Type,
+		CardType:       st.CardType,
+		AmountCaptured: st.AmountCaptured,
+		InvoiceID:      st.InvoiceID,
+	}
+
+	return ret, nil
 }

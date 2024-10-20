@@ -26,11 +26,11 @@ func TestProcess(t *testing.T) {
 	}
 
 	// Process a transaction.
-	tx, err := serv.Transaction.Process(&proto.Transaction{
-		UserID:         u.ID,
-		Type:           "sale",
-		CardType:       "visa",
-		AmountCaptured: 100,
+	tx, err := serv.Transaction.Process(&proto.TransactionProcessParams{
+		UserID:   u.ID,
+		Type:     "sale",
+		CardType: "visa",
+		Amount:   100,
 	})
 	if err != nil {
 		panic(err)

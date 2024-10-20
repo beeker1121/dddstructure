@@ -42,5 +42,5 @@ type Invoice interface {
 
 // Transaction defines the transaction service.
 type Transaction interface {
-	Process(t *proto.Transaction) (*proto.Transaction, error)
+	Process(t *proto.TransactionProcessParams) (*proto.Transaction, error)
 }
