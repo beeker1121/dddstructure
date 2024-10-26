@@ -2,7 +2,6 @@ package transaction
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 
 	"dddstructure/storage/transaction"
@@ -46,7 +45,7 @@ func (db *Database) Create(t *transaction.Transaction) (*transaction.Transaction
 func (db *Database) GetByID(id uint) (*transaction.Transaction, error) {
 	m, ok := transactionMap[id]
 	if !ok {
-		return nil, errors.New("could not find transaction")
+		return nil, transaction.ErrTransactionNotFound
 	}
 
 	fmt.Println("Got transaction from MySQL database...")

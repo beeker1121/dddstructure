@@ -2,6 +2,7 @@ package invoice
 
 import (
 	"dddstructure/proto"
+	serverrors "dddstructure/service/errors"
 	"dddstructure/service/interfaces"
 	"dddstructure/storage"
 	"dddstructure/storage/invoice"
@@ -74,6 +75,11 @@ func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 	// Get invoice by ID.
 	i, err := s.storage.Invoice.GetByID(id)
 	if err != nil {
+		if err == invoice.ErrInvoiceNotFound {
+			return nil, serverrors.ErrInvoiceNotFound
+		}
+
+		// Log here.
 		return nil, err
 	}
 

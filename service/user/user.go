@@ -2,6 +2,7 @@ package user
 
 import (
 	"dddstructure/proto"
+	serverrors "dddstructure/service/errors"
 	"dddstructure/service/interfaces"
 	"dddstructure/storage"
 	"dddstructure/storage/user"
@@ -61,6 +62,11 @@ func (s *Service) GetByID(id uint) (*proto.User, error) {
 	// Get user by ID.
 	u, err := s.storage.User.GetByID(id)
 	if err != nil {
+		if err == user.ErrUserNotFound {
+			return nil, serverrors.ErrUserNotFound
+		}
+
+		// Log here.
 		return nil, err
 	}
 

@@ -2,7 +2,6 @@ package user
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 
 	"dddstructure/storage/user"
@@ -42,7 +41,7 @@ func (db *Database) Create(u *user.User) (*user.User, error) {
 func (db *Database) GetByID(id uint) (*user.User, error) {
 	m, ok := userMap[id]
 	if !ok {
-		return nil, errors.New("could not find user")
+		return nil, user.ErrUserNotFound
 	}
 
 	fmt.Println("Got user from MySQL database...")
