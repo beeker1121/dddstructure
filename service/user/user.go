@@ -30,18 +30,37 @@ func New(s *storage.Storage) *Service {
 }
 
 // Create creates a new user.
-func (s *Service) Create(u *proto.User) (*proto.User, error) {
+func (s *Service) Create(params *proto.UserCreateParams) (*proto.User, error) {
+	// Validate parameters.
+	if err := s.ValidateCreateParams(params); err != nil {
+		return nil, err
+	}
+
+	// Handle email.
+	pes := serverrors.NewParamErrors()
+	_, err := s.storage.User.GetByEmail(params.Email)
+	if err == nil {
+		pes.Add(serverrors.NewParamError("email", serverrors.ErrUserEmailExists))
+	} else if err != nil && err != user.ErrUserNotFound {
+		return nil, err
+	}
+
+	// Return if there were parameter errors.
+	if pes.Length() > 0 {
+		return nil, pes
+	}
+
 	// Handle ID.
-	if u.ID == 0 {
-		u.ID = idCounter
+	if params.ID == 0 {
+		params.ID = idCounter
 		idCounter++
 	}
 
 	// Create a user.
-	use, err := s.storage.User.Create(&user.User{
-		ID:       u.ID,
-		Username: u.Username,
-		Email:    u.Email,
+	storageu, err := s.storage.User.Create(&user.User{
+		ID:       params.ID,
+		Email:    params.Email,
+		Password: params.Password,
 	})
 	if err != nil {
 		return nil, err
@@ -49,9 +68,9 @@ func (s *Service) Create(u *proto.User) (*proto.User, error) {
 
 	// Map to service type.
 	serviceu := &proto.User{
-		ID:       use.ID,
-		Username: use.Username,
-		Email:    u.Email,
+		ID:       storageu.ID,
+		Email:    storageu.Email,
+		Password: storageu.Password,
 	}
 
 	return serviceu, nil
@@ -60,7 +79,7 @@ func (s *Service) Create(u *proto.User) (*proto.User, error) {
 // GetByID gets a user by the given ID.
 func (s *Service) GetByID(id uint) (*proto.User, error) {
 	// Get user by ID.
-	u, err := s.storage.User.GetByID(id)
+	storageu, err := s.storage.User.GetByID(id)
 	if err != nil {
 		if err == user.ErrUserNotFound {
 			return nil, serverrors.ErrUserNotFound
@@ -72,9 +91,9 @@ func (s *Service) GetByID(id uint) (*proto.User, error) {
 
 	// Map to service type.
 	serviceu := &proto.User{
-		ID:       u.ID,
-		Username: u.Username,
-		Email:    u.Email,
+		ID:       storageu.ID,
+		Email:    storageu.Email,
+		Password: storageu.Password,
 	}
 
 	return serviceu, nil

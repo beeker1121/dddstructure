@@ -17,9 +17,9 @@ func TestCreate(t *testing.T) {
 	serv := service.New(store)
 
 	// Create a user.
-	u, err := serv.User.Create(&proto.User{
-		Username: "johndoe",
+	u, err := serv.User.Create(&proto.UserCreateParams{
 		Email:    "johndoe@fluidpay.com",
+		Password: "TestPassword123",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -31,8 +31,5 @@ func TestCreate(t *testing.T) {
 	}
 	if u.Email != "johndoe@fluidpay.com" {
 		t.Errorf("Expected user email to be '%s', got '%s'", "johndoe@fluidpay.com", u.Email)
-	}
-	if u.Username != "johndoe" {
-		t.Errorf("Expected user username to be '%s', got '%s'", "johndoe", u.Username)
 	}
 }

@@ -2,7 +2,6 @@ package invoice
 
 import (
 	"database/sql"
-	"fmt"
 
 	"dddstructure/storage/invoice"
 )
@@ -36,8 +35,6 @@ func (db *Database) Create(i *invoice.Invoice) (*invoice.Invoice, error) {
 
 	invoiceMap[inv.ID] = inv
 
-	fmt.Println("Created invoice and added to MySQL database...")
-
 	return inv, nil
 }
 
@@ -47,8 +44,6 @@ func (db *Database) GetByID(id uint) (*invoice.Invoice, error) {
 	if !ok {
 		return nil, invoice.ErrInvoiceNotFound
 	}
-
-	fmt.Println("Got invoice from MySQL database...")
 
 	return i, nil
 }

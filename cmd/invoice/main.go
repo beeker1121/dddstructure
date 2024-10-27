@@ -21,9 +21,9 @@ func main() {
 	serv := service.New(store)
 
 	// Create a user.
-	u, err := serv.User.Create(&proto.User{
-		Username: "johndoe",
+	u, err := serv.User.Create(&proto.UserCreateParams{
 		Email:    "johndoe@gmail.com",
+		Password: "TestPassword123",
 	})
 	if err != nil {
 		panic(err)

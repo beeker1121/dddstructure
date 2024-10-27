@@ -2,7 +2,6 @@ package user
 
 import (
 	"database/sql"
-	"fmt"
 
 	"dddstructure/storage/user"
 )
@@ -26,25 +25,33 @@ func New(db *sql.DB) *Database {
 func (db *Database) Create(u *user.User) (*user.User, error) {
 	use := &user.User{
 		ID:       u.ID,
-		Username: u.Username,
 		Email:    u.Email,
+		Password: u.Password,
 	}
 
 	userMap[use.ID] = use
 
-	fmt.Println("Created user and added to MySQL database...")
-
 	return use, nil
 }
 
-// GetByID gets an user by the given ID.
+// GetByID gets a user by the given ID.
 func (db *Database) GetByID(id uint) (*user.User, error) {
-	m, ok := userMap[id]
+	u, ok := userMap[id]
 	if !ok {
 		return nil, user.ErrUserNotFound
 	}
 
-	fmt.Println("Got user from MySQL database...")
+	return u, nil
+}
 
-	return m, nil
+// GetByEmail gets a user by the given email.
+func (db *Database) GetByEmail(email string) (*user.User, error) {
+	// Loop through users.
+	for _, v := range userMap {
+		if v.Email == email {
+			return v, nil
+		}
+	}
+
+	return nil, user.ErrUserNotFound
 }
