@@ -1,0 +1,77 @@
+package signup
+
+import (
+	"encoding/json"
+	"net/http"
+
+	apictx "dddstructure/cmd/api/context"
+	"dddstructure/cmd/api/errors"
+	"dddstructure/cmd/api/middleware/auth"
+	"dddstructure/cmd/api/response"
+	"dddstructure/proto"
+	serverrors "dddstructure/service/errors"
+
+	"github.com/beeker1121/httprouter"
+)
+
+// New creates the routes for the signup endpoints of the API.
+func New(ac *apictx.Context, router *httprouter.Router) {
+	// Handle the routes.
+	router.POST("/api/v1/signup", HandlePost(ac))
+}
+
+// RequestPost defines the request data for the HandlePost handler.
+type RequestPost struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+// ResultPost defines the response data for the HandlePost handler.
+type ResultPost struct {
+	Data string `json:"data"`
+}
+
+func HandlePost(ac *apictx.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Parse the parameters from the request body.
+		var req RequestPost
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			errors.Default(ac.Logger, w, errors.ErrBadRequest)
+			return
+		}
+
+		// Create the user.
+		user, err := ac.Service.User.Create(&proto.UserCreateParams{
+			Email:    req.Email,
+			Password: req.Password,
+		})
+		if pes, ok := err.(*serverrors.ParamErrors); ok && err != nil {
+			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
+			return
+		} else if err != nil {
+			ac.Logger.Printf("user.Create() service error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Issue a new JWT for this user.
+		token, err := auth.NewJWT(ac, user.Password, user.ID)
+		if err != nil {
+			ac.Logger.Printf("auth.NewJWT() error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Create a new Result.
+		result := ResultPost{
+			Data: token,
+		}
+
+		// Respond with JSON.
+		if err := response.JSON(w, true, result); err != nil {
+			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+	}
+}

@@ -1,2 +1,4 @@
 github.com/beeker1121/httprouter v0.0.0-20160817010721-ee8b3818a7f5 h1:GSp5LndrnJKH+wikRoxQhHSmbAsEVwtA2pVG4nCmebI=
 github.com/beeker1121/httprouter v0.0.0-20160817010721-ee8b3818a7f5/go.mod h1:F8IJlloRMY1sNitZZ1j8kK4GlStBnk+hNIXiSrQd/yc=
+github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
+github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=

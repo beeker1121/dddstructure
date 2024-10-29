@@ -3,9 +3,12 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"time"
 
+	"dddstructure/cmd/api/config"
 	apictx "dddstructure/cmd/api/context"
 	v1 "dddstructure/cmd/api/v1"
 	"dddstructure/service"
@@ -16,6 +19,22 @@ import (
 
 func main() {
 	fmt.Println("running...")
+
+	// Parse the API configuration file.
+	cfg, err := config.ParseConfigFile("config.json")
+	if err != nil {
+		panic(err)
+	}
+
+	// Get the configuration environment variables.
+	cfg.DBHost = os.Getenv("DB_HOST")
+	cfg.DBPort = os.Getenv("DB_PORT")
+	cfg.DBName = os.Getenv("DB_NAME")
+	cfg.DBUser = os.Getenv("DB_USER")
+	cfg.DBPass = os.Getenv("DB_PASS")
+	cfg.APIHost = os.Getenv("API_HOST")
+	cfg.APIPort = os.Getenv("API_PORT")
+	cfg.JWTSecret = os.Getenv("JWT_SECRET")
 
 	// Create a new MySQL storage implementation.
 	fmt.Println("[+] Creating new MySQL storage implementation...")
@@ -29,7 +48,8 @@ func main() {
 	router := httprouter.New()
 
 	// Create a new API context.
-	ac := apictx.New(serv)
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile)
+	ac := apictx.New(cfg, logger, serv)
 
 	// Create a new v1 API.
 	v1.New(ac, router)
