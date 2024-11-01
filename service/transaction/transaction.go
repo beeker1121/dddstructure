@@ -29,21 +29,26 @@ func New(s *storage.Storage) *Service {
 }
 
 // Process handles processing a transaction.
-func (s *Service) Process(t *proto.TransactionProcessParams) (*proto.Transaction, error) {
+func (s *Service) Process(params *proto.TransactionProcessParams) (*proto.Transaction, error) {
+	// Validate parameters.
+	if err := s.ValidateProcessParams(params); err != nil {
+		return nil, err
+	}
+
 	// Handle ID.
-	if t.ID == 0 {
-		t.ID = idCounter
+	if params.ID == 0 {
+		params.ID = idCounter
 		idCounter++
 	}
 
-	// Save new transaction.
-	st, err := s.storage.Transaction.Create(&transaction.Transaction{
-		ID:             t.ID,
-		UserID:         t.UserID,
-		Type:           t.Type,
-		CardType:       t.CardType,
-		AmountCaptured: t.Amount,
-		InvoiceID:      t.InvoiceID,
+	// Create a transaction.
+	storaget, err := s.storage.Transaction.Create(&transaction.Transaction{
+		ID:             params.ID,
+		UserID:         params.UserID,
+		Type:           params.Type,
+		CardType:       params.CardType,
+		AmountCaptured: params.Amount,
+		InvoiceID:      params.InvoiceID,
 		Status:         "approved",
 	})
 	if err != nil {
@@ -51,29 +56,36 @@ func (s *Service) Process(t *proto.TransactionProcessParams) (*proto.Transaction
 	}
 
 	// Update an invoice.
-	if t.Type == "refund" {
+	if params.Type == "refund" {
 		// Get the invoice.
-		i, err := s.services.Invoice.GetByID(t.InvoiceID)
+		servicei, err := s.services.Invoice.GetByID(params.InvoiceID)
 		if err != nil {
 			return nil, err
 		}
 
 		// Change amounts and status.
-		i.AmountDue += st.AmountCaptured
-		i.AmountPaid -= st.AmountCaptured
-		i.Status = "pending"
+		servicei.AmountDue += storaget.AmountCaptured
+		servicei.AmountPaid -= storaget.AmountCaptured
+		servicei.Status = "pending"
 
-		s.services.Invoice.Update(i)
+		if err := s.services.Invoice.Update(&proto.InvoiceUpdateParams{
+			ID:         servicei.ID,
+			AmountDue:  &servicei.AmountDue,
+			AmountPaid: &servicei.AmountPaid,
+			Status:     &servicei.Status,
+		}); err != nil {
+			return nil, err
+		}
 	}
 
 	ret := &proto.Transaction{
-		ID:             st.ID,
-		UserID:         st.UserID,
-		Type:           st.Type,
-		CardType:       st.CardType,
-		AmountCaptured: st.AmountCaptured,
-		InvoiceID:      st.InvoiceID,
-		Status:         st.Status,
+		ID:             storaget.ID,
+		UserID:         storaget.UserID,
+		Type:           storaget.Type,
+		CardType:       storaget.CardType,
+		AmountCaptured: storaget.AmountCaptured,
+		InvoiceID:      storaget.InvoiceID,
+		Status:         storaget.Status,
 	}
 
 	return ret, nil

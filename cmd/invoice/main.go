@@ -30,13 +30,11 @@ func main() {
 	}
 
 	// Create an invoice.
-	i, err := serv.Invoice.Create(&proto.Invoice{
-		UserID:     u.ID,
-		BillTo:     "Bill Smith",
-		PayTo:      "John Doe",
-		AmountDue:  100,
-		AmountPaid: 0,
-		Status:     "pending",
+	i, err := serv.Invoice.Create(&proto.InvoiceCreateParams{
+		UserID:    u.ID,
+		BillTo:    "Bill Smith",
+		PayTo:     "John Doe",
+		AmountDue: 100,
 	})
 	if err != nil {
 		panic(err)
@@ -44,7 +42,9 @@ func main() {
 	fmt.Printf("[+] New invoice: %+v\n", *i)
 
 	// Pay an invoice, will call transaction.Process service.
-	i, err = serv.Invoice.Pay(i.ID)
+	i, err = serv.Invoice.Pay(i.ID, &proto.InvoicePayParams{
+		Amount: 100,
+	})
 	if err != nil {
 		panic(err)
 	}

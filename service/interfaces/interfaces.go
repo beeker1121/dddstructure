@@ -28,19 +28,19 @@ func NewService(params NewServiceParams) *Service {
 
 // User defines the user service.
 type User interface {
-	Create(u *proto.UserCreateParams) (*proto.User, error)
+	Create(params *proto.UserCreateParams) (*proto.User, error)
 	GetByID(id uint) (*proto.User, error)
 }
 
 // Invoice defines the invoice service.
 type Invoice interface {
-	Create(i *proto.Invoice) (*proto.Invoice, error)
+	Create(params *proto.InvoiceCreateParams) (*proto.Invoice, error)
 	GetByID(id uint) (*proto.Invoice, error)
-	Update(i *proto.Invoice) error
-	Pay(id uint) (*proto.Invoice, error)
+	Update(params *proto.InvoiceUpdateParams) error
+	Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, error)
 }
 
 // Transaction defines the transaction service.
 type Transaction interface {
-	Process(t *proto.TransactionProcessParams) (*proto.Transaction, error)
+	Process(params *proto.TransactionProcessParams) (*proto.Transaction, error)
 }
