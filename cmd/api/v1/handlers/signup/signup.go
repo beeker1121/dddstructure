@@ -31,6 +31,7 @@ type ResultPost struct {
 	Data string `json:"data"`
 }
 
+// HandlePost handles the /api/v1/signup POST route of the API.
 func HandlePost(ac *apictx.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Parse the parameters from the request body.

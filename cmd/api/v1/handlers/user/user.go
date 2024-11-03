@@ -30,6 +30,7 @@ type ResultGet struct {
 	Data User `json:"data"`
 }
 
+// HandleGet handles the /api/v1/user GET route of the API.
 func HandleGet(ac *apictx.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Get this user from the request context.
@@ -69,6 +70,7 @@ type ResultGetByID struct {
 	Data User `json:"data"`
 }
 
+// HandleGetByID handles the /api/v1/user/:id GET route of the API.
 func HandleGetByID(ac *apictx.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Get the user ID.
