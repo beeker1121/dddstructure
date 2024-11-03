@@ -42,6 +42,13 @@ func (db *Database) Create(i *invoice.Invoice) (*invoice.Invoice, error) {
 func (db *Database) Get(params *invoice.GetParams) ([]*invoice.Invoice, error) {
 	invoices := []*invoice.Invoice{}
 	for _, invoice := range invoiceMap {
+		// Handle user ID.
+		if params.UserID != nil {
+			if invoice.UserID != *params.UserID {
+				continue
+			}
+		}
+
 		invoices = append(invoices, invoice)
 	}
 
@@ -50,7 +57,19 @@ func (db *Database) Get(params *invoice.GetParams) ([]*invoice.Invoice, error) {
 
 // GetCount gets the count of a set of invoices.
 func (db *Database) GetCount(params *invoice.GetParams) (uint, error) {
-	return uint(len(invoiceMap)), nil
+	invoices := []*invoice.Invoice{}
+	for _, invoice := range invoiceMap {
+		// Handle user ID.
+		if params.UserID != nil {
+			if invoice.UserID != *params.UserID {
+				continue
+			}
+		}
+
+		invoices = append(invoices, invoice)
+	}
+
+	return uint(len(invoices)), nil
 }
 
 // GetByID gets an invoice by the given ID.

@@ -63,7 +63,7 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	fmt.Printf("Running server...")
+	fmt.Printf("Running server...\n")
 
 	// Start the HTTP server.
 	if err := server.ListenAndServe(); err != nil {

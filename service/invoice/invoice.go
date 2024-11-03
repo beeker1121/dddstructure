@@ -72,6 +72,11 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 
 // Get gets a set of invoices.
 func (s *Service) Get(params *proto.InvoiceGetParams) ([]*proto.Invoice, error) {
+	// Validate parameters.
+	if err := s.ValidateGetParams(params); err != nil {
+		return nil, err
+	}
+
 	// Build the invoice get parameters.
 	getParams := &invoice.GetParams{}
 
@@ -121,6 +126,11 @@ func (s *Service) Get(params *proto.InvoiceGetParams) ([]*proto.Invoice, error) 
 
 // GetCount gets the count of a set of invoices.
 func (s *Service) GetCount(params *proto.InvoiceGetParams) (uint, error) {
+	// Validate parameters.
+	if err := s.ValidateGetParams(params); err != nil {
+		return 0, err
+	}
+
 	// Build the invoice get parameters.
 	getParams := &invoice.GetParams{}
 
@@ -177,9 +187,10 @@ func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 
 // Update handles updating an invoice.
 func (s *Service) Update(params *proto.InvoiceUpdateParams) error {
-	// Check ID.
-
-	// Validate params.
+	// Validate parameters.
+	if err := s.ValidateUpdateParams(params); err != nil {
+		return err
+	}
 
 	// Get invoice from storage.
 	storagei, err := s.storage.Invoice.GetByID(*params.ID)
@@ -207,6 +218,11 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) error {
 
 // Pay handles paying an invoice.
 func (s *Service) Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, error) {
+	// Validate parameters.
+	if err := s.ValidatePayParams(params); err != nil {
+		return nil, err
+	}
+
 	// Get the invoice.
 	servicei, err := s.GetByID(id)
 	if err != nil {

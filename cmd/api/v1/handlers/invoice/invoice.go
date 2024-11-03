@@ -18,8 +18,8 @@ import (
 // New creates the routes for the invoice endpoints of the API.
 func New(ac *apictx.Context, router *httprouter.Router) {
 	// Handle the routes.
-	router.GET("/api/v1/invoice", auth.AuthenticateEndpoint(ac, HandleGet(ac)))
 	router.POST("/api/v1/invoice", auth.AuthenticateEndpoint(ac, HandlePost(ac)))
+	router.GET("/api/v1/invoice", auth.AuthenticateEndpoint(ac, HandleGet(ac)))
 }
 
 // Invoice defines an invoice.
@@ -31,6 +31,73 @@ type Invoice struct {
 	AmountDue  uint   `json:"amount_due"`
 	AmountPaid uint   `json:"amount_paid"`
 	Status     string `json:"status"`
+}
+
+// RequestPost defines the request data for the HandlePost handler.
+type RequestPost struct {
+	BillTo    string `json:"bill_to"`
+	PayTo     string `json:"pay_to"`
+	AmountDue uint   `json:"amount_due"`
+}
+
+// ResultPost defines the response data for the HandlePost handler.
+type ResultPost struct {
+	Data *Invoice `json:"data"`
+}
+
+// HandlePost handles the /api/v1/invoice POST route of the API.
+func HandlePost(ac *apictx.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Parse the parameters from the request body.
+		var req RequestPost
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			errors.Default(ac.Logger, w, errors.ErrBadRequest)
+			return
+		}
+
+		// Get this user from the request context.
+		user, err := auth.GetUserFromRequest(r)
+		if err != nil {
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Create the invoice.
+		invoice, err := ac.Service.Invoice.Create(&proto.InvoiceCreateParams{
+			UserID:    user.ID,
+			BillTo:    req.BillTo,
+			PayTo:     req.PayTo,
+			AmountDue: req.AmountDue,
+		})
+		if pes, ok := err.(*serverrors.ParamErrors); ok && err != nil {
+			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
+			return
+		} else if err != nil {
+			ac.Logger.Printf("invoice.Create() error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Create a new Result.
+		result := ResultPost{
+			Data: &Invoice{
+				ID:         invoice.ID,
+				UserID:     invoice.UserID,
+				BillTo:     invoice.BillTo,
+				PayTo:      invoice.PayTo,
+				AmountDue:  invoice.AmountDue,
+				AmountPaid: invoice.AmountPaid,
+				Status:     invoice.Status,
+			},
+		}
+
+		// Respond with JSON.
+		if err := response.JSON(w, true, result); err != nil {
+			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+	}
 }
 
 // Meta defines the response top level meta object.
@@ -176,73 +243,6 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 
 			next := "https://" + ac.Config.APIHost + "/api/v1/invoice" + offsetstr + limitstr
 			result.Links.Next = &next
-		}
-
-		// Respond with JSON.
-		if err := response.JSON(w, true, result); err != nil {
-			ac.Logger.Printf("response.JSON() error: %s\n", err)
-			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
-			return
-		}
-	}
-}
-
-// RequestPost defines the request data for the HandlePost handler.
-type RequestPost struct {
-	BillTo    string `json:"bill_to"`
-	PayTo     string `json:"pay_to"`
-	AmountDue uint   `json:"amount_due"`
-}
-
-// ResultPost defines the response data for the HandlePost handler.
-type ResultPost struct {
-	Data *Invoice `json:"data"`
-}
-
-// HandlePost handles the /api/v1/invoice POST route of the API.
-func HandlePost(ac *apictx.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// Parse the parameters from the request body.
-		var req RequestPost
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			errors.Default(ac.Logger, w, errors.ErrBadRequest)
-			return
-		}
-
-		// Get this user from the request context.
-		user, err := auth.GetUserFromRequest(r)
-		if err != nil {
-			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
-			return
-		}
-
-		// Create the invoice.
-		invoice, err := ac.Service.Invoice.Create(&proto.InvoiceCreateParams{
-			UserID:    user.ID,
-			BillTo:    req.BillTo,
-			PayTo:     req.PayTo,
-			AmountDue: req.AmountDue,
-		})
-		if pes, ok := err.(*serverrors.ParamErrors); ok && err != nil {
-			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
-			return
-		} else if err != nil {
-			ac.Logger.Printf("invoice.Create() error: %s\n", err)
-			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
-			return
-		}
-
-		// Create a new Result.
-		result := ResultPost{
-			Data: &Invoice{
-				ID:         invoice.ID,
-				UserID:     invoice.UserID,
-				BillTo:     invoice.BillTo,
-				PayTo:      invoice.PayTo,
-				AmountDue:  invoice.AmountDue,
-				AmountPaid: invoice.AmountPaid,
-				Status:     invoice.Status,
-			},
 		}
 
 		// Respond with JSON.
