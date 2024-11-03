@@ -35,6 +35,8 @@ type User interface {
 // Invoice defines the invoice service.
 type Invoice interface {
 	Create(params *proto.InvoiceCreateParams) (*proto.Invoice, error)
+	Get(params *proto.InvoiceGetParams) ([]*proto.Invoice, error)
+	GetCount(params *proto.InvoiceGetParams) (uint, error)
 	GetByID(id uint) (*proto.Invoice, error)
 	Update(params *proto.InvoiceUpdateParams) error
 	Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, error)

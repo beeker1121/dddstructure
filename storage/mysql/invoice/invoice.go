@@ -38,6 +38,21 @@ func (db *Database) Create(i *invoice.Invoice) (*invoice.Invoice, error) {
 	return inv, nil
 }
 
+// Get gets a set of invoices.
+func (db *Database) Get(params *invoice.GetParams) ([]*invoice.Invoice, error) {
+	invoices := []*invoice.Invoice{}
+	for _, invoice := range invoiceMap {
+		invoices = append(invoices, invoice)
+	}
+
+	return invoices, nil
+}
+
+// GetCount gets the count of a set of invoices.
+func (db *Database) GetCount(params *invoice.GetParams) (uint, error) {
+	return uint(len(invoiceMap)), nil
+}
+
 // GetByID gets an invoice by the given ID.
 func (db *Database) GetByID(id uint) (*invoice.Invoice, error) {
 	i, ok := invoiceMap[id]

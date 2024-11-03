@@ -69,7 +69,7 @@ func (s *Service) Process(params *proto.TransactionProcessParams) (*proto.Transa
 		servicei.Status = "pending"
 
 		if err := s.services.Invoice.Update(&proto.InvoiceUpdateParams{
-			ID:         servicei.ID,
+			ID:         &servicei.ID,
 			AmountDue:  &servicei.AmountDue,
 			AmountPaid: &servicei.AmountPaid,
 			Status:     &servicei.Status,

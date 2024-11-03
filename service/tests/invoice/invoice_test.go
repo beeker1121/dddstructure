@@ -26,12 +26,11 @@ func TestPay(t *testing.T) {
 	}
 
 	// Create an invoice.
-	i, err := serv.Invoice.Create(&proto.Invoice{
-		UserID:     u.ID,
-		BillTo:     "Joe Smith",
-		PayTo:      "John Doe",
-		AmountDue:  100,
-		AmountPaid: 0,
+	i, err := serv.Invoice.Create(&proto.InvoiceCreateParams{
+		UserID:    u.ID,
+		BillTo:    "Joe Smith",
+		PayTo:     "John Doe",
+		AmountDue: 100,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -49,7 +48,9 @@ func TestPay(t *testing.T) {
 	}
 
 	// Pay invoice.
-	i, err = serv.Invoice.Pay(i.ID)
+	i, err = serv.Invoice.Pay(i.ID, &proto.InvoicePayParams{
+		Amount: 100,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

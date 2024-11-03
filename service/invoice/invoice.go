@@ -70,6 +70,84 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 	return servicei, nil
 }
 
+// Get gets a set of invoices.
+func (s *Service) Get(params *proto.InvoiceGetParams) ([]*proto.Invoice, error) {
+	// Build the invoice get parameters.
+	getParams := &invoice.GetParams{}
+
+	// Check ID.
+	if params.ID != nil {
+		getParams.ID = params.ID
+	}
+
+	// Check user ID.
+	if params.UserID != nil {
+		getParams.UserID = params.UserID
+	}
+
+	// Check status.
+	if params.Status != nil {
+		getParams.Status = params.Status
+	}
+
+	// Get invoices from storage.
+	storageis, err := s.storage.Invoice.Get(getParams)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a new invoices slice.
+	invoices := []*proto.Invoice{}
+
+	// Loop through the set of invoices.
+	for _, i := range storageis {
+		// Create a new invoice.
+		invoice := &proto.Invoice{
+			ID:         i.ID,
+			UserID:     i.UserID,
+			BillTo:     i.BillTo,
+			PayTo:      i.PayTo,
+			AmountDue:  i.AmountDue,
+			AmountPaid: i.AmountPaid,
+			Status:     i.Status,
+		}
+
+		// Add to invoices slice
+		invoices = append(invoices, invoice)
+	}
+
+	return invoices, nil
+}
+
+// GetCount gets the count of a set of invoices.
+func (s *Service) GetCount(params *proto.InvoiceGetParams) (uint, error) {
+	// Build the invoice get parameters.
+	getParams := &invoice.GetParams{}
+
+	// Check ID.
+	if params.ID != nil {
+		getParams.ID = params.ID
+	}
+
+	// Check user ID.
+	if params.UserID != nil {
+		getParams.UserID = params.UserID
+	}
+
+	// Check status.
+	if params.Status != nil {
+		getParams.Status = params.Status
+	}
+
+	// Get invoices count from storage.
+	count, err := s.storage.Invoice.GetCount(getParams)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 // GetByID gets an invoice by the given ID.
 func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 	// Get invoice by ID.
@@ -104,7 +182,7 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) error {
 	// Validate params.
 
 	// Get invoice from storage.
-	storagei, err := s.storage.Invoice.GetByID(params.ID)
+	storagei, err := s.storage.Invoice.GetByID(*params.ID)
 	if err != nil {
 		return err
 	}
@@ -153,7 +231,7 @@ func (s *Service) Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, 
 	servicei.Status = "paid"
 
 	err = s.Update(&proto.InvoiceUpdateParams{
-		ID:         servicei.ID,
+		ID:         &servicei.ID,
 		AmountDue:  &servicei.AmountDue,
 		AmountPaid: &servicei.AmountPaid,
 		Status:     &servicei.Status,

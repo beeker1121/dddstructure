@@ -12,7 +12,7 @@ import (
 	"github.com/beeker1121/httprouter"
 )
 
-// New creates the routes for the signup endpoints of the API.
+// New creates the routes for the user endpoints of the API.
 func New(ac *apictx.Context, router *httprouter.Router) {
 	// Handle the routes.
 	router.GET("/api/v1/user", auth.AuthenticateEndpoint(ac, HandleGet(ac)))

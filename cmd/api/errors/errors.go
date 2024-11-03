@@ -2,6 +2,7 @@ package errors
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -17,6 +18,23 @@ var (
 
 	// ErrInternalServerError is returned when an internal server error occurs.
 	ErrInternalServerError = New(http.StatusInternalServerError, "", "Internal server error")
+)
+
+var (
+	// ErrOffsetInvalid is returned when the offset parameter is invalid.
+	ErrOffsetInvalid = New(http.StatusBadRequest, "offset", "Offset parameter is invalid, must be an integer")
+
+	// ErrLimitInvalid is returned when the limit parameter is invalid.
+	ErrLimitInvalid = New(http.StatusBadRequest, "limit", "Limit parameter is invalid, must be an integer")
+
+	// ErrLimitMax is returned when the limit parameter is greater than the
+	// maximum allowable limit.
+	ErrLimitMax = func(limit, max uint) *Error {
+		return New(http.StatusBadRequest,
+			"limit",
+			fmt.Sprintf("Limit value of %d is greater than maximum allowable limit of %d", limit, max),
+		)
+	}
 )
 
 // Error defines the default API error type.

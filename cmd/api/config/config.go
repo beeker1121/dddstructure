@@ -20,8 +20,8 @@ type Config struct {
 	LogFile       string        `json:"log_file"`
 	JWTSecret     string        `json:"jwt_secret"`
 	JWTExpiryTime time.Duration `json:"jwt_expiry_time"`
-	LimitDefault  int           `json:"limit_default"`
-	LimitMax      int           `json:"limit_max"`
+	LimitDefault  uint          `json:"limit_default"`
+	LimitMax      uint          `json:"limit_max"`
 }
 
 // ParseConfigFile parses the API configuration file.
