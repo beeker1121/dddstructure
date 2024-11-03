@@ -77,6 +77,50 @@ Got invoice from MySQL database...
 [+] Invoice after transaction refund: {ID:1 MerchantID:1 BillTo:Bill Smith PayTo:John Doe AmountDue:100 AmountPaid:0 Status:pending}
 ```
 
+# Running the API
+
+Clone the project and then browse to the `cmd/api` folder.
+
+Run `go run main.go`
+
+The API will be running on `http://localhost:8080`
+
+## Create a New User
+
+Run this cURL request:
+
+```sh
+curl -X POST \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "email": "test@test.com",
+    "password": "TestPassword123"
+}' \
+http://localhost:8080/api/v1/signup
+```
+
+## Create a New Invoice
+
+```sh
+curl -X POST \
+    -H 'Authorization: Bearer <TOKEN>' \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "bill_to": "John Doe",
+    "pay_to": "John Smith",
+    "amount_due": 100
+}' \
+http://localhost:8080/api/v1/invoice
+```
+
+## Get Invoices
+
+```sh
+curl -X GET \
+    -H 'Authorization: Bearer <TOKEN>' \
+http://localhost:8080/api/v1/invoice
+```
+
 # Thanks
 
 Full credit to the following people for their ideas and help on how to implement this structure.
