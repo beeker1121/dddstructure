@@ -18,7 +18,7 @@ We have a main `service` package at the root level, which uses the `storage` int
 
 The question of how to handle services importing other services and the inherent cyclical dependency issue that may arise. We could either create other service packages who's only goal is to import other service packages, but this can become cluttered given larger applications, and there's a good chance code will be duplicated across 'top level' services.
 
-One solution, which is implemented in this example, is to create interfaces for each service, and create another root level package that implements each interface but can be shared between individual services. For example, the `merchant` service will have a sub `comm` package that implements the interface with methods of `Create` and `GetByID`. The root level package that can be shared across services, called `dep` in this example, will then expose these interfaces and their methods.
+One solution, which is implemented in this example, is to create interfaces for each service, and create another root level package that implements each interface but can be shared between individual services. Each service struct implements a separate interface which defines other services. When a new `services` is created, this also sets this service interface to be used by each individual service, ie each individual service can call `s.service.<service>.<method>` from its struct method.
 
 With this 'dependency' idea implemented, we can call top level service methods within other top level service methods. While we have to worry about infinite recursion, ie function A calls function B which also may call function A again, this would be present in any flat package structure.
 
