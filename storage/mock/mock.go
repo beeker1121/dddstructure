@@ -1,15 +1,15 @@
-package mysql
+package mock
 
 import (
 	"database/sql"
 
 	"dddstructure/storage"
-	"dddstructure/storage/mysql/invoice"
-	"dddstructure/storage/mysql/transaction"
-	"dddstructure/storage/mysql/user"
+	"dddstructure/storage/mock/invoice"
+	"dddstructure/storage/mock/transaction"
+	"dddstructure/storage/mock/user"
 )
 
-// New returns a new implementation of storage.Storage that uses MySQL as the
+// New returns a new implementation of storage.Storage that uses a mock as the
 // backend database.
 func New(db *sql.DB) *storage.Storage {
 	s := &storage.Storage{

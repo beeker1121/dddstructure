@@ -6,12 +6,12 @@ import (
 
 	"dddstructure/proto"
 	"dddstructure/service"
-	"dddstructure/storage/mysql"
+	"dddstructure/storage/mock"
 )
 
 func TestPay(t *testing.T) {
-	// Create a new MySQL storage implementation.
-	store := mysql.New(&sql.DB{})
+	// Create a new mock storage implementation.
+	store := mock.New(&sql.DB{})
 
 	// Create a new service.
 	serv := service.New(store)

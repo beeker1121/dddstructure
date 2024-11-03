@@ -6,15 +6,15 @@ import (
 
 	"dddstructure/proto"
 	"dddstructure/service"
-	"dddstructure/storage/mysql"
+	"dddstructure/storage/mock"
 )
 
 func main() {
 	fmt.Println("running...")
 
-	// Create a new MySQL storage implementation.
-	fmt.Println("[+] Creating new MySQL storage implementation...")
-	store := mysql.New(&sql.DB{})
+	// Create a new mock storage implementation.
+	fmt.Println("[+] Creating new mock storage implementation...")
+	store := mock.New(&sql.DB{})
 
 	// Create a new service.
 	fmt.Println("[+] Creating new service...")

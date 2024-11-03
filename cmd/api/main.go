@@ -12,7 +12,7 @@ import (
 	apictx "dddstructure/cmd/api/context"
 	v1 "dddstructure/cmd/api/v1"
 	"dddstructure/service"
-	"dddstructure/storage/mysql"
+	"dddstructure/storage/mock"
 
 	"github.com/beeker1121/httprouter"
 )
@@ -36,9 +36,9 @@ func main() {
 	cfg.APIPort = os.Getenv("API_PORT")
 	cfg.JWTSecret = os.Getenv("JWT_SECRET")
 
-	// Create a new MySQL storage implementation.
-	fmt.Println("[+] Creating new MySQL storage implementation...")
-	store := mysql.New(&sql.DB{})
+	// Create a new mock storage implementation.
+	fmt.Println("[+] Creating new mock storage implementation...")
+	store := mock.New(&sql.DB{})
 
 	// Create a new service.
 	fmt.Println("[+] Creating new service...")
