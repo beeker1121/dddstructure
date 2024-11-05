@@ -9,6 +9,7 @@ import (
 	"github.com/beeker1121/httprouter"
 )
 
+// New creates a new v1 API.
 func New(ac *apictx.Context, r *httprouter.Router) {
 	invoice.New(ac, r)
 	signup.New(ac, r)
