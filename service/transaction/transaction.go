@@ -5,6 +5,7 @@ import (
 	"dddstructure/service/interfaces"
 	"dddstructure/storage"
 	"dddstructure/storage/transaction"
+	"strings"
 )
 
 // idCounter handles increasing the ID.
@@ -41,12 +42,20 @@ func (s *Service) Process(params *proto.TransactionProcessParams) (*proto.Transa
 		idCounter++
 	}
 
+	// Get card type.
+	cardType := "unknown"
+	if params.PaymentMethod.Card != nil {
+		if strings.HasPrefix(params.PaymentMethod.Card.Number, "411111") {
+			cardType = "visa"
+		}
+	}
+
 	// Create a transaction.
 	storaget, err := s.storage.Transaction.Create(&transaction.Transaction{
 		ID:             params.ID,
 		UserID:         params.UserID,
 		Type:           params.Type,
-		CardType:       params.CardType,
+		CardType:       cardType,
 		AmountCaptured: params.Amount,
 		InvoiceID:      params.InvoiceID,
 		Status:         "approved",

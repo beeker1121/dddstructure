@@ -27,10 +27,15 @@ func TestProcess(t *testing.T) {
 
 	// Process a transaction.
 	tx, err := serv.Transaction.Process(&proto.TransactionProcessParams{
-		UserID:   u.ID,
-		Type:     "sale",
-		CardType: "visa",
-		Amount:   100,
+		UserID: 1,
+		Type:   "sale",
+		Amount: 100,
+		PaymentMethod: proto.TransactionPaymentMethod{
+			Card: &proto.TransactionPaymentMethodCard{
+				Number:         "4111111111111111",
+				ExpirationDate: "1125",
+			},
+		},
 	})
 	if err != nil {
 		panic(err)
@@ -41,7 +46,7 @@ func TestProcess(t *testing.T) {
 		t.Errorf("Expected transaction ID to be '%d', got '%d'", 1, tx.ID)
 	}
 	if tx.UserID != u.ID {
-		t.Errorf("Expected transaction merchant ID to be '%d', got '%d'", u.ID, tx.UserID)
+		t.Errorf("Expected transaction user ID to be '%d', got '%d'", u.ID, tx.UserID)
 	}
 	if tx.Type != "sale" {
 		t.Errorf("Expected transaction type to be '%s', got '%s'", "sale", tx.Type)

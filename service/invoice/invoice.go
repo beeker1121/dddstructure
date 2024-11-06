@@ -233,7 +233,6 @@ func (s *Service) Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, 
 	t, err := s.services.Transaction.Process(&proto.TransactionProcessParams{
 		UserID:    servicei.UserID,
 		Type:      "sale",
-		CardType:  "visa",
 		Amount:    params.Amount,
 		InvoiceID: id,
 	})

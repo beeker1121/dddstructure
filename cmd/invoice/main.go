@@ -54,7 +54,6 @@ func main() {
 	t, err := serv.Transaction.Process(&proto.TransactionProcessParams{
 		UserID:    i.UserID,
 		Type:      "refund",
-		CardType:  "visa",
 		Amount:    100,
 		InvoiceID: i.ID,
 	})
