@@ -27,3 +27,21 @@ func (s *Service) ValidateCreateParams(params *proto.UserCreateParams) error {
 
 	return nil
 }
+
+// ValidateLoginParams validates the login parameters.
+func (s *Service) ValidateLoginParams(params *proto.UserLoginParams) error {
+	// Create a new ParamErrors.
+	pes := errors.NewParamErrors()
+
+	// Check email.
+	if params.Email == "" {
+		pes.Add(errors.NewParamError("email", errors.ErrUserEmailEmpty))
+	}
+
+	// Return if there were parameter errors.
+	if pes.Length() > 0 {
+		return pes
+	}
+
+	return nil
+}

@@ -29,6 +29,7 @@ func NewService(params NewServiceParams) *Service {
 // User defines the user service.
 type User interface {
 	Create(params *proto.UserCreateParams) (*proto.User, error)
+	Login(params *proto.UserLoginParams) (*proto.User, error)
 	GetByID(id uint) (*proto.User, error)
 }
 

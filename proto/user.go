@@ -13,3 +13,9 @@ type UserCreateParams struct {
 	Email    string
 	Password string
 }
+
+// UserLoginParams defines the user login parameters.
+type UserLoginParams struct {
+	Email    string
+	Password string
+}

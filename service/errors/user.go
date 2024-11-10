@@ -14,4 +14,8 @@ var (
 
 	// ErrUserPassword is returned when the password is in an invalid format.
 	ErrUserPassword = errors.New("password must be at least 8 characters")
+
+	// ErrUserInvalidLogin is returned when the email and/or password used with
+	// login is invalid.
+	ErrUserInvalidLogin = errors.New("email and/or password is invalid")
 )
