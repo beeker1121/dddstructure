@@ -18,8 +18,6 @@ import (
 )
 
 func main() {
-	fmt.Println("running...")
-
 	// Parse the API configuration file.
 	cfg, err := config.ParseConfigFile("config.json")
 	if err != nil {
