@@ -63,7 +63,7 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	fmt.Printf("Running server...\n")
+	fmt.Printf("[+] Running server on port 8080...\n")
 
 	// Start the HTTP server.
 	if err := server.ListenAndServe(); err != nil {
