@@ -237,7 +237,7 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 				UserID: i.UserID,
 				BillTo: BillTo{
 					FirstName: i.BillTo.FirstName,
-					LastName:  i.PayTo.LastName,
+					LastName:  i.BillTo.LastName,
 				},
 				PayTo: PayTo{
 					FirstName: i.PayTo.FirstName,
