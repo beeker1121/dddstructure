@@ -1,11 +1,23 @@
 package proto
 
+// InvoiceBillTo defines the invoice billing information.
+type InvoiceBillTo struct {
+	FirstName string
+	LastName  string
+}
+
+// InvoicePayTo defines the invoice payee information.
+type InvoicePayTo struct {
+	FirstName string
+	LastName  string
+}
+
 // Invoice defines an invoice.
 type Invoice struct {
 	ID         uint
 	UserID     uint
-	BillTo     string
-	PayTo      string
+	BillTo     InvoiceBillTo
+	PayTo      InvoicePayTo
 	AmountDue  uint
 	AmountPaid uint
 	Status     string
@@ -15,8 +27,8 @@ type Invoice struct {
 type InvoiceCreateParams struct {
 	ID        uint
 	UserID    uint
-	BillTo    string
-	PayTo     string
+	BillTo    InvoiceBillTo
+	PayTo     InvoicePayTo
 	AmountDue uint
 }
 

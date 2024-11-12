@@ -27,9 +27,15 @@ func TestPay(t *testing.T) {
 
 	// Create an invoice.
 	i, err := serv.Invoice.Create(&proto.InvoiceCreateParams{
-		UserID:    u.ID,
-		BillTo:    "Joe Smith",
-		PayTo:     "John Doe",
+		UserID: u.ID,
+		BillTo: proto.InvoiceBillTo{
+			FirstName: "John",
+			LastName:  "Smith",
+		},
+		PayTo: proto.InvoicePayTo{
+			FirstName: "John",
+			LastName:  "Doe",
+		},
 		AmountDue: 100,
 	})
 	if err != nil {

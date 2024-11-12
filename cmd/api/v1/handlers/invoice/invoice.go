@@ -22,12 +22,24 @@ func New(ac *apictx.Context, router *httprouter.Router) {
 	router.GET("/api/v1/invoice", auth.AuthenticateEndpoint(ac, HandleGet(ac)))
 }
 
+// BillTo defines the billing information.
+type BillTo struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
+// PayTo defines the payee information.
+type PayTo struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
 // Invoice defines an invoice.
 type Invoice struct {
 	ID         uint   `json:"id"`
 	UserID     uint   `json:"user_id"`
-	BillTo     string `json:"bill_to"`
-	PayTo      string `json:"pay_to"`
+	BillTo     BillTo `json:"bill_to"`
+	PayTo      PayTo  `json:"pay_to"`
 	AmountDue  uint   `json:"amount_due"`
 	AmountPaid uint   `json:"amount_paid"`
 	Status     string `json:"status"`
@@ -35,8 +47,8 @@ type Invoice struct {
 
 // RequestPost defines the request data for the HandlePost handler.
 type RequestPost struct {
-	BillTo    string `json:"bill_to"`
-	PayTo     string `json:"pay_to"`
+	BillTo    BillTo `json:"bill_to"`
+	PayTo     PayTo  `json:"pay_to"`
 	AmountDue uint   `json:"amount_due"`
 }
 
@@ -64,9 +76,15 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 
 		// Create the invoice.
 		invoice, err := ac.Service.Invoice.Create(&proto.InvoiceCreateParams{
-			UserID:    user.ID,
-			BillTo:    req.BillTo,
-			PayTo:     req.PayTo,
+			UserID: user.ID,
+			BillTo: proto.InvoiceBillTo{
+				FirstName: req.BillTo.FirstName,
+				LastName:  req.BillTo.LastName,
+			},
+			PayTo: proto.InvoicePayTo{
+				FirstName: req.PayTo.FirstName,
+				LastName:  req.PayTo.LastName,
+			},
 			AmountDue: req.AmountDue,
 		})
 		if pes, ok := err.(*serverrors.ParamErrors); ok && err != nil {
@@ -81,10 +99,16 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 		// Create a new Result.
 		result := ResultPost{
 			Data: &Invoice{
-				ID:         invoice.ID,
-				UserID:     invoice.UserID,
-				BillTo:     invoice.BillTo,
-				PayTo:      invoice.PayTo,
+				ID:     invoice.ID,
+				UserID: invoice.UserID,
+				BillTo: BillTo{
+					FirstName: invoice.BillTo.FirstName,
+					LastName:  invoice.BillTo.LastName,
+				},
+				PayTo: PayTo{
+					FirstName: invoice.PayTo.FirstName,
+					LastName:  invoice.PayTo.LastName,
+				},
 				AmountDue:  invoice.AmountDue,
 				AmountPaid: invoice.AmountPaid,
 				Status:     invoice.Status,
@@ -209,10 +233,16 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 		for _, i := range invoices {
 			// Create a new invoice.
 			invoice := &Invoice{
-				ID:         i.ID,
-				UserID:     i.UserID,
-				BillTo:     i.BillTo,
-				PayTo:      i.PayTo,
+				ID:     i.ID,
+				UserID: i.UserID,
+				BillTo: BillTo{
+					FirstName: i.BillTo.FirstName,
+					LastName:  i.PayTo.LastName,
+				},
+				PayTo: PayTo{
+					FirstName: i.PayTo.FirstName,
+					LastName:  i.PayTo.LastName,
+				},
 				AmountDue:  i.AmountDue,
 				AmountPaid: i.AmountPaid,
 				Status:     i.Status,

@@ -44,10 +44,16 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 
 	// Create an invoice.
 	storagei, err := s.storage.Invoice.Create(&invoice.Invoice{
-		ID:         params.ID,
-		UserID:     params.UserID,
-		BillTo:     params.BillTo,
-		PayTo:      params.PayTo,
+		ID:     params.ID,
+		UserID: params.UserID,
+		BillTo: invoice.BillTo{
+			FirstName: params.BillTo.FirstName,
+			LastName:  params.BillTo.LastName,
+		},
+		PayTo: invoice.PayTo{
+			FirstName: params.PayTo.FirstName,
+			LastName:  params.PayTo.LastName,
+		},
 		AmountDue:  params.AmountDue,
 		AmountPaid: 0,
 		Status:     "pending",
@@ -58,10 +64,16 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 
 	// Map to service type.
 	servicei := &proto.Invoice{
-		ID:         storagei.ID,
-		UserID:     storagei.UserID,
-		BillTo:     storagei.BillTo,
-		PayTo:      storagei.PayTo,
+		ID:     storagei.ID,
+		UserID: storagei.UserID,
+		BillTo: proto.InvoiceBillTo{
+			FirstName: storagei.BillTo.FirstName,
+			LastName:  storagei.BillTo.LastName,
+		},
+		PayTo: proto.InvoicePayTo{
+			FirstName: storagei.PayTo.FirstName,
+			LastName:  storagei.PayTo.LastName,
+		},
 		AmountDue:  storagei.AmountDue,
 		AmountPaid: storagei.AmountPaid,
 		Status:     storagei.Status,
@@ -108,10 +120,16 @@ func (s *Service) Get(params *proto.InvoiceGetParams) ([]*proto.Invoice, error) 
 	for _, i := range storageis {
 		// Create a new invoice.
 		invoice := &proto.Invoice{
-			ID:         i.ID,
-			UserID:     i.UserID,
-			BillTo:     i.BillTo,
-			PayTo:      i.PayTo,
+			ID:     i.ID,
+			UserID: i.UserID,
+			BillTo: proto.InvoiceBillTo{
+				FirstName: i.BillTo.FirstName,
+				LastName:  i.BillTo.LastName,
+			},
+			PayTo: proto.InvoicePayTo{
+				FirstName: i.PayTo.FirstName,
+				LastName:  i.PayTo.LastName,
+			},
 			AmountDue:  i.AmountDue,
 			AmountPaid: i.AmountPaid,
 			Status:     i.Status,
@@ -173,10 +191,16 @@ func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 
 	// Map to service type.
 	servicei := &proto.Invoice{
-		ID:         storagei.ID,
-		UserID:     storagei.UserID,
-		BillTo:     storagei.BillTo,
-		PayTo:      storagei.PayTo,
+		ID:     storagei.ID,
+		UserID: storagei.UserID,
+		BillTo: proto.InvoiceBillTo{
+			FirstName: storagei.BillTo.FirstName,
+			LastName:  storagei.BillTo.LastName,
+		},
+		PayTo: proto.InvoicePayTo{
+			FirstName: storagei.PayTo.FirstName,
+			LastName:  storagei.PayTo.LastName,
+		},
 		AmountDue:  storagei.AmountDue,
 		AmountPaid: storagei.AmountPaid,
 		Status:     storagei.Status,

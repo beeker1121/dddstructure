@@ -9,12 +9,24 @@ type Database interface {
 	Update(i *Invoice) error
 }
 
+// BillTo defines the billing information.
+type BillTo struct {
+	FirstName string
+	LastName  string
+}
+
+// PayTo defines the payee information.
+type PayTo struct {
+	FirstName string
+	LastName  string
+}
+
 // Invoice defines an invoice.
 type Invoice struct {
 	ID         uint
 	UserID     uint
-	BillTo     string
-	PayTo      string
+	BillTo     BillTo
+	PayTo      PayTo
 	AmountDue  uint
 	AmountPaid uint
 	Status     string
