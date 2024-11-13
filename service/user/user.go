@@ -84,7 +84,7 @@ func (s *Service) Create(params *proto.UserCreateParams) (*proto.User, error) {
 	return serviceu, nil
 }
 
-// Login checks if a member exists in the database and can log in.
+// Login checks if a user exists in the database and can log in.
 func (s *Service) Login(params *proto.UserLoginParams) (*proto.User, error) {
 	// Validate parameters.
 	if err := s.ValidateLoginParams(params); err != nil {
