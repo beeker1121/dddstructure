@@ -55,3 +55,10 @@ func (db *Database) GetByEmail(email string) (*user.User, error) {
 
 	return nil, user.ErrUserNotFound
 }
+
+// Update updates an invoice.
+func (db *Database) Update(u *user.User) (*user.User, error) {
+	userMap[u.ID] = u
+
+	return u, nil
+}

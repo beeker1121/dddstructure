@@ -19,3 +19,10 @@ type UserLoginParams struct {
 	Email    string
 	Password string
 }
+
+// UserUpdateParams defines the user update parameters.
+type UserUpdateParams struct {
+	ID       *uint
+	Email    *string
+	Password *string
+}

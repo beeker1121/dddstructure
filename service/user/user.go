@@ -136,3 +136,59 @@ func (s *Service) GetByID(id uint) (*proto.User, error) {
 
 	return serviceu, nil
 }
+
+// Update handles updating a user.
+func (s *Service) Update(params *proto.UserUpdateParams) (*proto.User, error) {
+	// Validate parameters.
+	if err := s.ValidateUpdateParams(params); err != nil {
+		return nil, err
+	}
+
+	// Get the user.
+	serviceu, err := s.GetByID(*params.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check email.
+	pes := serverrors.NewParamErrors()
+	if params.Email != nil && *params.Email != serviceu.Email {
+		_, err := s.storage.User.GetByEmail(*params.Email)
+		if err == nil {
+			pes.Add(serverrors.NewParamError("email", serverrors.ErrUserEmailExists))
+		} else if err != nil && err != user.ErrUserNotFound {
+			return nil, err
+		}
+	}
+
+	// Return if there were parameter errors.
+	if pes.Length() > 0 {
+		return nil, pes
+	}
+
+	// Get user from storage.
+	storageu, err := s.storage.User.GetByID(*params.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Handle email.
+	if params.Email != nil && *params.Email != serviceu.Email {
+		storageu.Email = *params.Email
+	}
+
+	// Update the user.
+	storageu, err = s.storage.User.Update(storageu)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map to service type.
+	serviceu = &proto.User{
+		ID:       storageu.ID,
+		Email:    storageu.Email,
+		Password: storageu.Password,
+	}
+
+	return serviceu, nil
+}

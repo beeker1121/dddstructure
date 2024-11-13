@@ -54,7 +54,7 @@ type RequestPost struct {
 
 // ResultPost defines the response data for the HandlePost handler.
 type ResultPost struct {
-	Data *Invoice `json:"data"`
+	Data Invoice `json:"data"`
 }
 
 // HandlePost handles the /api/v1/invoice POST route of the API.
@@ -98,7 +98,7 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 
 		// Create a new Result.
 		result := ResultPost{
-			Data: &Invoice{
+			Data: Invoice{
 				ID:     invoice.ID,
 				UserID: invoice.UserID,
 				BillTo: BillTo{

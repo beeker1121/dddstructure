@@ -31,6 +31,7 @@ type User interface {
 	Create(params *proto.UserCreateParams) (*proto.User, error)
 	Login(params *proto.UserLoginParams) (*proto.User, error)
 	GetByID(id uint) (*proto.User, error)
+	Update(params *proto.UserUpdateParams) (*proto.User, error)
 }
 
 // Invoice defines the invoice service.
