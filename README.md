@@ -121,6 +121,47 @@ curl -X GET \
 http://localhost:8080/api/v1/invoice
 ```
 
+# Running for Development
+
+We use Docker for development, which runs and initializes the MySQL database.
+
+Export the following variables:
+
+```
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=simple_invoicing
+DB_USER=root
+DB_PASS=jLiEo34@3!%k
+```
+
+Run `docker-compose up` in a terminal.
+
+Once the container has finished loading, open a separate terminal, browse to `./cmd/api`, and run `go run main.go`.
+
+The API will now be running. You can now run the frontend application that will use this API.
+
+# Updating MySQL Models with SQLBoiler
+
+We use SQLBoiler to generate the Go structs (models) based on our MySQL database tables. This ORM also allows us to easily query MySQL.
+
+Install SQLBoiler and the MySQL driver if you haven't already:
+
+```
+go install github.com/volatiletech/sqlboiler/v4@latest
+go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@latest
+```
+
+Then run SQLBoiler to update the models based on the MySQL database schema:
+
+1. Create a new database migration file in the `./db` folder, so we know what to update in production.
+
+2. Update the `./db/init.sql` file with the migration, so when we start Docker it has the most up to date database version.
+
+3. Run `sqlboiler mysql` in a terminal in the root folder (where `sqlboiler.toml` is).
+
+4. The output will be to the `./storage/mysql/models` folder.
+
 # Thanks
 
 Full credit to the following people for their ideas and help on how to implement this structure.

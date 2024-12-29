@@ -12,9 +12,10 @@ import (
 	apictx "dddstructure/cmd/api/context"
 	v1 "dddstructure/cmd/api/v1"
 	"dddstructure/service"
-	"dddstructure/storage/mock"
+	storagemysql "dddstructure/storage/mysql"
 
 	"github.com/beeker1121/httprouter"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
@@ -34,9 +35,24 @@ func main() {
 	cfg.APIPort = os.Getenv("API_PORT")
 	cfg.JWTSecret = os.Getenv("JWT_SECRET")
 
-	// Create a new mock storage implementation.
+	/* // Create a new mock storage implementation.
 	fmt.Println("[+] Creating new mock storage implementation...")
-	store := mock.New(&sql.DB{})
+	store := mock.New(&sql.DB{}) */
+
+	// Connect to the MySQL database.
+	db, err := sql.Open("mysql", cfg.DBUser+":"+cfg.DBPass+"@tcp("+cfg.DBHost+":"+cfg.DBPort+")/"+cfg.DBName+"?parseTime=true")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	// Test database connection.
+	if err := db.Ping(); err != nil {
+		panic(err)
+	}
+
+	// Create a new MySQL storage implementation.
+	store := storagemysql.New(db)
 
 	// Create a new service.
 	fmt.Println("[+] Creating new service...")
