@@ -77,7 +77,7 @@ func (s *Service) Process(params *proto.TransactionProcessParams) (*proto.Transa
 		servicei.AmountPaid -= storaget.AmountCaptured
 		servicei.Status = "pending"
 
-		if err := s.services.Invoice.Update(&proto.InvoiceUpdateParams{
+		if _, err := s.services.Invoice.Update(&proto.InvoiceUpdateParams{
 			ID:         &servicei.ID,
 			AmountDue:  &servicei.AmountDue,
 			AmountPaid: &servicei.AmountPaid,

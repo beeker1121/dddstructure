@@ -45,8 +45,8 @@ type InvoiceGetParams struct {
 type InvoiceUpdateParams struct {
 	ID         *uint
 	UserID     *uint
-	BillTo     *string
-	PayTo      *string
+	BillTo     *InvoiceBillTo
+	PayTo      *InvoicePayTo
 	AmountDue  *uint
 	AmountPaid *uint
 	Status     *string

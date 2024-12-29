@@ -20,6 +20,8 @@ func New(ac *apictx.Context, router *httprouter.Router) {
 	// Handle the routes.
 	router.POST("/api/v1/invoice", auth.AuthenticateEndpoint(ac, HandlePost(ac)))
 	router.GET("/api/v1/invoice", auth.AuthenticateEndpoint(ac, HandleGet(ac)))
+	router.GET("/api/v1/invoice/:id", auth.AuthenticateEndpoint(ac, HandleGetInvoice(ac)))
+	router.POST("/api/v1/invoice/:id", auth.AuthenticateEndpoint(ac, HandlePostUpdate(ac)))
 }
 
 // BillTo defines the billing information.
@@ -273,6 +275,160 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 
 			next := "https://" + ac.Config.APIHost + "/api/v1/invoice" + offsetstr + limitstr
 			result.Links.Next = &next
+		}
+
+		// Respond with JSON.
+		if err := response.JSON(w, true, result); err != nil {
+			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+	}
+}
+
+// ResultGetInvoice defines the response data for the HandleGetInvoice handler.
+type ResultGetInvoice struct {
+	Data *Invoice `json:"data"`
+}
+
+// HandleGetInvoice handles the /api/v1/invoice/:id GET route of the API.
+func HandleGetInvoice(ac *apictx.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Try to get the invoice ID.
+		var id uint
+		id64, err := strconv.ParseInt(httprouter.GetParam(r, "id"), 10, 32)
+		if err != nil {
+			errors.Default(ac.Logger, w, errors.ErrBadRequest)
+			return
+		}
+		id = uint(id64)
+
+		// Get this user from the request context.
+		user, err := auth.GetUserFromRequest(r)
+		if err != nil {
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Get the invoice.
+		invoice, err := ac.Service.Invoice.GetByIDAndUserID(id, user.ID)
+		if err == serverrors.ErrInvoiceNotFound {
+			errors.Default(ac.Logger, w, errors.New(http.StatusNotFound, "", err.Error()))
+		} else if err != nil {
+			ac.Logger.Printf("invoice.GetByIDAndUserID() service error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Create a new result.
+		result := ResultGetInvoice{
+			Data: &Invoice{
+				ID:         invoice.ID,
+				UserID:     invoice.UserID,
+				BillTo:     BillTo(invoice.BillTo),
+				PayTo:      PayTo(invoice.PayTo),
+				AmountDue:  invoice.AmountDue,
+				AmountPaid: invoice.AmountPaid,
+				Status:     invoice.Status,
+			},
+		}
+
+		// Respond with JSON.
+		if err := response.JSON(w, true, result); err != nil {
+			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+	}
+}
+
+// RequestPostUpdate defines the request data for the HandlePostUpdate handler.
+type RequestPostUpdate struct {
+	BillTo    *BillTo `json:"bill_to"`
+	PayTo     *PayTo  `json:"pay_to"`
+	AmountDue *uint   `json:"amount_due"`
+}
+
+// ResultPostUpdate defines the response data for the HandlePostUpdate handler.
+type ResultPostUpdate struct {
+	Data Invoice `json:"data"`
+}
+
+// HandlePostUpdate handles the /api/v1/invoice/:id POST route of the API.
+func HandlePostUpdate(ac *apictx.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Parse the parameters from the request body.
+		var req RequestPostUpdate
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			errors.Default(ac.Logger, w, errors.ErrBadRequest)
+			return
+		}
+
+		// Try to get the invoice ID.
+		var id uint
+		id64, err := strconv.ParseInt(httprouter.GetParam(r, "id"), 10, 32)
+		if err != nil {
+			errors.Default(ac.Logger, w, errors.ErrBadRequest)
+			return
+		}
+		id = uint(id64)
+
+		// Get this user from the request context.
+		user, err := auth.GetUserFromRequest(r)
+		if err != nil {
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Handle invoice update params.
+		params := &proto.InvoiceUpdateParams{
+			ID:        &id,
+			UserID:    &user.ID,
+			AmountDue: req.AmountDue,
+		}
+
+		if req.BillTo != nil {
+			params.BillTo = &proto.InvoiceBillTo{
+				FirstName: req.BillTo.FirstName,
+				LastName:  req.BillTo.LastName,
+			}
+		}
+
+		if req.PayTo != nil {
+			params.PayTo = &proto.InvoicePayTo{
+				FirstName: req.PayTo.FirstName,
+				LastName:  req.PayTo.LastName,
+			}
+		}
+
+		// Update the invoice.
+		invoice, err := ac.Service.Invoice.UpdateByIDAndUserID(params)
+		if pes, ok := err.(*serverrors.ParamErrors); ok && err != nil {
+			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
+			return
+		} else if err != nil {
+			ac.Logger.Printf("user.Update() error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Create a new Result.
+		result := ResultPostUpdate{
+			Data: Invoice{
+				ID:     invoice.ID,
+				UserID: invoice.UserID,
+				BillTo: BillTo{
+					FirstName: invoice.BillTo.FirstName,
+					LastName:  invoice.BillTo.LastName,
+				},
+				PayTo: PayTo{
+					FirstName: invoice.PayTo.FirstName,
+					LastName:  invoice.PayTo.LastName,
+				},
+				AmountDue:  invoice.AmountDue,
+				AmountPaid: invoice.AmountPaid,
+				Status:     invoice.Status,
+			},
 		}
 
 		// Respond with JSON.

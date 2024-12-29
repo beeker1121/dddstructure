@@ -209,17 +209,65 @@ func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 	return servicei, nil
 }
 
+// GetByID gets an invoice by the given ID and user ID.
+func (s *Service) GetByIDAndUserID(id, userID uint) (*proto.Invoice, error) {
+	// Get invoice by ID.
+	storagei, err := s.storage.Invoice.GetByID(id)
+	if err != nil {
+		if err == invoice.ErrInvoiceNotFound {
+			return nil, serverrors.ErrInvoiceNotFound
+		}
+
+		// Log here.
+		return nil, err
+	}
+
+	// Check user ID.
+	if storagei.UserID != userID {
+		return nil, serverrors.ErrInvoiceNotFound
+	}
+
+	// Map to service type.
+	servicei := &proto.Invoice{
+		ID:     storagei.ID,
+		UserID: storagei.UserID,
+		BillTo: proto.InvoiceBillTo{
+			FirstName: storagei.BillTo.FirstName,
+			LastName:  storagei.BillTo.LastName,
+		},
+		PayTo: proto.InvoicePayTo{
+			FirstName: storagei.PayTo.FirstName,
+			LastName:  storagei.PayTo.LastName,
+		},
+		AmountDue:  storagei.AmountDue,
+		AmountPaid: storagei.AmountPaid,
+		Status:     storagei.Status,
+	}
+
+	return servicei, nil
+}
+
 // Update handles updating an invoice.
-func (s *Service) Update(params *proto.InvoiceUpdateParams) error {
+func (s *Service) Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, error) {
 	// Validate parameters.
 	if err := s.ValidateUpdateParams(params); err != nil {
-		return err
+		return nil, err
 	}
 
 	// Get invoice from storage.
 	storagei, err := s.storage.Invoice.GetByID(*params.ID)
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	// Handle bill to.
+	if params.BillTo != nil {
+		storagei.BillTo = invoice.BillTo(*params.BillTo)
+	}
+
+	// Handle pay to.
+	if params.PayTo != nil {
+		storagei.PayTo = invoice.PayTo(*params.PayTo)
 	}
 
 	// Handle amount due.
@@ -237,7 +285,42 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) error {
 		storagei.Status = *params.Status
 	}
 
-	return s.storage.Invoice.Update(storagei)
+	// Update the invoice.
+	storagei, err = s.storage.Invoice.Update(storagei)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map to service type.
+	servicei := &proto.Invoice{
+		ID:     storagei.ID,
+		UserID: storagei.UserID,
+		BillTo: proto.InvoiceBillTo{
+			FirstName: storagei.BillTo.FirstName,
+			LastName:  storagei.BillTo.LastName,
+		},
+		PayTo: proto.InvoicePayTo{
+			FirstName: storagei.PayTo.FirstName,
+			LastName:  storagei.PayTo.LastName,
+		},
+		AmountDue:  storagei.AmountDue,
+		AmountPaid: storagei.AmountPaid,
+		Status:     storagei.Status,
+	}
+
+	return servicei, nil
+}
+
+// UpdateByIDAndUserID handles updating an invoice by given ID and User ID.
+func (s *Service) UpdateByIDAndUserID(params *proto.InvoiceUpdateParams) (*proto.Invoice, error) {
+	// Get by ID and user ID.
+	_, err := s.GetByIDAndUserID(*params.ID, *params.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Call update.
+	return s.Update(params)
 }
 
 // Pay handles paying an invoice.
@@ -269,7 +352,7 @@ func (s *Service) Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, 
 	servicei.AmountDue -= t.AmountCaptured
 	servicei.Status = "paid"
 
-	err = s.Update(&proto.InvoiceUpdateParams{
+	_, err = s.Update(&proto.InvoiceUpdateParams{
 		ID:         &servicei.ID,
 		AmountDue:  &servicei.AmountDue,
 		AmountPaid: &servicei.AmountPaid,

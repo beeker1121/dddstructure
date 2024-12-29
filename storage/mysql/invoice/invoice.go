@@ -135,7 +135,7 @@ func (db *Database) GetByID(id uint) (*invoice.Invoice, error) {
 }
 
 // Update updates an invoice.
-func (db *Database) Update(i *invoice.Invoice) error {
+func (db *Database) Update(i *invoice.Invoice) (*invoice.Invoice, error) {
 	// Map to model.
 	model := models.Invoice{
 		ID:              i.ID,
@@ -152,8 +152,8 @@ func (db *Database) Update(i *invoice.Invoice) error {
 	// Update in database.
 	_, err := model.Update(context.Background(), db.db, boil.Infer())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return i, nil
 }
