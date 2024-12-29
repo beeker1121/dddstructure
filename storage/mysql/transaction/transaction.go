@@ -11,9 +11,6 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-// transactionMap acts as a mock MySQL database for transactions.
-var transactionMap map[uint]*transaction.Transaction = make(map[uint]*transaction.Transaction)
-
 // Database defines the database.
 type Database struct {
 	db *sql.DB
