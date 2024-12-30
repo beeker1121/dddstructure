@@ -162,6 +162,12 @@ Then run SQLBoiler to update the models based on the MySQL database schema:
 
 4. The output will be to the `./storage/mysql/models` folder.
 
+# TODO
+
+- Figure out how to handle `time.Time`, ie time coming in from the API, how to convert that to `time.Time` for service level, and finally how to store via storage layer.
+  - API request struct has it commented out currently.
+  - For storage side, the top level storage struct should still probably just use `time.Time` and the database itself can convert to and from that.
+
 # Thanks
 
 Full credit to the following people for their ideas and help on how to implement this structure.

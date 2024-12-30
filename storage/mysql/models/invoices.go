@@ -23,62 +23,182 @@ import (
 
 // Invoice is an object representing the database table.
 type Invoice struct {
-	ID              uint           `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UserID          uint           `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	BillToFirstName string         `boil:"bill_to_first_name" json:"bill_to_first_name" toml:"bill_to_first_name" yaml:"bill_to_first_name"`
-	BillToLastName  string         `boil:"bill_to_last_name" json:"bill_to_last_name" toml:"bill_to_last_name" yaml:"bill_to_last_name"`
-	PayToFirstName  string         `boil:"pay_to_first_name" json:"pay_to_first_name" toml:"pay_to_first_name" yaml:"pay_to_first_name"`
-	PayToLastName   string         `boil:"pay_to_last_name" json:"pay_to_last_name" toml:"pay_to_last_name" yaml:"pay_to_last_name"`
-	AmountDue       uint           `boil:"amount_due" json:"amount_due" toml:"amount_due" yaml:"amount_due"`
-	AmountPaid      uint           `boil:"amount_paid" json:"amount_paid" toml:"amount_paid" yaml:"amount_paid"`
-	Status          InvoicesStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
+	ID                 uint           `boil:"id" json:"id" toml:"id" yaml:"id"`
+	UserID             uint           `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	InvoiceNumber      string         `boil:"invoice_number" json:"invoice_number" toml:"invoice_number" yaml:"invoice_number"`
+	PoNumber           string         `boil:"po_number" json:"po_number" toml:"po_number" yaml:"po_number"`
+	Currency           string         `boil:"currency" json:"currency" toml:"currency" yaml:"currency"`
+	DueDate            time.Time      `boil:"due_date" json:"due_date" toml:"due_date" yaml:"due_date"`
+	Message            string         `boil:"message" json:"message" toml:"message" yaml:"message"`
+	BillToFirstName    string         `boil:"bill_to_first_name" json:"bill_to_first_name" toml:"bill_to_first_name" yaml:"bill_to_first_name"`
+	BillToLastName     string         `boil:"bill_to_last_name" json:"bill_to_last_name" toml:"bill_to_last_name" yaml:"bill_to_last_name"`
+	BillToCompany      string         `boil:"bill_to_company" json:"bill_to_company" toml:"bill_to_company" yaml:"bill_to_company"`
+	BillToAddressLine1 string         `boil:"bill_to_address_line_1" json:"bill_to_address_line_1" toml:"bill_to_address_line_1" yaml:"bill_to_address_line_1"`
+	BillToAddressLine2 string         `boil:"bill_to_address_line_2" json:"bill_to_address_line_2" toml:"bill_to_address_line_2" yaml:"bill_to_address_line_2"`
+	BillToCity         string         `boil:"bill_to_city" json:"bill_to_city" toml:"bill_to_city" yaml:"bill_to_city"`
+	BillToState        string         `boil:"bill_to_state" json:"bill_to_state" toml:"bill_to_state" yaml:"bill_to_state"`
+	BillToPostalCode   string         `boil:"bill_to_postal_code" json:"bill_to_postal_code" toml:"bill_to_postal_code" yaml:"bill_to_postal_code"`
+	BillToCountry      string         `boil:"bill_to_country" json:"bill_to_country" toml:"bill_to_country" yaml:"bill_to_country"`
+	BillToEmail        string         `boil:"bill_to_email" json:"bill_to_email" toml:"bill_to_email" yaml:"bill_to_email"`
+	BillToPhone        string         `boil:"bill_to_phone" json:"bill_to_phone" toml:"bill_to_phone" yaml:"bill_to_phone"`
+	PayToFirstName     string         `boil:"pay_to_first_name" json:"pay_to_first_name" toml:"pay_to_first_name" yaml:"pay_to_first_name"`
+	PayToLastName      string         `boil:"pay_to_last_name" json:"pay_to_last_name" toml:"pay_to_last_name" yaml:"pay_to_last_name"`
+	PayToCompany       string         `boil:"pay_to_company" json:"pay_to_company" toml:"pay_to_company" yaml:"pay_to_company"`
+	PayToAddressLine1  string         `boil:"pay_to_address_line_1" json:"pay_to_address_line_1" toml:"pay_to_address_line_1" yaml:"pay_to_address_line_1"`
+	PayToAddressLine2  string         `boil:"pay_to_address_line_2" json:"pay_to_address_line_2" toml:"pay_to_address_line_2" yaml:"pay_to_address_line_2"`
+	PayToCity          string         `boil:"pay_to_city" json:"pay_to_city" toml:"pay_to_city" yaml:"pay_to_city"`
+	PayToState         string         `boil:"pay_to_state" json:"pay_to_state" toml:"pay_to_state" yaml:"pay_to_state"`
+	PayToPostalCode    string         `boil:"pay_to_postal_code" json:"pay_to_postal_code" toml:"pay_to_postal_code" yaml:"pay_to_postal_code"`
+	PayToCountry       string         `boil:"pay_to_country" json:"pay_to_country" toml:"pay_to_country" yaml:"pay_to_country"`
+	PayToEmail         string         `boil:"pay_to_email" json:"pay_to_email" toml:"pay_to_email" yaml:"pay_to_email"`
+	PayToPhone         string         `boil:"pay_to_phone" json:"pay_to_phone" toml:"pay_to_phone" yaml:"pay_to_phone"`
+	TaxRate            string         `boil:"tax_rate" json:"tax_rate" toml:"tax_rate" yaml:"tax_rate"`
+	AmountDue          uint           `boil:"amount_due" json:"amount_due" toml:"amount_due" yaml:"amount_due"`
+	AmountPaid         uint           `boil:"amount_paid" json:"amount_paid" toml:"amount_paid" yaml:"amount_paid"`
+	Status             InvoicesStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
 
 	R *invoiceR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L invoiceL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var InvoiceColumns = struct {
-	ID              string
-	UserID          string
-	BillToFirstName string
-	BillToLastName  string
-	PayToFirstName  string
-	PayToLastName   string
-	AmountDue       string
-	AmountPaid      string
-	Status          string
+	ID                 string
+	UserID             string
+	InvoiceNumber      string
+	PoNumber           string
+	Currency           string
+	DueDate            string
+	Message            string
+	BillToFirstName    string
+	BillToLastName     string
+	BillToCompany      string
+	BillToAddressLine1 string
+	BillToAddressLine2 string
+	BillToCity         string
+	BillToState        string
+	BillToPostalCode   string
+	BillToCountry      string
+	BillToEmail        string
+	BillToPhone        string
+	PayToFirstName     string
+	PayToLastName      string
+	PayToCompany       string
+	PayToAddressLine1  string
+	PayToAddressLine2  string
+	PayToCity          string
+	PayToState         string
+	PayToPostalCode    string
+	PayToCountry       string
+	PayToEmail         string
+	PayToPhone         string
+	TaxRate            string
+	AmountDue          string
+	AmountPaid         string
+	Status             string
 }{
-	ID:              "id",
-	UserID:          "user_id",
-	BillToFirstName: "bill_to_first_name",
-	BillToLastName:  "bill_to_last_name",
-	PayToFirstName:  "pay_to_first_name",
-	PayToLastName:   "pay_to_last_name",
-	AmountDue:       "amount_due",
-	AmountPaid:      "amount_paid",
-	Status:          "status",
+	ID:                 "id",
+	UserID:             "user_id",
+	InvoiceNumber:      "invoice_number",
+	PoNumber:           "po_number",
+	Currency:           "currency",
+	DueDate:            "due_date",
+	Message:            "message",
+	BillToFirstName:    "bill_to_first_name",
+	BillToLastName:     "bill_to_last_name",
+	BillToCompany:      "bill_to_company",
+	BillToAddressLine1: "bill_to_address_line_1",
+	BillToAddressLine2: "bill_to_address_line_2",
+	BillToCity:         "bill_to_city",
+	BillToState:        "bill_to_state",
+	BillToPostalCode:   "bill_to_postal_code",
+	BillToCountry:      "bill_to_country",
+	BillToEmail:        "bill_to_email",
+	BillToPhone:        "bill_to_phone",
+	PayToFirstName:     "pay_to_first_name",
+	PayToLastName:      "pay_to_last_name",
+	PayToCompany:       "pay_to_company",
+	PayToAddressLine1:  "pay_to_address_line_1",
+	PayToAddressLine2:  "pay_to_address_line_2",
+	PayToCity:          "pay_to_city",
+	PayToState:         "pay_to_state",
+	PayToPostalCode:    "pay_to_postal_code",
+	PayToCountry:       "pay_to_country",
+	PayToEmail:         "pay_to_email",
+	PayToPhone:         "pay_to_phone",
+	TaxRate:            "tax_rate",
+	AmountDue:          "amount_due",
+	AmountPaid:         "amount_paid",
+	Status:             "status",
 }
 
 var InvoiceTableColumns = struct {
-	ID              string
-	UserID          string
-	BillToFirstName string
-	BillToLastName  string
-	PayToFirstName  string
-	PayToLastName   string
-	AmountDue       string
-	AmountPaid      string
-	Status          string
+	ID                 string
+	UserID             string
+	InvoiceNumber      string
+	PoNumber           string
+	Currency           string
+	DueDate            string
+	Message            string
+	BillToFirstName    string
+	BillToLastName     string
+	BillToCompany      string
+	BillToAddressLine1 string
+	BillToAddressLine2 string
+	BillToCity         string
+	BillToState        string
+	BillToPostalCode   string
+	BillToCountry      string
+	BillToEmail        string
+	BillToPhone        string
+	PayToFirstName     string
+	PayToLastName      string
+	PayToCompany       string
+	PayToAddressLine1  string
+	PayToAddressLine2  string
+	PayToCity          string
+	PayToState         string
+	PayToPostalCode    string
+	PayToCountry       string
+	PayToEmail         string
+	PayToPhone         string
+	TaxRate            string
+	AmountDue          string
+	AmountPaid         string
+	Status             string
 }{
-	ID:              "invoices.id",
-	UserID:          "invoices.user_id",
-	BillToFirstName: "invoices.bill_to_first_name",
-	BillToLastName:  "invoices.bill_to_last_name",
-	PayToFirstName:  "invoices.pay_to_first_name",
-	PayToLastName:   "invoices.pay_to_last_name",
-	AmountDue:       "invoices.amount_due",
-	AmountPaid:      "invoices.amount_paid",
-	Status:          "invoices.status",
+	ID:                 "invoices.id",
+	UserID:             "invoices.user_id",
+	InvoiceNumber:      "invoices.invoice_number",
+	PoNumber:           "invoices.po_number",
+	Currency:           "invoices.currency",
+	DueDate:            "invoices.due_date",
+	Message:            "invoices.message",
+	BillToFirstName:    "invoices.bill_to_first_name",
+	BillToLastName:     "invoices.bill_to_last_name",
+	BillToCompany:      "invoices.bill_to_company",
+	BillToAddressLine1: "invoices.bill_to_address_line_1",
+	BillToAddressLine2: "invoices.bill_to_address_line_2",
+	BillToCity:         "invoices.bill_to_city",
+	BillToState:        "invoices.bill_to_state",
+	BillToPostalCode:   "invoices.bill_to_postal_code",
+	BillToCountry:      "invoices.bill_to_country",
+	BillToEmail:        "invoices.bill_to_email",
+	BillToPhone:        "invoices.bill_to_phone",
+	PayToFirstName:     "invoices.pay_to_first_name",
+	PayToLastName:      "invoices.pay_to_last_name",
+	PayToCompany:       "invoices.pay_to_company",
+	PayToAddressLine1:  "invoices.pay_to_address_line_1",
+	PayToAddressLine2:  "invoices.pay_to_address_line_2",
+	PayToCity:          "invoices.pay_to_city",
+	PayToState:         "invoices.pay_to_state",
+	PayToPostalCode:    "invoices.pay_to_postal_code",
+	PayToCountry:       "invoices.pay_to_country",
+	PayToEmail:         "invoices.pay_to_email",
+	PayToPhone:         "invoices.pay_to_phone",
+	TaxRate:            "invoices.tax_rate",
+	AmountDue:          "invoices.amount_due",
+	AmountPaid:         "invoices.amount_paid",
+	Status:             "invoices.status",
 }
 
 // Generated where
@@ -131,6 +251,27 @@ func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
+type whereHelpertime_Time struct{ field string }
+
+func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 type whereHelperInvoicesStatus struct{ field string }
 
 func (w whereHelperInvoicesStatus) EQ(x InvoicesStatus) qm.QueryMod {
@@ -167,25 +308,73 @@ func (w whereHelperInvoicesStatus) NIN(slice []InvoicesStatus) qm.QueryMod {
 }
 
 var InvoiceWhere = struct {
-	ID              whereHelperuint
-	UserID          whereHelperuint
-	BillToFirstName whereHelperstring
-	BillToLastName  whereHelperstring
-	PayToFirstName  whereHelperstring
-	PayToLastName   whereHelperstring
-	AmountDue       whereHelperuint
-	AmountPaid      whereHelperuint
-	Status          whereHelperInvoicesStatus
+	ID                 whereHelperuint
+	UserID             whereHelperuint
+	InvoiceNumber      whereHelperstring
+	PoNumber           whereHelperstring
+	Currency           whereHelperstring
+	DueDate            whereHelpertime_Time
+	Message            whereHelperstring
+	BillToFirstName    whereHelperstring
+	BillToLastName     whereHelperstring
+	BillToCompany      whereHelperstring
+	BillToAddressLine1 whereHelperstring
+	BillToAddressLine2 whereHelperstring
+	BillToCity         whereHelperstring
+	BillToState        whereHelperstring
+	BillToPostalCode   whereHelperstring
+	BillToCountry      whereHelperstring
+	BillToEmail        whereHelperstring
+	BillToPhone        whereHelperstring
+	PayToFirstName     whereHelperstring
+	PayToLastName      whereHelperstring
+	PayToCompany       whereHelperstring
+	PayToAddressLine1  whereHelperstring
+	PayToAddressLine2  whereHelperstring
+	PayToCity          whereHelperstring
+	PayToState         whereHelperstring
+	PayToPostalCode    whereHelperstring
+	PayToCountry       whereHelperstring
+	PayToEmail         whereHelperstring
+	PayToPhone         whereHelperstring
+	TaxRate            whereHelperstring
+	AmountDue          whereHelperuint
+	AmountPaid         whereHelperuint
+	Status             whereHelperInvoicesStatus
 }{
-	ID:              whereHelperuint{field: "`invoices`.`id`"},
-	UserID:          whereHelperuint{field: "`invoices`.`user_id`"},
-	BillToFirstName: whereHelperstring{field: "`invoices`.`bill_to_first_name`"},
-	BillToLastName:  whereHelperstring{field: "`invoices`.`bill_to_last_name`"},
-	PayToFirstName:  whereHelperstring{field: "`invoices`.`pay_to_first_name`"},
-	PayToLastName:   whereHelperstring{field: "`invoices`.`pay_to_last_name`"},
-	AmountDue:       whereHelperuint{field: "`invoices`.`amount_due`"},
-	AmountPaid:      whereHelperuint{field: "`invoices`.`amount_paid`"},
-	Status:          whereHelperInvoicesStatus{field: "`invoices`.`status`"},
+	ID:                 whereHelperuint{field: "`invoices`.`id`"},
+	UserID:             whereHelperuint{field: "`invoices`.`user_id`"},
+	InvoiceNumber:      whereHelperstring{field: "`invoices`.`invoice_number`"},
+	PoNumber:           whereHelperstring{field: "`invoices`.`po_number`"},
+	Currency:           whereHelperstring{field: "`invoices`.`currency`"},
+	DueDate:            whereHelpertime_Time{field: "`invoices`.`due_date`"},
+	Message:            whereHelperstring{field: "`invoices`.`message`"},
+	BillToFirstName:    whereHelperstring{field: "`invoices`.`bill_to_first_name`"},
+	BillToLastName:     whereHelperstring{field: "`invoices`.`bill_to_last_name`"},
+	BillToCompany:      whereHelperstring{field: "`invoices`.`bill_to_company`"},
+	BillToAddressLine1: whereHelperstring{field: "`invoices`.`bill_to_address_line_1`"},
+	BillToAddressLine2: whereHelperstring{field: "`invoices`.`bill_to_address_line_2`"},
+	BillToCity:         whereHelperstring{field: "`invoices`.`bill_to_city`"},
+	BillToState:        whereHelperstring{field: "`invoices`.`bill_to_state`"},
+	BillToPostalCode:   whereHelperstring{field: "`invoices`.`bill_to_postal_code`"},
+	BillToCountry:      whereHelperstring{field: "`invoices`.`bill_to_country`"},
+	BillToEmail:        whereHelperstring{field: "`invoices`.`bill_to_email`"},
+	BillToPhone:        whereHelperstring{field: "`invoices`.`bill_to_phone`"},
+	PayToFirstName:     whereHelperstring{field: "`invoices`.`pay_to_first_name`"},
+	PayToLastName:      whereHelperstring{field: "`invoices`.`pay_to_last_name`"},
+	PayToCompany:       whereHelperstring{field: "`invoices`.`pay_to_company`"},
+	PayToAddressLine1:  whereHelperstring{field: "`invoices`.`pay_to_address_line_1`"},
+	PayToAddressLine2:  whereHelperstring{field: "`invoices`.`pay_to_address_line_2`"},
+	PayToCity:          whereHelperstring{field: "`invoices`.`pay_to_city`"},
+	PayToState:         whereHelperstring{field: "`invoices`.`pay_to_state`"},
+	PayToPostalCode:    whereHelperstring{field: "`invoices`.`pay_to_postal_code`"},
+	PayToCountry:       whereHelperstring{field: "`invoices`.`pay_to_country`"},
+	PayToEmail:         whereHelperstring{field: "`invoices`.`pay_to_email`"},
+	PayToPhone:         whereHelperstring{field: "`invoices`.`pay_to_phone`"},
+	TaxRate:            whereHelperstring{field: "`invoices`.`tax_rate`"},
+	AmountDue:          whereHelperuint{field: "`invoices`.`amount_due`"},
+	AmountPaid:         whereHelperuint{field: "`invoices`.`amount_paid`"},
+	Status:             whereHelperInvoicesStatus{field: "`invoices`.`status`"},
 }
 
 // InvoiceRels is where relationship names are stored.
@@ -205,8 +394,8 @@ func (*invoiceR) NewStruct() *invoiceR {
 type invoiceL struct{}
 
 var (
-	invoiceAllColumns            = []string{"id", "user_id", "bill_to_first_name", "bill_to_last_name", "pay_to_first_name", "pay_to_last_name", "amount_due", "amount_paid", "status"}
-	invoiceColumnsWithoutDefault = []string{"id", "user_id", "bill_to_first_name", "bill_to_last_name", "pay_to_first_name", "pay_to_last_name", "amount_due", "amount_paid", "status"}
+	invoiceAllColumns            = []string{"id", "user_id", "invoice_number", "po_number", "currency", "due_date", "message", "bill_to_first_name", "bill_to_last_name", "bill_to_company", "bill_to_address_line_1", "bill_to_address_line_2", "bill_to_city", "bill_to_state", "bill_to_postal_code", "bill_to_country", "bill_to_email", "bill_to_phone", "pay_to_first_name", "pay_to_last_name", "pay_to_company", "pay_to_address_line_1", "pay_to_address_line_2", "pay_to_city", "pay_to_state", "pay_to_postal_code", "pay_to_country", "pay_to_email", "pay_to_phone", "tax_rate", "amount_due", "amount_paid", "status"}
+	invoiceColumnsWithoutDefault = []string{"id", "user_id", "invoice_number", "po_number", "currency", "due_date", "message", "bill_to_first_name", "bill_to_last_name", "bill_to_company", "bill_to_address_line_1", "bill_to_address_line_2", "bill_to_city", "bill_to_state", "bill_to_postal_code", "bill_to_country", "bill_to_email", "bill_to_phone", "pay_to_first_name", "pay_to_last_name", "pay_to_company", "pay_to_address_line_1", "pay_to_address_line_2", "pay_to_city", "pay_to_state", "pay_to_postal_code", "pay_to_country", "pay_to_email", "pay_to_phone", "tax_rate", "amount_due", "amount_paid", "status"}
 	invoiceColumnsWithDefault    = []string{}
 	invoicePrimaryKeyColumns     = []string{"id"}
 	invoiceGeneratedColumns      = []string{}

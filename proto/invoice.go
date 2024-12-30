@@ -1,35 +1,67 @@
 package proto
 
+import "time"
+
 // InvoiceBillTo defines the invoice billing information.
 type InvoiceBillTo struct {
-	FirstName string
-	LastName  string
+	FirstName    string
+	LastName     string
+	Company      string
+	AddressLine1 string
+	AddressLine2 string
+	City         string
+	State        string
+	PostalCode   string
+	Country      string
+	Email        string
+	Phone        string
 }
 
 // InvoicePayTo defines the invoice payee information.
 type InvoicePayTo struct {
-	FirstName string
-	LastName  string
+	FirstName    string
+	LastName     string
+	Company      string
+	AddressLine1 string
+	AddressLine2 string
+	City         string
+	State        string
+	PostalCode   string
+	Country      string
+	Email        string
+	Phone        string
 }
 
 // Invoice defines an invoice.
 type Invoice struct {
-	ID         uint
-	UserID     uint
-	BillTo     InvoiceBillTo
-	PayTo      InvoicePayTo
-	AmountDue  uint
-	AmountPaid uint
-	Status     string
+	ID            uint
+	UserID        uint
+	InvoiceNumber string
+	PONumber      string
+	Currency      string
+	DueDate       time.Time
+	Message       string
+	BillTo        InvoiceBillTo
+	PayTo         InvoicePayTo
+	TaxRate       string
+	AmountDue     uint
+	AmountPaid    uint
+	Status        string
 }
 
 // InvoiceCreateParams defines the invoice create parameters.
 type InvoiceCreateParams struct {
-	ID        uint
-	UserID    uint
-	BillTo    InvoiceBillTo
-	PayTo     InvoicePayTo
-	AmountDue uint
+	ID            uint
+	UserID        uint
+	InvoiceNumber string
+	PONumber      string
+	Currency      string
+	DueDate       time.Time
+	Message       string
+	BillTo        InvoiceBillTo
+	PayTo         InvoicePayTo
+	TaxRate       string
+	AmountDue     uint
 }
 
 // InvoiceGetParams defines the invoice get parameters.
@@ -41,15 +73,51 @@ type InvoiceGetParams struct {
 	Limit  uint
 }
 
+// InvoiceBillToUpdate defines the invoice billing information for update.
+type InvoiceBillToUpdate struct {
+	FirstName    *string
+	LastName     *string
+	Company      *string
+	AddressLine1 *string
+	AddressLine2 *string
+	City         *string
+	State        *string
+	PostalCode   *string
+	Country      *string
+	Email        *string
+	Phone        *string
+}
+
+// InvoicePayToUpdate defines the invoice payee information for update.
+type InvoicePayToUpdate struct {
+	FirstName    *string
+	LastName     *string
+	Company      *string
+	AddressLine1 *string
+	AddressLine2 *string
+	City         *string
+	State        *string
+	PostalCode   *string
+	Country      *string
+	Email        *string
+	Phone        *string
+}
+
 // InvoiceUpdateParams defines the invoice update parameters.
 type InvoiceUpdateParams struct {
-	ID         *uint
-	UserID     *uint
-	BillTo     *InvoiceBillTo
-	PayTo      *InvoicePayTo
-	AmountDue  *uint
-	AmountPaid *uint
-	Status     *string
+	ID            *uint
+	UserID        *uint
+	InvoiceNumber *string
+	PONumber      *string
+	Currency      *string
+	DueDate       *time.Time
+	Message       *string
+	BillTo        *InvoiceBillToUpdate
+	PayTo         *InvoicePayToUpdate
+	TaxRate       *string
+	AmountDue     *uint
+	AmountPaid    *uint
+	Status        *string
 }
 
 // InvoicePayParams defines the invoice pay parameters.

@@ -83,8 +83,8 @@ func (db *Database) GetByID(id uint) (*invoice.Invoice, error) {
 }
 
 // Update updates an invoice.
-func (db *Database) Update(i *invoice.Invoice) error {
+func (db *Database) Update(i *invoice.Invoice) (*invoice.Invoice, error) {
 	invoiceMap[i.ID] = i
 
-	return nil
+	return i, nil
 }

@@ -52,7 +52,7 @@ type RequestPost struct {
 
 // ResultPost defines the response data for the HandlePost handler.
 type ResultPost struct {
-	Data *Transaction `json:"data"`
+	Data Transaction `json:"data"`
 }
 
 // HandlePost handles the /api/v1/transaction POST route of the API.
@@ -100,7 +100,7 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 
 		// Create a new Result.
 		result := ResultPost{
-			Data: &Transaction{
+			Data: Transaction{
 				ID:             transaction.ID,
 				UserID:         transaction.UserID,
 				Type:           transaction.Type,

@@ -1,5 +1,7 @@
 package invoice
 
+import "time"
+
 // Database defines the invoice database interface.
 type Database interface {
 	Create(i *Invoice) (*Invoice, error)
@@ -11,25 +13,49 @@ type Database interface {
 
 // BillTo defines the billing information.
 type BillTo struct {
-	FirstName string
-	LastName  string
+	FirstName    string
+	LastName     string
+	Company      string
+	AddressLine1 string
+	AddressLine2 string
+	City         string
+	State        string
+	PostalCode   string
+	Country      string
+	Email        string
+	Phone        string
 }
 
 // PayTo defines the payee information.
 type PayTo struct {
-	FirstName string
-	LastName  string
+	FirstName    string
+	LastName     string
+	Company      string
+	AddressLine1 string
+	AddressLine2 string
+	City         string
+	State        string
+	PostalCode   string
+	Country      string
+	Email        string
+	Phone        string
 }
 
 // Invoice defines an invoice.
 type Invoice struct {
-	ID         uint
-	UserID     uint
-	BillTo     BillTo
-	PayTo      PayTo
-	AmountDue  uint
-	AmountPaid uint
-	Status     string
+	ID            uint
+	UserID        uint
+	InvoiceNumber string
+	PONumber      string
+	Currency      string
+	DueDate       time.Time
+	Message       string
+	BillTo        BillTo
+	PayTo         PayTo
+	TaxRate       string
+	AmountDue     uint
+	AmountPaid    uint
+	Status        string
 }
 
 // GetParams defines the get parameters.

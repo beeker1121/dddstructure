@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	apictx "dddstructure/cmd/api/context"
 	"dddstructure/cmd/api/errors"
@@ -26,31 +27,61 @@ func New(ac *apictx.Context, router *httprouter.Router) {
 
 // BillTo defines the billing information.
 type BillTo struct {
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	Company      string `json:"company"`
+	AddressLine1 string `json:"address_line_1"`
+	AddressLine2 string `json:"address_line_2"`
+	City         string `json:"city"`
+	State        string `json:"state"`
+	PostalCode   string `json:"postal_code"`
+	Country      string `json:"country"`
+	Email        string `json:"email"`
+	Phone        string `json:"phone"`
 }
 
 // PayTo defines the payee information.
 type PayTo struct {
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	Company      string `json:"company"`
+	AddressLine1 string `json:"address_line_1"`
+	AddressLine2 string `json:"address_line_2"`
+	City         string `json:"city"`
+	State        string `json:"state"`
+	PostalCode   string `json:"postal_code"`
+	Country      string `json:"country"`
+	Email        string `json:"email"`
+	Phone        string `json:"phone"`
 }
 
 // Invoice defines an invoice.
 type Invoice struct {
-	ID         uint   `json:"id"`
-	UserID     uint   `json:"user_id"`
-	BillTo     BillTo `json:"bill_to"`
-	PayTo      PayTo  `json:"pay_to"`
-	AmountDue  uint   `json:"amount_due"`
-	AmountPaid uint   `json:"amount_paid"`
-	Status     string `json:"status"`
+	ID            uint      `json:"id"`
+	UserID        uint      `json:"user_id"`
+	InvoiceNumber string    `json:"invoice_number"`
+	PONumber      string    `json:"po_number"`
+	Currency      string    `json:"currency"`
+	DueDate       time.Time `json:"due_date"`
+	Message       string    `json:"message"`
+	BillTo        BillTo    `json:"bill_to"`
+	PayTo         PayTo     `json:"pay_to"`
+	TaxRate       string    `json:"tax_rate"`
+	AmountDue     uint      `json:"amount_due"`
+	AmountPaid    uint      `json:"amount_paid"`
+	Status        string    `json:"status"`
 }
 
 // RequestPost defines the request data for the HandlePost handler.
 type RequestPost struct {
+	InvoiceNumber string `json:"invoice_number"`
+	PONumber      string `json:"po_number"`
+	Currency      string `json:"currency"`
+	// DueDate       time.Time `json:"due_date"`
+	Message   string `json:"message"`
 	BillTo    BillTo `json:"bill_to"`
 	PayTo     PayTo  `json:"pay_to"`
+	TaxRate   string `json:"tax_rate"`
 	AmountDue uint   `json:"amount_due"`
 }
 
@@ -78,15 +109,39 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 
 		// Create the invoice.
 		invoice, err := ac.Service.Invoice.Create(&proto.InvoiceCreateParams{
-			UserID: user.ID,
+			UserID:        user.ID,
+			InvoiceNumber: req.InvoiceNumber,
+			PONumber:      req.PONumber,
+			Currency:      req.Currency,
+			DueDate:       time.Now(),
+			Message:       req.Message,
 			BillTo: proto.InvoiceBillTo{
-				FirstName: req.BillTo.FirstName,
-				LastName:  req.BillTo.LastName,
+				FirstName:    req.BillTo.FirstName,
+				LastName:     req.BillTo.LastName,
+				Company:      req.BillTo.Company,
+				AddressLine1: req.BillTo.AddressLine1,
+				AddressLine2: req.BillTo.AddressLine2,
+				City:         req.BillTo.City,
+				State:        req.BillTo.State,
+				PostalCode:   req.BillTo.PostalCode,
+				Country:      req.BillTo.Country,
+				Email:        req.BillTo.Email,
+				Phone:        req.BillTo.Phone,
 			},
 			PayTo: proto.InvoicePayTo{
-				FirstName: req.PayTo.FirstName,
-				LastName:  req.PayTo.LastName,
+				FirstName:    req.PayTo.FirstName,
+				LastName:     req.PayTo.LastName,
+				Company:      req.PayTo.Company,
+				AddressLine1: req.PayTo.AddressLine1,
+				AddressLine2: req.PayTo.AddressLine2,
+				City:         req.PayTo.City,
+				State:        req.PayTo.State,
+				PostalCode:   req.PayTo.PostalCode,
+				Country:      req.PayTo.Country,
+				Email:        req.PayTo.Email,
+				Phone:        req.PayTo.Phone,
 			},
+			TaxRate:   req.TaxRate,
 			AmountDue: req.AmountDue,
 		})
 		if pes, ok := err.(*serverrors.ParamErrors); ok && err != nil {
@@ -100,21 +155,7 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 
 		// Create a new Result.
 		result := ResultPost{
-			Data: Invoice{
-				ID:     invoice.ID,
-				UserID: invoice.UserID,
-				BillTo: BillTo{
-					FirstName: invoice.BillTo.FirstName,
-					LastName:  invoice.BillTo.LastName,
-				},
-				PayTo: PayTo{
-					FirstName: invoice.PayTo.FirstName,
-					LastName:  invoice.PayTo.LastName,
-				},
-				AmountDue:  invoice.AmountDue,
-				AmountPaid: invoice.AmountPaid,
-				Status:     invoice.Status,
-			},
+			Data: protoToInvoice(invoice),
 		}
 
 		// Respond with JSON.
@@ -141,9 +182,9 @@ type Links struct {
 
 // ResultGet defines the response data for the HandleGet handler.
 type ResultGet struct {
-	Data  []*Invoice `json:"data"`
-	Meta  Meta       `json:"meta"`
-	Links Links      `json:"links"`
+	Data  []Invoice `json:"data"`
+	Meta  Meta      `json:"meta"`
+	Links Links     `json:"links"`
 }
 
 // HandleGet handles the /api/v1/invoice GET route of the API.
@@ -222,7 +263,7 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 
 		// Create a new Result.
 		result := ResultGet{
-			Data: []*Invoice{},
+			Data: []Invoice{},
 			Meta: Meta{
 				Offset: params.Offset,
 				Limit:  params.Limit,
@@ -233,24 +274,7 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 
 		// Loop through the invoices.
 		for _, i := range invoices {
-			// Create a new invoice.
-			invoice := &Invoice{
-				ID:     i.ID,
-				UserID: i.UserID,
-				BillTo: BillTo{
-					FirstName: i.BillTo.FirstName,
-					LastName:  i.BillTo.LastName,
-				},
-				PayTo: PayTo{
-					FirstName: i.PayTo.FirstName,
-					LastName:  i.PayTo.LastName,
-				},
-				AmountDue:  i.AmountDue,
-				AmountPaid: i.AmountPaid,
-				Status:     i.Status,
-			}
-
-			result.Data = append(result.Data, invoice)
+			result.Data = append(result.Data, protoToInvoice(i))
 		}
 
 		// Handle previous link.
@@ -288,7 +312,7 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 
 // ResultGetInvoice defines the response data for the HandleGetInvoice handler.
 type ResultGetInvoice struct {
-	Data *Invoice `json:"data"`
+	Data Invoice `json:"data"`
 }
 
 // HandleGetInvoice handles the /api/v1/invoice/:id GET route of the API.
@@ -322,15 +346,7 @@ func HandleGetInvoice(ac *apictx.Context) http.HandlerFunc {
 
 		// Create a new result.
 		result := ResultGetInvoice{
-			Data: &Invoice{
-				ID:         invoice.ID,
-				UserID:     invoice.UserID,
-				BillTo:     BillTo(invoice.BillTo),
-				PayTo:      PayTo(invoice.PayTo),
-				AmountDue:  invoice.AmountDue,
-				AmountPaid: invoice.AmountPaid,
-				Status:     invoice.Status,
-			},
+			Data: protoToInvoice(invoice),
 		}
 
 		// Respond with JSON.
@@ -342,11 +358,47 @@ func HandleGetInvoice(ac *apictx.Context) http.HandlerFunc {
 	}
 }
 
+// BillToUpdate defines the billing information for update.
+type BillToUpdate struct {
+	FirstName    *string `json:"first_name"`
+	LastName     *string `json:"last_name"`
+	Company      *string `json:"company"`
+	AddressLine1 *string `json:"address_line_1"`
+	AddressLine2 *string `json:"address_line_2"`
+	City         *string `json:"city"`
+	State        *string `json:"state"`
+	PostalCode   *string `json:"postal_code"`
+	Country      *string `json:"country"`
+	Email        *string `json:"email"`
+	Phone        *string `json:"phone"`
+}
+
+// PayToUpdate defines the payee information for update.
+type PayToUpdate struct {
+	FirstName    *string `json:"first_name"`
+	LastName     *string `json:"last_name"`
+	Company      *string `json:"company"`
+	AddressLine1 *string `json:"address_line_1"`
+	AddressLine2 *string `json:"address_line_2"`
+	City         *string `json:"city"`
+	State        *string `json:"state"`
+	PostalCode   *string `json:"postal_code"`
+	Country      *string `json:"country"`
+	Email        *string `json:"email"`
+	Phone        *string `json:"phone"`
+}
+
 // RequestPostUpdate defines the request data for the HandlePostUpdate handler.
 type RequestPostUpdate struct {
-	BillTo    *BillTo `json:"bill_to"`
-	PayTo     *PayTo  `json:"pay_to"`
-	AmountDue *uint   `json:"amount_due"`
+	InvoiceNumber *string       `json:"invoice_number"`
+	PONumber      *string       `json:"po_number"`
+	Currency      *string       `json:"currency"`
+	DueDate       *time.Time    `json:"due_date"`
+	Message       *string       `json:"message"`
+	BillTo        *BillToUpdate `json:"bill_to"`
+	PayTo         *PayToUpdate  `json:"pay_to"`
+	TaxRate       *string       `json:"tax_rate"`
+	AmountDue     *uint         `json:"amount_due"`
 }
 
 // ResultPostUpdate defines the response data for the HandlePostUpdate handler.
@@ -382,22 +434,46 @@ func HandlePostUpdate(ac *apictx.Context) http.HandlerFunc {
 
 		// Handle invoice update params.
 		params := &proto.InvoiceUpdateParams{
-			ID:        &id,
-			UserID:    &user.ID,
-			AmountDue: req.AmountDue,
+			ID:            &id,
+			UserID:        &user.ID,
+			InvoiceNumber: req.InvoiceNumber,
+			PONumber:      req.PONumber,
+			Currency:      req.Currency,
+			DueDate:       req.DueDate,
+			Message:       req.Message,
+			TaxRate:       req.TaxRate,
+			AmountDue:     req.AmountDue,
 		}
 
 		if req.BillTo != nil {
-			params.BillTo = &proto.InvoiceBillTo{
-				FirstName: req.BillTo.FirstName,
-				LastName:  req.BillTo.LastName,
+			params.BillTo = &proto.InvoiceBillToUpdate{
+				FirstName:    req.BillTo.FirstName,
+				LastName:     req.BillTo.LastName,
+				Company:      req.BillTo.Company,
+				AddressLine1: req.BillTo.AddressLine1,
+				AddressLine2: req.BillTo.AddressLine2,
+				City:         req.BillTo.City,
+				State:        req.BillTo.State,
+				PostalCode:   req.BillTo.PostalCode,
+				Country:      req.BillTo.Country,
+				Email:        req.BillTo.Email,
+				Phone:        req.BillTo.Phone,
 			}
 		}
 
 		if req.PayTo != nil {
-			params.PayTo = &proto.InvoicePayTo{
-				FirstName: req.PayTo.FirstName,
-				LastName:  req.PayTo.LastName,
+			params.PayTo = &proto.InvoicePayToUpdate{
+				FirstName:    req.PayTo.FirstName,
+				LastName:     req.PayTo.LastName,
+				Company:      req.PayTo.Company,
+				AddressLine1: req.PayTo.AddressLine1,
+				AddressLine2: req.PayTo.AddressLine2,
+				City:         req.PayTo.City,
+				State:        req.PayTo.State,
+				PostalCode:   req.PayTo.PostalCode,
+				Country:      req.PayTo.Country,
+				Email:        req.PayTo.Email,
+				Phone:        req.PayTo.Phone,
 			}
 		}
 
@@ -414,21 +490,7 @@ func HandlePostUpdate(ac *apictx.Context) http.HandlerFunc {
 
 		// Create a new Result.
 		result := ResultPostUpdate{
-			Data: Invoice{
-				ID:     invoice.ID,
-				UserID: invoice.UserID,
-				BillTo: BillTo{
-					FirstName: invoice.BillTo.FirstName,
-					LastName:  invoice.BillTo.LastName,
-				},
-				PayTo: PayTo{
-					FirstName: invoice.PayTo.FirstName,
-					LastName:  invoice.PayTo.LastName,
-				},
-				AmountDue:  invoice.AmountDue,
-				AmountPaid: invoice.AmountPaid,
-				Status:     invoice.Status,
-			},
+			Data: protoToInvoice(invoice),
 		}
 
 		// Respond with JSON.
@@ -437,5 +499,49 @@ func HandlePostUpdate(ac *apictx.Context) http.HandlerFunc {
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
+	}
+}
+
+// protoToInvoice handles mapping a proto invoice type to the response invoice
+// type.
+func protoToInvoice(i *proto.Invoice) Invoice {
+	return Invoice{
+		ID:            i.ID,
+		UserID:        i.UserID,
+		InvoiceNumber: i.InvoiceNumber,
+		PONumber:      i.PONumber,
+		Currency:      i.Currency,
+		DueDate:       i.DueDate,
+		Message:       i.Message,
+		BillTo: BillTo{
+			FirstName:    i.BillTo.FirstName,
+			LastName:     i.BillTo.LastName,
+			Company:      i.BillTo.Company,
+			AddressLine1: i.BillTo.AddressLine1,
+			AddressLine2: i.BillTo.AddressLine2,
+			City:         i.BillTo.City,
+			State:        i.BillTo.State,
+			PostalCode:   i.BillTo.PostalCode,
+			Country:      i.BillTo.Country,
+			Email:        i.BillTo.Email,
+			Phone:        i.BillTo.Phone,
+		},
+		PayTo: PayTo{
+			FirstName:    i.PayTo.FirstName,
+			LastName:     i.PayTo.LastName,
+			Company:      i.PayTo.Company,
+			AddressLine1: i.PayTo.AddressLine1,
+			AddressLine2: i.PayTo.AddressLine2,
+			City:         i.PayTo.City,
+			State:        i.PayTo.State,
+			PostalCode:   i.PayTo.PostalCode,
+			Country:      i.PayTo.Country,
+			Email:        i.PayTo.Email,
+			Phone:        i.PayTo.Phone,
+		},
+		TaxRate:    i.TaxRate,
+		AmountDue:  i.AmountDue,
+		AmountPaid: i.AmountPaid,
+		Status:     i.Status,
 	}
 }

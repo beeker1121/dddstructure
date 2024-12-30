@@ -44,16 +44,40 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 
 	// Create an invoice.
 	storagei, err := s.storage.Invoice.Create(&invoice.Invoice{
-		ID:     params.ID,
-		UserID: params.UserID,
+		ID:            params.ID,
+		UserID:        params.UserID,
+		InvoiceNumber: params.InvoiceNumber,
+		PONumber:      params.PONumber,
+		Currency:      params.Currency,
+		DueDate:       params.DueDate,
+		Message:       params.Message,
 		BillTo: invoice.BillTo{
-			FirstName: params.BillTo.FirstName,
-			LastName:  params.BillTo.LastName,
+			FirstName:    params.BillTo.FirstName,
+			LastName:     params.BillTo.LastName,
+			Company:      params.BillTo.Company,
+			AddressLine1: params.BillTo.AddressLine1,
+			AddressLine2: params.BillTo.AddressLine2,
+			City:         params.BillTo.City,
+			State:        params.BillTo.State,
+			PostalCode:   params.BillTo.PostalCode,
+			Country:      params.BillTo.Country,
+			Email:        params.BillTo.Email,
+			Phone:        params.BillTo.Phone,
 		},
 		PayTo: invoice.PayTo{
-			FirstName: params.PayTo.FirstName,
-			LastName:  params.PayTo.LastName,
+			FirstName:    params.PayTo.FirstName,
+			LastName:     params.PayTo.LastName,
+			Company:      params.PayTo.Company,
+			AddressLine1: params.PayTo.AddressLine1,
+			AddressLine2: params.PayTo.AddressLine2,
+			City:         params.PayTo.City,
+			State:        params.PayTo.State,
+			PostalCode:   params.PayTo.PostalCode,
+			Country:      params.PayTo.Country,
+			Email:        params.PayTo.Email,
+			Phone:        params.PayTo.Phone,
 		},
+		TaxRate:    params.TaxRate,
 		AmountDue:  params.AmountDue,
 		AmountPaid: 0,
 		Status:     "pending",
@@ -62,24 +86,7 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 		return nil, err
 	}
 
-	// Map to service type.
-	servicei := &proto.Invoice{
-		ID:     storagei.ID,
-		UserID: storagei.UserID,
-		BillTo: proto.InvoiceBillTo{
-			FirstName: storagei.BillTo.FirstName,
-			LastName:  storagei.BillTo.LastName,
-		},
-		PayTo: proto.InvoicePayTo{
-			FirstName: storagei.PayTo.FirstName,
-			LastName:  storagei.PayTo.LastName,
-		},
-		AmountDue:  storagei.AmountDue,
-		AmountPaid: storagei.AmountPaid,
-		Status:     storagei.Status,
-	}
-
-	return servicei, nil
+	return storageToProto(storagei), nil
 }
 
 // Get gets a set of invoices.
@@ -119,21 +126,7 @@ func (s *Service) Get(params *proto.InvoiceGetParams) ([]*proto.Invoice, error) 
 	// Loop through the set of invoices.
 	for _, i := range storageis {
 		// Create a new invoice.
-		invoice := &proto.Invoice{
-			ID:     i.ID,
-			UserID: i.UserID,
-			BillTo: proto.InvoiceBillTo{
-				FirstName: i.BillTo.FirstName,
-				LastName:  i.BillTo.LastName,
-			},
-			PayTo: proto.InvoicePayTo{
-				FirstName: i.PayTo.FirstName,
-				LastName:  i.PayTo.LastName,
-			},
-			AmountDue:  i.AmountDue,
-			AmountPaid: i.AmountPaid,
-			Status:     i.Status,
-		}
+		invoice := storageToProto(i)
 
 		// Add to invoices slice
 		invoices = append(invoices, invoice)
@@ -189,24 +182,7 @@ func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 		return nil, err
 	}
 
-	// Map to service type.
-	servicei := &proto.Invoice{
-		ID:     storagei.ID,
-		UserID: storagei.UserID,
-		BillTo: proto.InvoiceBillTo{
-			FirstName: storagei.BillTo.FirstName,
-			LastName:  storagei.BillTo.LastName,
-		},
-		PayTo: proto.InvoicePayTo{
-			FirstName: storagei.PayTo.FirstName,
-			LastName:  storagei.PayTo.LastName,
-		},
-		AmountDue:  storagei.AmountDue,
-		AmountPaid: storagei.AmountPaid,
-		Status:     storagei.Status,
-	}
-
-	return servicei, nil
+	return storageToProto(storagei), nil
 }
 
 // GetByID gets an invoice by the given ID and user ID.
@@ -227,24 +203,7 @@ func (s *Service) GetByIDAndUserID(id, userID uint) (*proto.Invoice, error) {
 		return nil, serverrors.ErrInvoiceNotFound
 	}
 
-	// Map to service type.
-	servicei := &proto.Invoice{
-		ID:     storagei.ID,
-		UserID: storagei.UserID,
-		BillTo: proto.InvoiceBillTo{
-			FirstName: storagei.BillTo.FirstName,
-			LastName:  storagei.BillTo.LastName,
-		},
-		PayTo: proto.InvoicePayTo{
-			FirstName: storagei.PayTo.FirstName,
-			LastName:  storagei.PayTo.LastName,
-		},
-		AmountDue:  storagei.AmountDue,
-		AmountPaid: storagei.AmountPaid,
-		Status:     storagei.Status,
-	}
-
-	return servicei, nil
+	return storageToProto(storagei), nil
 }
 
 // Update handles updating an invoice.
@@ -260,14 +219,108 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, err
 		return nil, err
 	}
 
+	// Handle invoice number.
+	if params.InvoiceNumber != nil {
+		storagei.InvoiceNumber = *params.InvoiceNumber
+	}
+
+	// Handle PO number.
+	if params.PONumber != nil {
+		storagei.PONumber = *params.PONumber
+	}
+
+	// Handle currency.
+	if params.Currency != nil {
+		storagei.Currency = *params.Currency
+	}
+
+	// Handle due date.
+	if params.DueDate != nil {
+		storagei.DueDate = *params.DueDate
+	}
+
+	// Handle message.
+	if params.Message != nil {
+		storagei.Message = *params.Message
+	}
+
 	// Handle bill to.
 	if params.BillTo != nil {
-		storagei.BillTo = invoice.BillTo(*params.BillTo)
+		if params.BillTo.FirstName != nil {
+			storagei.BillTo.FirstName = *params.BillTo.FirstName
+		}
+		if params.BillTo.LastName != nil {
+			storagei.BillTo.LastName = *params.BillTo.LastName
+		}
+		if params.BillTo.Company != nil {
+			storagei.BillTo.Company = *params.BillTo.Company
+		}
+		if params.BillTo.AddressLine1 != nil {
+			storagei.BillTo.AddressLine1 = *params.BillTo.AddressLine1
+		}
+		if params.BillTo.AddressLine2 != nil {
+			storagei.BillTo.AddressLine2 = *params.BillTo.AddressLine2
+		}
+		if params.BillTo.City != nil {
+			storagei.BillTo.City = *params.BillTo.City
+		}
+		if params.BillTo.State != nil {
+			storagei.BillTo.State = *params.BillTo.State
+		}
+		if params.BillTo.PostalCode != nil {
+			storagei.BillTo.PostalCode = *params.BillTo.PostalCode
+		}
+		if params.BillTo.Country != nil {
+			storagei.BillTo.Country = *params.BillTo.Country
+		}
+		if params.BillTo.Email != nil {
+			storagei.BillTo.Email = *params.BillTo.Email
+		}
+		if params.BillTo.Phone != nil {
+			storagei.BillTo.Phone = *params.BillTo.Phone
+		}
 	}
 
 	// Handle pay to.
 	if params.PayTo != nil {
-		storagei.PayTo = invoice.PayTo(*params.PayTo)
+		if params.PayTo.FirstName != nil {
+			storagei.PayTo.FirstName = *params.PayTo.FirstName
+		}
+		if params.PayTo.LastName != nil {
+			storagei.PayTo.LastName = *params.PayTo.LastName
+		}
+		if params.PayTo.Company != nil {
+			storagei.PayTo.Company = *params.PayTo.Company
+		}
+		if params.PayTo.AddressLine1 != nil {
+			storagei.PayTo.AddressLine1 = *params.PayTo.AddressLine1
+		}
+		if params.PayTo.AddressLine2 != nil {
+			storagei.PayTo.AddressLine2 = *params.PayTo.AddressLine2
+		}
+		if params.PayTo.City != nil {
+			storagei.PayTo.City = *params.PayTo.City
+		}
+		if params.PayTo.State != nil {
+			storagei.PayTo.State = *params.PayTo.State
+		}
+		if params.PayTo.PostalCode != nil {
+			storagei.PayTo.PostalCode = *params.PayTo.PostalCode
+		}
+		if params.PayTo.Country != nil {
+			storagei.PayTo.Country = *params.PayTo.Country
+		}
+		if params.PayTo.Email != nil {
+			storagei.PayTo.Email = *params.PayTo.Email
+		}
+		if params.PayTo.Phone != nil {
+			storagei.PayTo.Phone = *params.PayTo.Phone
+		}
+	}
+
+	// Handle tax rate.
+	if params.TaxRate != nil {
+		storagei.TaxRate = *params.TaxRate
 	}
 
 	// Handle amount due.
@@ -291,24 +344,7 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, err
 		return nil, err
 	}
 
-	// Map to service type.
-	servicei := &proto.Invoice{
-		ID:     storagei.ID,
-		UserID: storagei.UserID,
-		BillTo: proto.InvoiceBillTo{
-			FirstName: storagei.BillTo.FirstName,
-			LastName:  storagei.BillTo.LastName,
-		},
-		PayTo: proto.InvoicePayTo{
-			FirstName: storagei.PayTo.FirstName,
-			LastName:  storagei.PayTo.LastName,
-		},
-		AmountDue:  storagei.AmountDue,
-		AmountPaid: storagei.AmountPaid,
-		Status:     storagei.Status,
-	}
-
-	return servicei, nil
+	return storageToProto(storagei), nil
 }
 
 // UpdateByIDAndUserID handles updating an invoice by given ID and User ID.
@@ -363,4 +399,48 @@ func (s *Service) Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, 
 	}
 
 	return servicei, nil
+}
+
+// storageToProto handles mapping a storage invoice type to the proto invoice
+// type.
+func storageToProto(s *invoice.Invoice) *proto.Invoice {
+	return &proto.Invoice{
+		ID:            s.ID,
+		UserID:        s.UserID,
+		InvoiceNumber: s.InvoiceNumber,
+		PONumber:      s.PONumber,
+		Currency:      s.Currency,
+		DueDate:       s.DueDate,
+		Message:       s.Message,
+		BillTo: proto.InvoiceBillTo{
+			FirstName:    s.BillTo.FirstName,
+			LastName:     s.BillTo.LastName,
+			Company:      s.BillTo.Company,
+			AddressLine1: s.BillTo.AddressLine1,
+			AddressLine2: s.BillTo.AddressLine2,
+			City:         s.BillTo.City,
+			State:        s.BillTo.State,
+			PostalCode:   s.BillTo.PostalCode,
+			Country:      s.BillTo.Country,
+			Email:        s.BillTo.Email,
+			Phone:        s.BillTo.Phone,
+		},
+		PayTo: proto.InvoicePayTo{
+			FirstName:    s.PayTo.FirstName,
+			LastName:     s.PayTo.LastName,
+			Company:      s.PayTo.Company,
+			AddressLine1: s.PayTo.AddressLine1,
+			AddressLine2: s.PayTo.AddressLine2,
+			City:         s.PayTo.City,
+			State:        s.PayTo.State,
+			PostalCode:   s.PayTo.PostalCode,
+			Country:      s.PayTo.Country,
+			Email:        s.PayTo.Email,
+			Phone:        s.PayTo.Phone,
+		},
+		TaxRate:    s.TaxRate,
+		AmountDue:  s.AmountDue,
+		AmountPaid: s.AmountPaid,
+		Status:     s.Status,
+	}
 }
