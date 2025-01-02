@@ -167,6 +167,8 @@ Then run SQLBoiler to update the models based on the MySQL database schema:
 - Figure out how to handle `time.Time`, ie time coming in from the API, how to convert that to `time.Time` for service level, and finally how to store via storage layer.
   - API request struct has it commented out currently.
   - For storage side, the top level storage struct should still probably just use `time.Time` and the database itself can convert to and from that.
+- Add validate methods where needed.
+  - On invoice create, validate at least one line item is passed in.
 
 # Thanks
 
