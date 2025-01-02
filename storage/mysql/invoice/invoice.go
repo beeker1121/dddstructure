@@ -3,10 +3,12 @@ package invoice
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 
 	"dddstructure/storage/invoice"
 	"dddstructure/storage/mysql/models"
 
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -26,10 +28,13 @@ func New(db *sql.DB) *Database {
 // Create creates a new invoice.
 func (db *Database) Create(i *invoice.Invoice) (*invoice.Invoice, error) {
 	// Map to model.
-	model := storageToModel(i)
+	model, err := storageToModel(i)
+	if err != nil {
+		return nil, err
+	}
 
 	// Insert into database.
-	err := model.Insert(context.Background(), db.db, boil.Infer())
+	err = model.Insert(context.Background(), db.db, boil.Infer())
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +60,10 @@ func (db *Database) Get(params *invoice.GetParams) ([]*invoice.Invoice, error) {
 	// Build invoices slice.
 	invoices := []*invoice.Invoice{}
 	for _, mi := range modelInvoices {
-		i := modelToStorage(mi)
+		i, err := modelToStorage(mi)
+		if err != nil {
+			return nil, err
+		}
 
 		invoices = append(invoices, &i)
 	}
@@ -91,7 +99,10 @@ func (db *Database) GetByID(id uint) (*invoice.Invoice, error) {
 	}
 
 	// Map to invoice type.
-	i := modelToStorage(modeli)
+	i, err := modelToStorage(modeli)
+	if err != nil {
+		return nil, err
+	}
 
 	return &i, nil
 }
@@ -99,10 +110,13 @@ func (db *Database) GetByID(id uint) (*invoice.Invoice, error) {
 // Update updates an invoice.
 func (db *Database) Update(i *invoice.Invoice) (*invoice.Invoice, error) {
 	// Map to model.
-	model := storageToModel(i)
+	model, err := storageToModel(i)
+	if err != nil {
+		return nil, err
+	}
 
 	// Update in database.
-	_, err := model.Update(context.Background(), db.db, boil.Infer())
+	_, err = model.Update(context.Background(), db.db, boil.Infer())
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +126,18 @@ func (db *Database) Update(i *invoice.Invoice) (*invoice.Invoice, error) {
 
 // storageToModel handles mapping a storage invoice type to the model invoice
 // type.
-func storageToModel(i *invoice.Invoice) models.Invoice {
+func storageToModel(i *invoice.Invoice) (models.Invoice, error) {
+	// Handle line items.
+	lineItemsJSON, err := json.Marshal(i.LineItems)
+	if err != nil {
+		return models.Invoice{}, err
+	}
+
+	lineItems := null.JSON{}
+	if err := json.Unmarshal(lineItemsJSON, &lineItems); err != nil {
+		return models.Invoice{}, err
+	}
+
 	return models.Invoice{
 		ID:                 i.ID,
 		UserID:             i.UserID,
@@ -143,16 +168,23 @@ func storageToModel(i *invoice.Invoice) models.Invoice {
 		PayToCountry:       i.PayTo.Country,
 		PayToEmail:         i.PayTo.Email,
 		PayToPhone:         i.PayTo.Phone,
+		LineItems:          lineItems,
 		TaxRate:            i.TaxRate,
 		AmountDue:          i.AmountDue,
 		AmountPaid:         i.AmountPaid,
 		Status:             models.InvoicesStatus(i.Status),
-	}
+	}, nil
 }
 
 // modelToStorage handles mapping a model invoice type to the storage invoice
 // type.
-func modelToStorage(i *models.Invoice) invoice.Invoice {
+func modelToStorage(i *models.Invoice) (invoice.Invoice, error) {
+	// Handle line items.
+	lineItems := []invoice.LineItem{}
+	if err := i.LineItems.Unmarshal(&lineItems); err != nil {
+		return invoice.Invoice{}, err
+	}
+
 	return invoice.Invoice{
 		ID:            i.ID,
 		UserID:        i.UserID,
@@ -187,9 +219,10 @@ func modelToStorage(i *models.Invoice) invoice.Invoice {
 			Email:        i.PayToEmail,
 			Phone:        i.PayToPhone,
 		},
+		LineItems:  lineItems,
 		TaxRate:    i.TaxRate,
 		AmountDue:  i.AmountDue,
 		AmountPaid: i.AmountPaid,
 		Status:     i.Status.String(),
-	}
+	}, nil
 }

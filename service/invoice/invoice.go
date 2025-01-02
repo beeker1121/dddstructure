@@ -42,6 +42,20 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 		idCounter++
 	}
 
+	// Handle line items.
+	lineItems := []invoice.LineItem{}
+	for _, v := range params.LineItems {
+		lineItem := invoice.LineItem{
+			Name:        v.Name,
+			Description: v.Description,
+			Quantity:    v.Quantity,
+			Price:       v.Price,
+			Subtotal:    v.Subtotal,
+		}
+
+		lineItems = append(lineItems, lineItem)
+	}
+
 	// Create an invoice.
 	storagei, err := s.storage.Invoice.Create(&invoice.Invoice{
 		ID:            params.ID,
@@ -77,6 +91,7 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 			Email:        params.PayTo.Email,
 			Phone:        params.PayTo.Phone,
 		},
+		LineItems:  lineItems,
 		TaxRate:    params.TaxRate,
 		AmountDue:  params.AmountDue,
 		AmountPaid: 0,
@@ -318,6 +333,24 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, err
 		}
 	}
 
+	// Handle line items.
+	if params.LineItems != nil {
+		lineItems := []invoice.LineItem{}
+		for _, v := range *params.LineItems {
+			lineItem := invoice.LineItem{
+				Name:        v.Name,
+				Description: v.Description,
+				Quantity:    v.Quantity,
+				Price:       v.Price,
+				Subtotal:    v.Subtotal,
+			}
+
+			lineItems = append(lineItems, lineItem)
+		}
+
+		storagei.LineItems = lineItems
+	}
+
 	// Handle tax rate.
 	if params.TaxRate != nil {
 		storagei.TaxRate = *params.TaxRate
@@ -404,6 +437,20 @@ func (s *Service) Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, 
 // storageToProto handles mapping a storage invoice type to the proto invoice
 // type.
 func storageToProto(s *invoice.Invoice) *proto.Invoice {
+	// Handle line items.
+	lineItems := []proto.InvoiceLineItem{}
+	for _, v := range s.LineItems {
+		lineItem := proto.InvoiceLineItem{
+			Name:        v.Name,
+			Description: v.Description,
+			Quantity:    v.Quantity,
+			Price:       v.Price,
+			Subtotal:    v.Subtotal,
+		}
+
+		lineItems = append(lineItems, lineItem)
+	}
+
 	return &proto.Invoice{
 		ID:            s.ID,
 		UserID:        s.UserID,
@@ -438,6 +485,7 @@ func storageToProto(s *invoice.Invoice) *proto.Invoice {
 			Email:        s.PayTo.Email,
 			Phone:        s.PayTo.Phone,
 		},
+		LineItems:  lineItems,
 		TaxRate:    s.TaxRate,
 		AmountDue:  s.AmountDue,
 		AmountPaid: s.AmountPaid,

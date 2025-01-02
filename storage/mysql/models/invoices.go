@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -52,6 +53,7 @@ type Invoice struct {
 	PayToCountry       string         `boil:"pay_to_country" json:"pay_to_country" toml:"pay_to_country" yaml:"pay_to_country"`
 	PayToEmail         string         `boil:"pay_to_email" json:"pay_to_email" toml:"pay_to_email" yaml:"pay_to_email"`
 	PayToPhone         string         `boil:"pay_to_phone" json:"pay_to_phone" toml:"pay_to_phone" yaml:"pay_to_phone"`
+	LineItems          null.JSON      `boil:"line_items" json:"line_items,omitempty" toml:"line_items" yaml:"line_items,omitempty"`
 	TaxRate            string         `boil:"tax_rate" json:"tax_rate" toml:"tax_rate" yaml:"tax_rate"`
 	AmountDue          uint           `boil:"amount_due" json:"amount_due" toml:"amount_due" yaml:"amount_due"`
 	AmountPaid         uint           `boil:"amount_paid" json:"amount_paid" toml:"amount_paid" yaml:"amount_paid"`
@@ -91,6 +93,7 @@ var InvoiceColumns = struct {
 	PayToCountry       string
 	PayToEmail         string
 	PayToPhone         string
+	LineItems          string
 	TaxRate            string
 	AmountDue          string
 	AmountPaid         string
@@ -125,6 +128,7 @@ var InvoiceColumns = struct {
 	PayToCountry:       "pay_to_country",
 	PayToEmail:         "pay_to_email",
 	PayToPhone:         "pay_to_phone",
+	LineItems:          "line_items",
 	TaxRate:            "tax_rate",
 	AmountDue:          "amount_due",
 	AmountPaid:         "amount_paid",
@@ -161,6 +165,7 @@ var InvoiceTableColumns = struct {
 	PayToCountry       string
 	PayToEmail         string
 	PayToPhone         string
+	LineItems          string
 	TaxRate            string
 	AmountDue          string
 	AmountPaid         string
@@ -195,6 +200,7 @@ var InvoiceTableColumns = struct {
 	PayToCountry:       "invoices.pay_to_country",
 	PayToEmail:         "invoices.pay_to_email",
 	PayToPhone:         "invoices.pay_to_phone",
+	LineItems:          "invoices.line_items",
 	TaxRate:            "invoices.tax_rate",
 	AmountDue:          "invoices.amount_due",
 	AmountPaid:         "invoices.amount_paid",
@@ -272,6 +278,30 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_JSON struct{ field string }
+
+func (w whereHelpernull_JSON) EQ(x null.JSON) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_JSON) NEQ(x null.JSON) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_JSON) LT(x null.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_JSON) LTE(x null.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_JSON) GT(x null.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_JSON) GTE(x null.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+func (w whereHelpernull_JSON) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_JSON) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+
 type whereHelperInvoicesStatus struct{ field string }
 
 func (w whereHelperInvoicesStatus) EQ(x InvoicesStatus) qm.QueryMod {
@@ -337,6 +367,7 @@ var InvoiceWhere = struct {
 	PayToCountry       whereHelperstring
 	PayToEmail         whereHelperstring
 	PayToPhone         whereHelperstring
+	LineItems          whereHelpernull_JSON
 	TaxRate            whereHelperstring
 	AmountDue          whereHelperuint
 	AmountPaid         whereHelperuint
@@ -371,6 +402,7 @@ var InvoiceWhere = struct {
 	PayToCountry:       whereHelperstring{field: "`invoices`.`pay_to_country`"},
 	PayToEmail:         whereHelperstring{field: "`invoices`.`pay_to_email`"},
 	PayToPhone:         whereHelperstring{field: "`invoices`.`pay_to_phone`"},
+	LineItems:          whereHelpernull_JSON{field: "`invoices`.`line_items`"},
 	TaxRate:            whereHelperstring{field: "`invoices`.`tax_rate`"},
 	AmountDue:          whereHelperuint{field: "`invoices`.`amount_due`"},
 	AmountPaid:         whereHelperuint{field: "`invoices`.`amount_paid`"},
@@ -394,8 +426,8 @@ func (*invoiceR) NewStruct() *invoiceR {
 type invoiceL struct{}
 
 var (
-	invoiceAllColumns            = []string{"id", "user_id", "invoice_number", "po_number", "currency", "due_date", "message", "bill_to_first_name", "bill_to_last_name", "bill_to_company", "bill_to_address_line_1", "bill_to_address_line_2", "bill_to_city", "bill_to_state", "bill_to_postal_code", "bill_to_country", "bill_to_email", "bill_to_phone", "pay_to_first_name", "pay_to_last_name", "pay_to_company", "pay_to_address_line_1", "pay_to_address_line_2", "pay_to_city", "pay_to_state", "pay_to_postal_code", "pay_to_country", "pay_to_email", "pay_to_phone", "tax_rate", "amount_due", "amount_paid", "status"}
-	invoiceColumnsWithoutDefault = []string{"id", "user_id", "invoice_number", "po_number", "currency", "due_date", "message", "bill_to_first_name", "bill_to_last_name", "bill_to_company", "bill_to_address_line_1", "bill_to_address_line_2", "bill_to_city", "bill_to_state", "bill_to_postal_code", "bill_to_country", "bill_to_email", "bill_to_phone", "pay_to_first_name", "pay_to_last_name", "pay_to_company", "pay_to_address_line_1", "pay_to_address_line_2", "pay_to_city", "pay_to_state", "pay_to_postal_code", "pay_to_country", "pay_to_email", "pay_to_phone", "tax_rate", "amount_due", "amount_paid", "status"}
+	invoiceAllColumns            = []string{"id", "user_id", "invoice_number", "po_number", "currency", "due_date", "message", "bill_to_first_name", "bill_to_last_name", "bill_to_company", "bill_to_address_line_1", "bill_to_address_line_2", "bill_to_city", "bill_to_state", "bill_to_postal_code", "bill_to_country", "bill_to_email", "bill_to_phone", "pay_to_first_name", "pay_to_last_name", "pay_to_company", "pay_to_address_line_1", "pay_to_address_line_2", "pay_to_city", "pay_to_state", "pay_to_postal_code", "pay_to_country", "pay_to_email", "pay_to_phone", "line_items", "tax_rate", "amount_due", "amount_paid", "status"}
+	invoiceColumnsWithoutDefault = []string{"id", "user_id", "invoice_number", "po_number", "currency", "due_date", "message", "bill_to_first_name", "bill_to_last_name", "bill_to_company", "bill_to_address_line_1", "bill_to_address_line_2", "bill_to_city", "bill_to_state", "bill_to_postal_code", "bill_to_country", "bill_to_email", "bill_to_phone", "pay_to_first_name", "pay_to_last_name", "pay_to_company", "pay_to_address_line_1", "pay_to_address_line_2", "pay_to_city", "pay_to_state", "pay_to_postal_code", "pay_to_country", "pay_to_email", "pay_to_phone", "line_items", "tax_rate", "amount_due", "amount_paid", "status"}
 	invoiceColumnsWithDefault    = []string{}
 	invoicePrimaryKeyColumns     = []string{"id"}
 	invoiceGeneratedColumns      = []string{}

@@ -55,21 +55,31 @@ type PayTo struct {
 	Phone        string `json:"phone"`
 }
 
+// LineItems defines a line item.
+type LineItem struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Quantity    uint   `json:"quantity"`
+	Price       uint   `json:"price"`
+	Subtotal    uint   `json:"subtotal"`
+}
+
 // Invoice defines an invoice.
 type Invoice struct {
-	ID            uint      `json:"id"`
-	UserID        uint      `json:"user_id"`
-	InvoiceNumber string    `json:"invoice_number"`
-	PONumber      string    `json:"po_number"`
-	Currency      string    `json:"currency"`
-	DueDate       time.Time `json:"due_date"`
-	Message       string    `json:"message"`
-	BillTo        BillTo    `json:"bill_to"`
-	PayTo         PayTo     `json:"pay_to"`
-	TaxRate       string    `json:"tax_rate"`
-	AmountDue     uint      `json:"amount_due"`
-	AmountPaid    uint      `json:"amount_paid"`
-	Status        string    `json:"status"`
+	ID            uint       `json:"id"`
+	UserID        uint       `json:"user_id"`
+	InvoiceNumber string     `json:"invoice_number"`
+	PONumber      string     `json:"po_number"`
+	Currency      string     `json:"currency"`
+	DueDate       time.Time  `json:"due_date"`
+	Message       string     `json:"message"`
+	BillTo        BillTo     `json:"bill_to"`
+	PayTo         PayTo      `json:"pay_to"`
+	LineItems     []LineItem `json:"line_items"`
+	TaxRate       string     `json:"tax_rate"`
+	AmountDue     uint       `json:"amount_due"`
+	AmountPaid    uint       `json:"amount_paid"`
+	Status        string     `json:"status"`
 }
 
 // RequestPost defines the request data for the HandlePost handler.
@@ -78,11 +88,12 @@ type RequestPost struct {
 	PONumber      string `json:"po_number"`
 	Currency      string `json:"currency"`
 	// DueDate       time.Time `json:"due_date"`
-	Message   string `json:"message"`
-	BillTo    BillTo `json:"bill_to"`
-	PayTo     PayTo  `json:"pay_to"`
-	TaxRate   string `json:"tax_rate"`
-	AmountDue uint   `json:"amount_due"`
+	Message   string     `json:"message"`
+	BillTo    BillTo     `json:"bill_to"`
+	PayTo     PayTo      `json:"pay_to"`
+	LineItems []LineItem `json:"line_items"`
+	TaxRate   string     `json:"tax_rate"`
+	AmountDue uint       `json:"amount_due"`
 }
 
 // ResultPost defines the response data for the HandlePost handler.
@@ -105,6 +116,20 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 		if err != nil {
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
+		}
+
+		// Handle line items.
+		lineItems := []proto.InvoiceLineItem{}
+		for _, v := range req.LineItems {
+			lineItem := proto.InvoiceLineItem{
+				Name:        v.Name,
+				Description: v.Description,
+				Quantity:    v.Quantity,
+				Price:       v.Price,
+				Subtotal:    v.Subtotal,
+			}
+
+			lineItems = append(lineItems, lineItem)
 		}
 
 		// Create the invoice.
@@ -141,6 +166,7 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 				Email:        req.PayTo.Email,
 				Phone:        req.PayTo.Phone,
 			},
+			LineItems: lineItems,
 			TaxRate:   req.TaxRate,
 			AmountDue: req.AmountDue,
 		})
@@ -397,6 +423,7 @@ type RequestPostUpdate struct {
 	Message       *string       `json:"message"`
 	BillTo        *BillToUpdate `json:"bill_to"`
 	PayTo         *PayToUpdate  `json:"pay_to"`
+	LineItems     *[]LineItem   `json:"line_items"`
 	TaxRate       *string       `json:"tax_rate"`
 	AmountDue     *uint         `json:"amount_due"`
 }
@@ -477,6 +504,24 @@ func HandlePostUpdate(ac *apictx.Context) http.HandlerFunc {
 			}
 		}
 
+		// Handle line items.
+		if req.LineItems != nil {
+			lineItems := []proto.InvoiceLineItem{}
+			for _, v := range *req.LineItems {
+				lineItem := proto.InvoiceLineItem{
+					Name:        v.Name,
+					Description: v.Description,
+					Quantity:    v.Quantity,
+					Price:       v.Price,
+					Subtotal:    v.Subtotal,
+				}
+
+				lineItems = append(lineItems, lineItem)
+			}
+
+			params.LineItems = &lineItems
+		}
+
 		// Update the invoice.
 		invoice, err := ac.Service.Invoice.UpdateByIDAndUserID(params)
 		if pes, ok := err.(*serverrors.ParamErrors); ok && err != nil {
@@ -505,6 +550,20 @@ func HandlePostUpdate(ac *apictx.Context) http.HandlerFunc {
 // protoToInvoice handles mapping a proto invoice type to the response invoice
 // type.
 func protoToInvoice(i *proto.Invoice) Invoice {
+	// Handle line items.
+	lineItems := []LineItem{}
+	for _, v := range i.LineItems {
+		lineItem := LineItem{
+			Name:        v.Name,
+			Description: v.Description,
+			Quantity:    v.Quantity,
+			Price:       v.Price,
+			Subtotal:    v.Subtotal,
+		}
+
+		lineItems = append(lineItems, lineItem)
+	}
+
 	return Invoice{
 		ID:            i.ID,
 		UserID:        i.UserID,
@@ -539,6 +598,7 @@ func protoToInvoice(i *proto.Invoice) Invoice {
 			Email:        i.PayTo.Email,
 			Phone:        i.PayTo.Phone,
 		},
+		LineItems:  lineItems,
 		TaxRate:    i.TaxRate,
 		AmountDue:  i.AmountDue,
 		AmountPaid: i.AmountPaid,

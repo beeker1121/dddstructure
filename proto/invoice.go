@@ -32,6 +32,15 @@ type InvoicePayTo struct {
 	Phone        string
 }
 
+// InvoiceLineItem defines an invoice line item.
+type InvoiceLineItem struct {
+	Name        string
+	Description string
+	Quantity    uint
+	Price       uint
+	Subtotal    uint
+}
+
 // Invoice defines an invoice.
 type Invoice struct {
 	ID            uint
@@ -43,6 +52,7 @@ type Invoice struct {
 	Message       string
 	BillTo        InvoiceBillTo
 	PayTo         InvoicePayTo
+	LineItems     []InvoiceLineItem
 	TaxRate       string
 	AmountDue     uint
 	AmountPaid    uint
@@ -60,6 +70,7 @@ type InvoiceCreateParams struct {
 	Message       string
 	BillTo        InvoiceBillTo
 	PayTo         InvoicePayTo
+	LineItems     []InvoiceLineItem
 	TaxRate       string
 	AmountDue     uint
 }
@@ -114,6 +125,7 @@ type InvoiceUpdateParams struct {
 	Message       *string
 	BillTo        *InvoiceBillToUpdate
 	PayTo         *InvoicePayToUpdate
+	LineItems     *[]InvoiceLineItem
 	TaxRate       *string
 	AmountDue     *uint
 	AmountPaid    *uint
