@@ -177,6 +177,16 @@ func (s *Service) Update(params *proto.UserUpdateParams) (*proto.User, error) {
 		storageu.Email = *params.Email
 	}
 
+	// Hash the password.
+	if params.Password != nil {
+		pwHash, err := bcrypt.GenerateFromPassword([]byte(*params.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return nil, err
+		}
+
+		storageu.Password = string(pwHash)
+	}
+
 	// Update the user.
 	storageu, err = s.storage.User.Update(storageu)
 	if err != nil {
