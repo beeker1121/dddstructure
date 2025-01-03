@@ -9,6 +9,7 @@ type Database interface {
 	GetCount(params *GetParams) (uint, error)
 	GetByID(id uint) (*Invoice, error)
 	Update(i *Invoice) (*Invoice, error)
+	Delete(id uint) error
 }
 
 // BillTo defines the billing information.

@@ -88,3 +88,10 @@ func (db *Database) Update(i *invoice.Invoice) (*invoice.Invoice, error) {
 
 	return i, nil
 }
+
+// Delete deletes an invoice.
+func (db *Database) Delete(id uint) error {
+	delete(invoiceMap, id)
+
+	return nil
+}

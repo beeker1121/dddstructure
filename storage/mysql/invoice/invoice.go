@@ -91,7 +91,7 @@ func (db *Database) GetCount(params *invoice.GetParams) (uint, error) {
 
 // GetByID gets an invoice by the given ID.
 func (db *Database) GetByID(id uint) (*invoice.Invoice, error) {
-	modeli, err := models.Invoices(qm.Where("id=?", id)).One(context.Background(), db.db)
+	model, err := models.Invoices(qm.Where("id=?", id)).One(context.Background(), db.db)
 	if err == sql.ErrNoRows {
 		return nil, invoice.ErrInvoiceNotFound
 	} else if err != nil {
@@ -99,7 +99,7 @@ func (db *Database) GetByID(id uint) (*invoice.Invoice, error) {
 	}
 
 	// Map to invoice type.
-	i, err := modelToStorage(modeli)
+	i, err := modelToStorage(model)
 	if err != nil {
 		return nil, err
 	}
@@ -122,6 +122,24 @@ func (db *Database) Update(i *invoice.Invoice) (*invoice.Invoice, error) {
 	}
 
 	return i, nil
+}
+
+// Delete deletes an invoice.
+func (db *Database) Delete(id uint) error {
+	model, err := models.Invoices(qm.Where("id=?", id)).One(context.Background(), db.db)
+	if err == sql.ErrNoRows {
+		return invoice.ErrInvoiceNotFound
+	} else if err != nil {
+		return err
+	}
+
+	// Delete from database.
+	_, err = model.Delete(context.Background(), db.db)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // storageToModel handles mapping a storage invoice type to the model invoice

@@ -392,6 +392,22 @@ func (s *Service) UpdateByIDAndUserID(params *proto.InvoiceUpdateParams) (*proto
 	return s.Update(params)
 }
 
+// Delete deletes an invoice by the given ID.
+func (s *Service) Delete(id uint) error {
+	// Delete invoice by ID.
+	err := s.storage.Invoice.Delete(id)
+	if err != nil {
+		if err == invoice.ErrInvoiceNotFound {
+			return serverrors.ErrInvoiceNotFound
+		}
+
+		// Log here.
+		return err
+	}
+
+	return nil
+}
+
 // Pay handles paying an invoice.
 func (s *Service) Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, error) {
 	// Validate parameters.

@@ -23,6 +23,7 @@ func New(ac *apictx.Context, router *httprouter.Router) {
 	router.GET("/api/v1/invoice", auth.AuthenticateEndpoint(ac, HandleGet(ac)))
 	router.GET("/api/v1/invoice/:id", auth.AuthenticateEndpoint(ac, HandleGetInvoice(ac)))
 	router.POST("/api/v1/invoice/:id", auth.AuthenticateEndpoint(ac, HandlePostUpdate(ac)))
+	router.DELETE("/api/v1/invoice/:id", auth.AuthenticateEndpoint(ac, HandleDelete(ac)))
 }
 
 // BillTo defines the billing information.
@@ -364,6 +365,7 @@ func HandleGetInvoice(ac *apictx.Context) http.HandlerFunc {
 		invoice, err := ac.Service.Invoice.GetByIDAndUserID(id, user.ID)
 		if err == serverrors.ErrInvoiceNotFound {
 			errors.Default(ac.Logger, w, errors.New(http.StatusNotFound, "", err.Error()))
+			return
 		} else if err != nil {
 			ac.Logger.Printf("invoice.GetByIDAndUserID() service error: %s\n", err)
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
@@ -544,6 +546,51 @@ func HandlePostUpdate(ac *apictx.Context) http.HandlerFunc {
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
+	}
+}
+
+// HandleDelete handles the /api/v1/invoice/:id DELETE route of the API.
+func HandleDelete(ac *apictx.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Try to get the invoice ID.
+		var id uint
+		id64, err := strconv.ParseInt(httprouter.GetParam(r, "id"), 10, 32)
+		if err != nil {
+			errors.Default(ac.Logger, w, errors.ErrBadRequest)
+			return
+		}
+		id = uint(id64)
+
+		// Get this user from the request context.
+		user, err := auth.GetUserFromRequest(r)
+		if err != nil {
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Get the invoice.
+		_, err = ac.Service.Invoice.GetByIDAndUserID(id, user.ID)
+		if err == serverrors.ErrInvoiceNotFound {
+			errors.Default(ac.Logger, w, errors.New(http.StatusNotFound, "", err.Error()))
+			return
+		} else if err != nil {
+			ac.Logger.Printf("invoice.GetByIDAndUserID() service error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Delete the invoice.
+		err = ac.Service.Invoice.Delete(id)
+		if err == serverrors.ErrInvoiceNotFound {
+			errors.Default(ac.Logger, w, errors.New(http.StatusNotFound, "", err.Error()))
+			return
+		} else if err != nil {
+			ac.Logger.Printf("invoice.GetByIDAndUserID() service error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
 	}
 }
 

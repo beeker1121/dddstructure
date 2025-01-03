@@ -40,7 +40,10 @@ type Invoice interface {
 	Get(params *proto.InvoiceGetParams) ([]*proto.Invoice, error)
 	GetCount(params *proto.InvoiceGetParams) (uint, error)
 	GetByID(id uint) (*proto.Invoice, error)
+	GetByIDAndUserID(id, userID uint) (*proto.Invoice, error)
 	Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, error)
+	UpdateByIDAndUserID(params *proto.InvoiceUpdateParams) (*proto.Invoice, error)
+	Delete(id uint) error
 	Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, error)
 }
 
