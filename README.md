@@ -169,6 +169,7 @@ Then run SQLBoiler to update the models based on the MySQL database schema:
   - For storage side, the top level storage struct should still probably just use `time.Time` and the database itself can convert to and from that.
 - Add validate methods where needed.
   - On invoice create, validate at least one line item is passed in.
+    - Validate at least one payment method is passed in.
 - Use xid for all IDs instead of an unsigned int.
 
 # Thanks
