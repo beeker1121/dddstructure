@@ -91,11 +91,12 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 			Email:        params.PayTo.Email,
 			Phone:        params.PayTo.Phone,
 		},
-		LineItems:  lineItems,
-		TaxRate:    params.TaxRate,
-		AmountDue:  params.AmountDue,
-		AmountPaid: 0,
-		Status:     "pending",
+		LineItems:      lineItems,
+		PaymentMethods: params.PaymentMethods,
+		TaxRate:        params.TaxRate,
+		AmountDue:      params.AmountDue,
+		AmountPaid:     0,
+		Status:         "pending",
 	})
 	if err != nil {
 		return nil, err
@@ -351,6 +352,11 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, err
 		storagei.LineItems = lineItems
 	}
 
+	// Handle payment methods.
+	if params.PaymentMethods != nil {
+		storagei.PaymentMethods = *params.PaymentMethods
+	}
+
 	// Handle tax rate.
 	if params.TaxRate != nil {
 		storagei.TaxRate = *params.TaxRate
@@ -501,10 +507,11 @@ func storageToProto(s *invoice.Invoice) *proto.Invoice {
 			Email:        s.PayTo.Email,
 			Phone:        s.PayTo.Phone,
 		},
-		LineItems:  lineItems,
-		TaxRate:    s.TaxRate,
-		AmountDue:  s.AmountDue,
-		AmountPaid: s.AmountPaid,
-		Status:     s.Status,
+		LineItems:      lineItems,
+		PaymentMethods: s.PaymentMethods,
+		TaxRate:        s.TaxRate,
+		AmountDue:      s.AmountDue,
+		AmountPaid:     s.AmountPaid,
+		Status:         s.Status,
 	}
 }

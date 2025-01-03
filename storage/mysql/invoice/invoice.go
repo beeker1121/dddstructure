@@ -156,6 +156,17 @@ func storageToModel(i *invoice.Invoice) (models.Invoice, error) {
 		return models.Invoice{}, err
 	}
 
+	// Handle payment methods.
+	paymentMethodsJSON, err := json.Marshal(i.PaymentMethods)
+	if err != nil {
+		return models.Invoice{}, err
+	}
+
+	paymentMethods := null.JSON{}
+	if err := json.Unmarshal(paymentMethodsJSON, &paymentMethods); err != nil {
+		return models.Invoice{}, err
+	}
+
 	return models.Invoice{
 		ID:                 i.ID,
 		UserID:             i.UserID,
@@ -187,6 +198,7 @@ func storageToModel(i *invoice.Invoice) (models.Invoice, error) {
 		PayToEmail:         i.PayTo.Email,
 		PayToPhone:         i.PayTo.Phone,
 		LineItems:          lineItems,
+		PaymentMethods:     paymentMethods,
 		TaxRate:            i.TaxRate,
 		AmountDue:          i.AmountDue,
 		AmountPaid:         i.AmountPaid,
@@ -200,6 +212,12 @@ func modelToStorage(i *models.Invoice) (invoice.Invoice, error) {
 	// Handle line items.
 	lineItems := []invoice.LineItem{}
 	if err := i.LineItems.Unmarshal(&lineItems); err != nil {
+		return invoice.Invoice{}, err
+	}
+
+	// Handle payment methods.
+	paymentMethods := []string{}
+	if err := i.PaymentMethods.Unmarshal(&paymentMethods); err != nil {
 		return invoice.Invoice{}, err
 	}
 
@@ -237,10 +255,11 @@ func modelToStorage(i *models.Invoice) (invoice.Invoice, error) {
 			Email:        i.PayToEmail,
 			Phone:        i.PayToPhone,
 		},
-		LineItems:  lineItems,
-		TaxRate:    i.TaxRate,
-		AmountDue:  i.AmountDue,
-		AmountPaid: i.AmountPaid,
-		Status:     i.Status.String(),
+		LineItems:      lineItems,
+		PaymentMethods: paymentMethods,
+		TaxRate:        i.TaxRate,
+		AmountDue:      i.AmountDue,
+		AmountPaid:     i.AmountPaid,
+		Status:         i.Status.String(),
 	}, nil
 }

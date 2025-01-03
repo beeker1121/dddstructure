@@ -36,6 +36,7 @@ CREATE TABLE `invoices` (
     `pay_to_email` varchar(255) NOT NULL,
     `pay_to_phone` varchar(15) NOT NULL,
     `line_items` json DEFAULT NULL,
+    `payment_methods` json DEFAULT NULL,
     `tax_rate` varchar(10) NOT NULL,
     `amount_due` int UNSIGNED NOT NULL,
     `amount_paid` int UNSIGNED NOT NULL,

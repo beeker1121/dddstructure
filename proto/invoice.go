@@ -43,36 +43,38 @@ type InvoiceLineItem struct {
 
 // Invoice defines an invoice.
 type Invoice struct {
-	ID            uint
-	UserID        uint
-	InvoiceNumber string
-	PONumber      string
-	Currency      string
-	DueDate       time.Time
-	Message       string
-	BillTo        InvoiceBillTo
-	PayTo         InvoicePayTo
-	LineItems     []InvoiceLineItem
-	TaxRate       string
-	AmountDue     uint
-	AmountPaid    uint
-	Status        string
+	ID             uint
+	UserID         uint
+	InvoiceNumber  string
+	PONumber       string
+	Currency       string
+	DueDate        time.Time
+	Message        string
+	BillTo         InvoiceBillTo
+	PayTo          InvoicePayTo
+	LineItems      []InvoiceLineItem
+	PaymentMethods []string
+	TaxRate        string
+	AmountDue      uint
+	AmountPaid     uint
+	Status         string
 }
 
 // InvoiceCreateParams defines the invoice create parameters.
 type InvoiceCreateParams struct {
-	ID            uint
-	UserID        uint
-	InvoiceNumber string
-	PONumber      string
-	Currency      string
-	DueDate       time.Time
-	Message       string
-	BillTo        InvoiceBillTo
-	PayTo         InvoicePayTo
-	LineItems     []InvoiceLineItem
-	TaxRate       string
-	AmountDue     uint
+	ID             uint
+	UserID         uint
+	InvoiceNumber  string
+	PONumber       string
+	Currency       string
+	DueDate        time.Time
+	Message        string
+	BillTo         InvoiceBillTo
+	PayTo          InvoicePayTo
+	LineItems      []InvoiceLineItem
+	PaymentMethods []string
+	TaxRate        string
+	AmountDue      uint
 }
 
 // InvoiceGetParams defines the invoice get parameters.
@@ -116,20 +118,21 @@ type InvoicePayToUpdate struct {
 
 // InvoiceUpdateParams defines the invoice update parameters.
 type InvoiceUpdateParams struct {
-	ID            *uint
-	UserID        *uint
-	InvoiceNumber *string
-	PONumber      *string
-	Currency      *string
-	DueDate       *time.Time
-	Message       *string
-	BillTo        *InvoiceBillToUpdate
-	PayTo         *InvoicePayToUpdate
-	LineItems     *[]InvoiceLineItem
-	TaxRate       *string
-	AmountDue     *uint
-	AmountPaid    *uint
-	Status        *string
+	ID             *uint
+	UserID         *uint
+	InvoiceNumber  *string
+	PONumber       *string
+	Currency       *string
+	DueDate        *time.Time
+	Message        *string
+	BillTo         *InvoiceBillToUpdate
+	PayTo          *InvoicePayToUpdate
+	LineItems      *[]InvoiceLineItem
+	PaymentMethods *[]string
+	TaxRate        *string
+	AmountDue      *uint
+	AmountPaid     *uint
+	Status         *string
 }
 
 // InvoicePayParams defines the invoice pay parameters.

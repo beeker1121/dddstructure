@@ -52,20 +52,21 @@ type LineItem struct {
 
 // Invoice defines an invoice.
 type Invoice struct {
-	ID            uint
-	UserID        uint
-	InvoiceNumber string
-	PONumber      string
-	Currency      string
-	DueDate       time.Time
-	Message       string
-	BillTo        BillTo
-	PayTo         PayTo
-	LineItems     []LineItem
-	TaxRate       string
-	AmountDue     uint
-	AmountPaid    uint
-	Status        string
+	ID             uint
+	UserID         uint
+	InvoiceNumber  string
+	PONumber       string
+	Currency       string
+	DueDate        time.Time
+	Message        string
+	BillTo         BillTo
+	PayTo          PayTo
+	LineItems      []LineItem
+	PaymentMethods []string
+	TaxRate        string
+	AmountDue      uint
+	AmountPaid     uint
+	Status         string
 }
 
 // GetParams defines the get parameters.
