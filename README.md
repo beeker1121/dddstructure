@@ -171,6 +171,9 @@ Then run SQLBoiler to update the models based on the MySQL database schema:
   - On invoice create, validate at least one line item is passed in.
     - Validate at least one payment method is passed in.
 - Use xid for all IDs instead of an unsigned int.
+- Determine if we want to refactor services.
+  - Right now, we have certain functions like `Invoice.UpdateByIDAndUserID` to ensure a user is updating an invoice they own. Should this just be coded into the main `Invoice.Update()` function? Then, have another function like `Invoice.UpdateRaw()` that will let you pass any field of an invoice to update to that service method, just use the ID on the params? Or should that not be a 'service' level method, and if that needs to happen, then use `storage` directly?
+- Move all main error logging to the service layer instead of the API layer.
 
 # Thanks
 
