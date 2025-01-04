@@ -11,7 +11,7 @@ CREATE TABLE `invoices` (
     `invoice_number` varchar(50) NOT NULL,
     `po_number` varchar(50) NOT NULL,
     `currency` char(3) NOT NULL,
-    `due_date` datetime NOT NULL,
+    `due_date` date NOT NULL,
     `message` varchar(255) NOT NULL,
     `bill_to_first_name` varchar(255) NOT NULL,
     `bill_to_last_name` varchar(255) NOT NULL,

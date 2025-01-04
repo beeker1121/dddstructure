@@ -2,8 +2,10 @@ package invoice
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	apictx "dddstructure/cmd/api/context"
@@ -65,6 +67,29 @@ type LineItem struct {
 	Subtotal    uint   `json:"subtotal"`
 }
 
+// DueDate defines an invoice due date.
+type DueDate struct {
+	time.Time
+}
+
+// UnmarshalJSON implements the json.UnmarshalJSON interface.
+func (dd *DueDate) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), `"`)
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		return err
+	}
+
+	dd.Time = t
+
+	return nil
+}
+
+// MarshalJSON implements the json.MarshalJSON interface.
+func (dd DueDate) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf(`"%s"`, dd.Format("2006-01-02"))), nil
+}
+
 // Invoice defines an invoice.
 type Invoice struct {
 	ID             uint       `json:"id"`
@@ -72,7 +97,7 @@ type Invoice struct {
 	InvoiceNumber  string     `json:"invoice_number"`
 	PONumber       string     `json:"po_number"`
 	Currency       string     `json:"currency"`
-	DueDate        time.Time  `json:"due_date"`
+	DueDate        DueDate    `json:"due_date"`
 	Message        string     `json:"message"`
 	BillTo         BillTo     `json:"bill_to"`
 	PayTo          PayTo      `json:"pay_to"`
@@ -86,10 +111,10 @@ type Invoice struct {
 
 // RequestPost defines the request data for the HandlePost handler.
 type RequestPost struct {
-	InvoiceNumber string `json:"invoice_number"`
-	PONumber      string `json:"po_number"`
-	Currency      string `json:"currency"`
-	// DueDate       time.Time `json:"due_date"`
+	InvoiceNumber  string     `json:"invoice_number"`
+	PONumber       string     `json:"po_number"`
+	Currency       string     `json:"currency"`
+	DueDate        DueDate    `json:"due_date"`
 	Message        string     `json:"message"`
 	BillTo         BillTo     `json:"bill_to"`
 	PayTo          PayTo      `json:"pay_to"`
@@ -141,7 +166,7 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 			InvoiceNumber: req.InvoiceNumber,
 			PONumber:      req.PONumber,
 			Currency:      req.Currency,
-			DueDate:       time.Now(),
+			DueDate:       time.Time(req.DueDate.Time),
 			Message:       req.Message,
 			BillTo: proto.InvoiceBillTo{
 				FirstName:    req.BillTo.FirstName,
@@ -424,7 +449,7 @@ type RequestPostUpdate struct {
 	InvoiceNumber  *string       `json:"invoice_number"`
 	PONumber       *string       `json:"po_number"`
 	Currency       *string       `json:"currency"`
-	DueDate        *time.Time    `json:"due_date"`
+	DueDate        *DueDate      `json:"due_date"`
 	Message        *string       `json:"message"`
 	BillTo         *BillToUpdate `json:"bill_to"`
 	PayTo          *PayToUpdate  `json:"pay_to"`
@@ -472,11 +497,16 @@ func HandlePostUpdate(ac *apictx.Context) http.HandlerFunc {
 			InvoiceNumber:  req.InvoiceNumber,
 			PONumber:       req.PONumber,
 			Currency:       req.Currency,
-			DueDate:        req.DueDate,
 			Message:        req.Message,
 			PaymentMethods: req.PaymentMethods,
 			TaxRate:        req.TaxRate,
 			AmountDue:      req.AmountDue,
+		}
+
+		// Handle due date.
+		if req.DueDate != nil {
+			t := time.Time(req.DueDate.Time)
+			params.DueDate = &t
 		}
 
 		if req.BillTo != nil {
@@ -622,7 +652,7 @@ func protoToInvoice(i *proto.Invoice) Invoice {
 		InvoiceNumber: i.InvoiceNumber,
 		PONumber:      i.PONumber,
 		Currency:      i.Currency,
-		DueDate:       i.DueDate,
+		DueDate:       DueDate{i.DueDate},
 		Message:       i.Message,
 		BillTo: BillTo{
 			FirstName:    i.BillTo.FirstName,
