@@ -98,7 +98,7 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 		AmountDue:      params.AmountDue,
 		AmountPaid:     0,
 		Status:         "pending",
-		CreatedAt:      time.Now(),
+		CreatedAt:      time.Now().UTC(),
 	})
 	if err != nil {
 		return nil, err
