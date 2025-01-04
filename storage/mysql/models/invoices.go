@@ -59,6 +59,7 @@ type Invoice struct {
 	AmountDue          uint           `boil:"amount_due" json:"amount_due" toml:"amount_due" yaml:"amount_due"`
 	AmountPaid         uint           `boil:"amount_paid" json:"amount_paid" toml:"amount_paid" yaml:"amount_paid"`
 	Status             InvoicesStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
+	CreatedAt          time.Time      `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 
 	R *invoiceR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L invoiceL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -100,6 +101,7 @@ var InvoiceColumns = struct {
 	AmountDue          string
 	AmountPaid         string
 	Status             string
+	CreatedAt          string
 }{
 	ID:                 "id",
 	UserID:             "user_id",
@@ -136,6 +138,7 @@ var InvoiceColumns = struct {
 	AmountDue:          "amount_due",
 	AmountPaid:         "amount_paid",
 	Status:             "status",
+	CreatedAt:          "created_at",
 }
 
 var InvoiceTableColumns = struct {
@@ -174,6 +177,7 @@ var InvoiceTableColumns = struct {
 	AmountDue          string
 	AmountPaid         string
 	Status             string
+	CreatedAt          string
 }{
 	ID:                 "invoices.id",
 	UserID:             "invoices.user_id",
@@ -210,6 +214,7 @@ var InvoiceTableColumns = struct {
 	AmountDue:          "invoices.amount_due",
 	AmountPaid:         "invoices.amount_paid",
 	Status:             "invoices.status",
+	CreatedAt:          "invoices.created_at",
 }
 
 // Generated where
@@ -378,6 +383,7 @@ var InvoiceWhere = struct {
 	AmountDue          whereHelperuint
 	AmountPaid         whereHelperuint
 	Status             whereHelperInvoicesStatus
+	CreatedAt          whereHelpertime_Time
 }{
 	ID:                 whereHelperuint{field: "`invoices`.`id`"},
 	UserID:             whereHelperuint{field: "`invoices`.`user_id`"},
@@ -414,6 +420,7 @@ var InvoiceWhere = struct {
 	AmountDue:          whereHelperuint{field: "`invoices`.`amount_due`"},
 	AmountPaid:         whereHelperuint{field: "`invoices`.`amount_paid`"},
 	Status:             whereHelperInvoicesStatus{field: "`invoices`.`status`"},
+	CreatedAt:          whereHelpertime_Time{field: "`invoices`.`created_at`"},
 }
 
 // InvoiceRels is where relationship names are stored.
@@ -433,8 +440,8 @@ func (*invoiceR) NewStruct() *invoiceR {
 type invoiceL struct{}
 
 var (
-	invoiceAllColumns            = []string{"id", "user_id", "invoice_number", "po_number", "currency", "due_date", "message", "bill_to_first_name", "bill_to_last_name", "bill_to_company", "bill_to_address_line_1", "bill_to_address_line_2", "bill_to_city", "bill_to_state", "bill_to_postal_code", "bill_to_country", "bill_to_email", "bill_to_phone", "pay_to_first_name", "pay_to_last_name", "pay_to_company", "pay_to_address_line_1", "pay_to_address_line_2", "pay_to_city", "pay_to_state", "pay_to_postal_code", "pay_to_country", "pay_to_email", "pay_to_phone", "line_items", "payment_methods", "tax_rate", "amount_due", "amount_paid", "status"}
-	invoiceColumnsWithoutDefault = []string{"id", "user_id", "invoice_number", "po_number", "currency", "due_date", "message", "bill_to_first_name", "bill_to_last_name", "bill_to_company", "bill_to_address_line_1", "bill_to_address_line_2", "bill_to_city", "bill_to_state", "bill_to_postal_code", "bill_to_country", "bill_to_email", "bill_to_phone", "pay_to_first_name", "pay_to_last_name", "pay_to_company", "pay_to_address_line_1", "pay_to_address_line_2", "pay_to_city", "pay_to_state", "pay_to_postal_code", "pay_to_country", "pay_to_email", "pay_to_phone", "line_items", "payment_methods", "tax_rate", "amount_due", "amount_paid", "status"}
+	invoiceAllColumns            = []string{"id", "user_id", "invoice_number", "po_number", "currency", "due_date", "message", "bill_to_first_name", "bill_to_last_name", "bill_to_company", "bill_to_address_line_1", "bill_to_address_line_2", "bill_to_city", "bill_to_state", "bill_to_postal_code", "bill_to_country", "bill_to_email", "bill_to_phone", "pay_to_first_name", "pay_to_last_name", "pay_to_company", "pay_to_address_line_1", "pay_to_address_line_2", "pay_to_city", "pay_to_state", "pay_to_postal_code", "pay_to_country", "pay_to_email", "pay_to_phone", "line_items", "payment_methods", "tax_rate", "amount_due", "amount_paid", "status", "created_at"}
+	invoiceColumnsWithoutDefault = []string{"id", "user_id", "invoice_number", "po_number", "currency", "due_date", "message", "bill_to_first_name", "bill_to_last_name", "bill_to_company", "bill_to_address_line_1", "bill_to_address_line_2", "bill_to_city", "bill_to_state", "bill_to_postal_code", "bill_to_country", "bill_to_email", "bill_to_phone", "pay_to_first_name", "pay_to_last_name", "pay_to_company", "pay_to_address_line_1", "pay_to_address_line_2", "pay_to_city", "pay_to_state", "pay_to_postal_code", "pay_to_country", "pay_to_email", "pay_to_phone", "line_items", "payment_methods", "tax_rate", "amount_due", "amount_paid", "status", "created_at"}
 	invoiceColumnsWithDefault    = []string{}
 	invoicePrimaryKeyColumns     = []string{"id"}
 	invoiceGeneratedColumns      = []string{}
@@ -794,6 +801,13 @@ func (o *Invoice) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 	}
 
 	var err error
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -1018,6 +1032,13 @@ var mySQLInvoiceUniqueColumns = []string{
 func (o *Invoice) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no invoices provided for upsert")
+	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

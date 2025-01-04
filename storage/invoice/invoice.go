@@ -67,13 +67,21 @@ type Invoice struct {
 	AmountDue      uint
 	AmountPaid     uint
 	Status         string
+	CreatedAt      time.Time
+}
+
+// GetParamsCreatedAt defines a datetime range.
+type GetParamsCreatedAt struct {
+	StartDate *time.Time
+	EndDate   *time.Time
 }
 
 // GetParams defines the get parameters.
 type GetParams struct {
-	ID     *uint
-	UserID *uint
-	Status *string
-	Offset uint
-	Limit  uint
+	ID        *uint
+	UserID    *uint
+	Status    *string
+	CreatedAt *GetParamsCreatedAt
+	Offset    uint
+	Limit     uint
 }

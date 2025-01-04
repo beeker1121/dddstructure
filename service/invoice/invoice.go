@@ -6,6 +6,7 @@ import (
 	"dddstructure/service/interfaces"
 	"dddstructure/storage"
 	"dddstructure/storage/invoice"
+	"time"
 )
 
 // idCounter handles increasing the ID.
@@ -97,6 +98,7 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 		AmountDue:      params.AmountDue,
 		AmountPaid:     0,
 		Status:         "pending",
+		CreatedAt:      time.Now(),
 	})
 	if err != nil {
 		return nil, err
@@ -128,6 +130,17 @@ func (s *Service) Get(params *proto.InvoiceGetParams) ([]*proto.Invoice, error) 
 	// Check status.
 	if params.Status != nil {
 		getParams.Status = params.Status
+	}
+
+	// Check created at.
+	if params.CreatedAt != nil {
+		getParams.CreatedAt = &invoice.GetParamsCreatedAt{}
+		if params.CreatedAt.StartDate != nil {
+			getParams.CreatedAt.StartDate = params.CreatedAt.StartDate
+		}
+		if params.CreatedAt.EndDate != nil {
+			getParams.CreatedAt.EndDate = params.CreatedAt.EndDate
+		}
 	}
 
 	// Get invoices from storage.
@@ -513,5 +526,6 @@ func storageToProto(s *invoice.Invoice) *proto.Invoice {
 		AmountDue:      s.AmountDue,
 		AmountPaid:     s.AmountPaid,
 		Status:         s.Status,
+		CreatedAt:      s.CreatedAt,
 	}
 }

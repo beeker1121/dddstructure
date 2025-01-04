@@ -107,6 +107,7 @@ type Invoice struct {
 	AmountDue      uint       `json:"amount_due"`
 	AmountPaid     uint       `json:"amount_paid"`
 	Status         string     `json:"status"`
+	CreatedAt      time.Time  `json:"created_at"`
 }
 
 // RequestPost defines the request data for the HandlePost handler.
@@ -259,6 +260,35 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 
 		// Create a new API Errors.
 		errs := &errors.Errors{}
+
+		// Handle created at start.
+		if createdAtStartqs, ok := r.URL.Query()["created_at_start"]; ok && len(createdAtStartqs) == 1 {
+			if params.CreatedAt == nil {
+				params.CreatedAt = &proto.InvoiceGetParamsCreatedAt{}
+			}
+
+			t, err := time.Parse("2006-01-02 15:04:05", createdAtStartqs[0])
+			if err != nil {
+				errs.Add(errors.New(http.StatusBadRequest, "created_at_start", "invalid created at start date"))
+			} else {
+				params.CreatedAt.StartDate = &t
+			}
+		}
+
+		// Handle created at end.
+		if createdAtEndqs, ok := r.URL.Query()["created_at_end"]; ok && len(createdAtEndqs) == 1 {
+			if params.CreatedAt == nil {
+				params.CreatedAt = &proto.InvoiceGetParamsCreatedAt{}
+			}
+
+			t, err := time.Parse("2006-01-02 15:04:05", createdAtEndqs[0])
+			if err != nil {
+				fmt.Printf("\n\nerr: %v\n\n", err)
+				errs.Add(errors.New(http.StatusBadRequest, "created_at_end", "invalid created at end date"))
+			} else {
+				params.CreatedAt.EndDate = &t
+			}
+		}
 
 		// Handle offset.
 		if offsetqs, ok := r.URL.Query()["offset"]; ok && len(offsetqs) == 1 {
@@ -686,5 +716,6 @@ func protoToInvoice(i *proto.Invoice) Invoice {
 		AmountDue:      i.AmountDue,
 		AmountPaid:     i.AmountPaid,
 		Status:         i.Status,
+		CreatedAt:      i.CreatedAt,
 	}
 }

@@ -41,6 +41,7 @@ CREATE TABLE `invoices` (
     `amount_due` int UNSIGNED NOT NULL,
     `amount_paid` int UNSIGNED NOT NULL,
     `status` enum('pending') NOT NULL,
+    `created_at` datetime NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

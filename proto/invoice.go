@@ -58,6 +58,7 @@ type Invoice struct {
 	AmountDue      uint
 	AmountPaid     uint
 	Status         string
+	CreatedAt      time.Time
 }
 
 // InvoiceCreateParams defines the invoice create parameters.
@@ -77,13 +78,20 @@ type InvoiceCreateParams struct {
 	AmountDue      uint
 }
 
+// InvoiceGetParamsCreatedAt defines a created at datetime range.
+type InvoiceGetParamsCreatedAt struct {
+	StartDate *time.Time
+	EndDate   *time.Time
+}
+
 // InvoiceGetParams defines the invoice get parameters.
 type InvoiceGetParams struct {
-	ID     *uint
-	UserID *uint
-	Status *string
-	Offset uint
-	Limit  uint
+	ID        *uint
+	UserID    *uint
+	Status    *string
+	CreatedAt *InvoiceGetParamsCreatedAt
+	Offset    uint
+	Limit     uint
 }
 
 // InvoiceBillToUpdate defines the invoice billing information for update.

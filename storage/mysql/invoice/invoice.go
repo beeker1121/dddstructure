@@ -51,6 +51,15 @@ func (db *Database) Get(params *invoice.GetParams) ([]*invoice.Invoice, error) {
 		filter = append(filter, qm.Where("user_id=?", params.UserID))
 	}
 
+	if params.CreatedAt != nil {
+		if params.CreatedAt.StartDate != nil {
+			filter = append(filter, qm.And("created_at>=?", params.CreatedAt.StartDate))
+		}
+		if params.CreatedAt.EndDate != nil {
+			filter = append(filter, qm.And("created_at<=?", params.CreatedAt.EndDate))
+		}
+	}
+
 	// Get from database.
 	modelInvoices, err := models.Invoices(filter...).All(context.Background(), db.db)
 	if err != nil {
@@ -203,6 +212,7 @@ func storageToModel(i *invoice.Invoice) (models.Invoice, error) {
 		AmountDue:          i.AmountDue,
 		AmountPaid:         i.AmountPaid,
 		Status:             models.InvoicesStatus(i.Status),
+		CreatedAt:          i.CreatedAt,
 	}, nil
 }
 
@@ -261,5 +271,6 @@ func modelToStorage(i *models.Invoice) (invoice.Invoice, error) {
 		AmountDue:      i.AmountDue,
 		AmountPaid:     i.AmountPaid,
 		Status:         i.Status.String(),
+		CreatedAt:      i.CreatedAt,
 	}, nil
 }
