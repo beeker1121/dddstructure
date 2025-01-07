@@ -283,7 +283,6 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 
 			t, err := time.Parse("2006-01-02 15:04:05", createdAtEndqs[0])
 			if err != nil {
-				fmt.Printf("\n\nerr: %v\n\n", err)
 				errs.Add(errors.New(http.StatusBadRequest, "created_at_end", "invalid created at end date"))
 			} else {
 				params.CreatedAt.EndDate = &t

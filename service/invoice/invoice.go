@@ -115,7 +115,10 @@ func (s *Service) Get(params *proto.InvoiceGetParams) ([]*proto.Invoice, error) 
 	}
 
 	// Build the invoice get parameters.
-	getParams := &invoice.GetParams{}
+	getParams := &invoice.GetParams{
+		Offset: params.Offset,
+		Limit:  params.Limit,
+	}
 
 	// Check ID.
 	if params.ID != nil {

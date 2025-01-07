@@ -60,6 +60,9 @@ func (db *Database) Get(params *invoice.GetParams) ([]*invoice.Invoice, error) {
 		}
 	}
 
+	filter = append(filter, qm.Offset(int(params.Offset)))
+	filter = append(filter, qm.Limit(int(params.Limit)))
+
 	// Get from database.
 	modelInvoices, err := models.Invoices(filter...).All(context.Background(), db.db)
 	if err != nil {
