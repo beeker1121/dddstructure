@@ -57,6 +57,15 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 		lineItems = append(lineItems, lineItem)
 	}
 
+	// Calculate invoice amounts.
+	amounts, err := CalculateAmounts(CalculateAmountsParams{
+		LineItems: params.LineItems,
+		TaxRate:   params.TaxRate,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	// Create an invoice.
 	storagei, err := s.storage.Invoice.Create(&invoice.Invoice{
 		ID:            params.ID,
@@ -95,7 +104,7 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 		LineItems:      lineItems,
 		PaymentMethods: params.PaymentMethods,
 		TaxRate:        params.TaxRate,
-		AmountDue:      params.AmountDue,
+		AmountDue:      amounts.AmountDue,
 		AmountPaid:     0,
 		Status:         "pending",
 		CreatedAt:      time.Now().UTC(),
@@ -393,6 +402,18 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, err
 		storagei.Status = *params.Status
 	}
 
+	// Calculate invoice amounts.
+	amounts, err := CalculateAmounts(CalculateAmountsParams{
+		LineItems: storageLineItemsToProto(storagei.LineItems),
+		TaxRate:   storagei.TaxRate,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Set invoice amounts.
+	storagei.AmountDue = amounts.AmountDue
+
 	// Update the invoice.
 	storagei, err = s.storage.Invoice.Update(storagei)
 	if err != nil {
@@ -472,12 +493,11 @@ func (s *Service) Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, 
 	return servicei, nil
 }
 
-// storageToProto handles mapping a storage invoice type to the proto invoice
-// type.
-func storageToProto(s *invoice.Invoice) *proto.Invoice {
-	// Handle line items.
+// storageLineItemsToProto handles mappings the storage invoice line items type
+// to the proto invoice line items type.
+func storageLineItemsToProto(li []invoice.LineItem) []proto.InvoiceLineItem {
 	lineItems := []proto.InvoiceLineItem{}
-	for _, v := range s.LineItems {
+	for _, v := range li {
 		lineItem := proto.InvoiceLineItem{
 			Name:        v.Name,
 			Description: v.Description,
@@ -488,6 +508,15 @@ func storageToProto(s *invoice.Invoice) *proto.Invoice {
 
 		lineItems = append(lineItems, lineItem)
 	}
+
+	return lineItems
+}
+
+// storageToProto handles mapping a storage invoice type to the proto invoice
+// type.
+func storageToProto(s *invoice.Invoice) *proto.Invoice {
+	// Handle line items.
+	lineItems := storageLineItemsToProto(s.LineItems)
 
 	return &proto.Invoice{
 		ID:            s.ID,

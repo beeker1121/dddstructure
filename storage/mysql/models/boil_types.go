@@ -56,17 +56,21 @@ type InvoicesStatus string
 // Enum values for InvoicesStatus
 const (
 	InvoicesStatusPending InvoicesStatus = "pending"
+	InvoicesStatusPaid    InvoicesStatus = "paid"
+	InvoicesStatusPastDue InvoicesStatus = "past_due"
 )
 
 func AllInvoicesStatus() []InvoicesStatus {
 	return []InvoicesStatus{
 		InvoicesStatusPending,
+		InvoicesStatusPaid,
+		InvoicesStatusPastDue,
 	}
 }
 
 func (e InvoicesStatus) IsValid() error {
 	switch e {
-	case InvoicesStatusPending:
+	case InvoicesStatusPending, InvoicesStatusPaid, InvoicesStatusPastDue:
 		return nil
 	default:
 		return errors.New("enum is not valid")
@@ -81,6 +85,10 @@ func (e InvoicesStatus) Ordinal() int {
 	switch e {
 	case InvoicesStatusPending:
 		return 0
+	case InvoicesStatusPaid:
+		return 1
+	case InvoicesStatusPastDue:
+		return 2
 
 	default:
 		panic(errors.New("enum is not valid"))
