@@ -1,23 +1,30 @@
 package invoice
 
 import (
+	"errors"
+
 	"dddstructure/proto"
-	"dddstructure/service/errors"
+	serverrors "dddstructure/service/errors"
 )
 
 // ValidateCreateParams validates the create parameters.
 func (s *Service) ValidateCreateParams(params *proto.InvoiceCreateParams) error {
 	// Create a new ParamErrors.
-	pes := errors.NewParamErrors()
+	pes := serverrors.NewParamErrors()
+
+	// Check bill to.
+	if len(params.BillTo.FirstName) > 255 {
+		pes.Add(serverrors.NewParamError("bill_to.first_name", errors.New("first name must be less than 255 characters")))
+	}
 
 	// Check payment methods.
 	if len(params.PaymentMethods) == 0 {
-		pes.Add(errors.NewParamError("payment_methods", errors.ErrInvoicePaymentMethodRequired))
+		pes.Add(serverrors.NewParamError("payment_methods", serverrors.ErrInvoicePaymentMethodRequired))
 	}
 
 	for _, v := range params.PaymentMethods {
 		if v != "card" && v != "ach" {
-			pes.Add(errors.NewParamError("payment_methods", errors.ErrInvoicePaymentMethodInvalid))
+			pes.Add(serverrors.NewParamError("payment_methods", serverrors.ErrInvoicePaymentMethodInvalid))
 			break
 		}
 	}
@@ -33,7 +40,7 @@ func (s *Service) ValidateCreateParams(params *proto.InvoiceCreateParams) error 
 // ValidateGetParams validates the get parameters.
 func (s *Service) ValidateGetParams(params *proto.InvoiceGetParams) error {
 	// Create a new ParamErrors.
-	pes := errors.NewParamErrors()
+	pes := serverrors.NewParamErrors()
 
 	// Check validation here.
 
@@ -48,17 +55,17 @@ func (s *Service) ValidateGetParams(params *proto.InvoiceGetParams) error {
 // ValidateUpdateParams validates the update parameters.
 func (s *Service) ValidateUpdateParams(params *proto.InvoiceUpdateParams) error {
 	// Create a new ParamErrors.
-	pes := errors.NewParamErrors()
+	pes := serverrors.NewParamErrors()
 
 	// Check payment methods.
 	if params.PaymentMethods != nil {
 		if len(*params.PaymentMethods) == 0 {
-			pes.Add(errors.NewParamError("payment_methods", errors.ErrInvoicePaymentMethodRequired))
+			pes.Add(serverrors.NewParamError("payment_methods", serverrors.ErrInvoicePaymentMethodRequired))
 		}
 
 		for _, v := range *params.PaymentMethods {
 			if v != "card" && v != "ach" {
-				pes.Add(errors.NewParamError("payment_methods", errors.ErrInvoicePaymentMethodInvalid))
+				pes.Add(serverrors.NewParamError("payment_methods", serverrors.ErrInvoicePaymentMethodInvalid))
 				break
 			}
 		}
@@ -75,12 +82,12 @@ func (s *Service) ValidateUpdateParams(params *proto.InvoiceUpdateParams) error 
 // ValidateUpdateForTransactionParams validates the update parameters.
 func (s *Service) ValidateUpdateForTransactionParams(params *proto.InvoiceUpdateForTransactionParams) error {
 	// Create a new ParamErrors.
-	pes := errors.NewParamErrors()
+	pes := serverrors.NewParamErrors()
 
 	// Check amount.
 	if params.AmountDue != nil {
 		if *params.AmountDue > 1000000 {
-			pes.Add(errors.NewParamError("amount_due", errors.ErrInvoiceAmountDueLimit))
+			pes.Add(serverrors.NewParamError("amount_due", serverrors.ErrInvoiceAmountDueLimit))
 		}
 	}
 
@@ -95,11 +102,11 @@ func (s *Service) ValidateUpdateForTransactionParams(params *proto.InvoiceUpdate
 // ValidatePayParams validates the pay parameters.
 func (s *Service) ValidatePayParams(params *proto.InvoicePayParams) error {
 	// Create a new ParamErrors.
-	pes := errors.NewParamErrors()
+	pes := serverrors.NewParamErrors()
 
 	// Check amount.
 	if params.Amount > 1000000 {
-		pes.Add(errors.NewParamError("amount_due", errors.ErrInvoiceAmountDueLimit))
+		pes.Add(serverrors.NewParamError("amount_due", serverrors.ErrInvoiceAmountDueLimit))
 	}
 
 	// Return if there were parameter errors.
