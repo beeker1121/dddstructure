@@ -3,6 +3,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
+	"os"
 
 	"dddstructure/proto"
 	"dddstructure/service"
@@ -12,13 +14,16 @@ import (
 func main() {
 	fmt.Println("running...")
 
+	// Create a new logger.
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Create a new mock storage implementation.
 	fmt.Println("[+] Creating new mock storage implementation...")
 	store := mock.New(&sql.DB{})
 
 	// Create a new service.
 	fmt.Println("[+] Creating new service...")
-	serv := service.New(store)
+	serv := service.New(store, logger)
 
 	// Create a user.
 	u, err := serv.User.Create(&proto.UserCreateParams{

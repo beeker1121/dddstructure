@@ -9,4 +9,8 @@ var (
 	// ErrInvoiceAmountDueLimit is returned when the invoice amount due is over
 	// the max limit.
 	ErrInvoiceAmountDueLimit = errors.New("amount due is over limit")
+
+	// ErrInvoiceCalculatingAmounts is returned when there was an error
+	// calculating the invoice amounts.
+	ErrInvoiceCalculatingAmounts = errors.New("error calculating invoice amounts")
 )

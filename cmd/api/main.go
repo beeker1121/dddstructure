@@ -35,6 +35,9 @@ func main() {
 	cfg.APIPort = os.Getenv("API_PORT")
 	cfg.JWTSecret = os.Getenv("JWT_SECRET")
 
+	// Create a new logger.
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	/* // Create a new mock storage implementation.
 	fmt.Println("[+] Creating new mock storage implementation...")
 	store := mock.New(&sql.DB{}) */
@@ -56,13 +59,12 @@ func main() {
 
 	// Create a new service.
 	fmt.Println("[+] Creating new service...")
-	serv := service.New(store)
+	serv := service.New(store, logger)
 
 	// Create a new router.
 	router := httprouter.New()
 
 	// Create a new API context.
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile)
 	ac := apictx.New(cfg, logger, serv)
 
 	// Create a new v1 API.

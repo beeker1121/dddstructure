@@ -1,6 +1,8 @@
 package invoice
 
 import (
+	"log"
+
 	"dddstructure/proto"
 	serverrors "dddstructure/service/errors"
 	"dddstructure/service/interfaces"
@@ -16,6 +18,7 @@ var idCounter uint = 1
 type Service struct {
 	storage  *storage.Storage
 	services *interfaces.Service
+	logger   *log.Logger
 }
 
 // SetServices sets the services interface.
@@ -24,9 +27,10 @@ func (s *Service) SetServices(services *interfaces.Service) {
 }
 
 // New creates a new service.
-func New(s *storage.Storage) *Service {
+func New(s *storage.Storage, l *log.Logger) *Service {
 	return &Service{
 		storage: s,
+		logger:  l,
 	}
 }
 
@@ -62,7 +66,8 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 		TaxRate:   params.TaxRate,
 	})
 	if err != nil {
-		return nil, err
+		s.logger.Printf("CalculateAmounts() error: %s\n", err)
+		return nil, serverrors.ErrInvoiceCalculatingAmounts
 	}
 
 	// Create an invoice.
@@ -109,6 +114,7 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 		CreatedAt:      time.Now().UTC(),
 	})
 	if err != nil {
+		s.logger.Printf("storage.Invoice.Create() error: %s\n", err)
 		return nil, err
 	}
 
@@ -157,6 +163,7 @@ func (s *Service) Get(params *proto.InvoiceGetParams) ([]*proto.Invoice, error) 
 	// Get invoices from storage.
 	storageis, err := s.storage.Invoice.Get(getParams)
 	if err != nil {
+		s.logger.Printf("storage.Invoice.Get() error: %s\n", err)
 		return nil, err
 	}
 
@@ -203,6 +210,7 @@ func (s *Service) GetCount(params *proto.InvoiceGetParams) (uint, error) {
 	// Get invoices count from storage.
 	count, err := s.storage.Invoice.GetCount(getParams)
 	if err != nil {
+		s.logger.Printf("storage.Invoice.GetCount() error: %s\n", err)
 		return 0, err
 	}
 
@@ -218,7 +226,7 @@ func (s *Service) GetByID(id uint) (*proto.Invoice, error) {
 			return nil, serverrors.ErrInvoiceNotFound
 		}
 
-		// Log here.
+		s.logger.Printf("storage.Invoice.GetByID() error: %s\n", err)
 		return nil, err
 	}
 
@@ -234,7 +242,7 @@ func (s *Service) GetByIDAndUserID(id, userID uint) (*proto.Invoice, error) {
 			return nil, serverrors.ErrInvoiceNotFound
 		}
 
-		// Log here.
+		s.logger.Printf("storage.Invoice.GetByID() error: %s\n", err)
 		return nil, err
 	}
 
@@ -256,6 +264,7 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, err
 	// Get invoice from storage.
 	storagei, err := s.storage.Invoice.GetByID(*params.ID)
 	if err != nil {
+		s.logger.Printf("storage.Invoice.GetByID() error: %s\n", err)
 		return nil, err
 	}
 
@@ -391,7 +400,8 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, err
 		TaxRate:   storagei.TaxRate,
 	})
 	if err != nil {
-		return nil, err
+		s.logger.Printf("CalculateAmounts() error: %s\n", err)
+		return nil, serverrors.ErrInvoiceCalculatingAmounts
 	}
 
 	// Set invoice amounts.
@@ -400,6 +410,7 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, err
 	// Update the invoice.
 	storagei, err = s.storage.Invoice.Update(storagei)
 	if err != nil {
+		s.logger.Printf("storage.Invoice.Update() error: %s\n", err)
 		return nil, err
 	}
 
@@ -428,6 +439,7 @@ func (s *Service) UpdateForTransaction(params *proto.InvoiceUpdateForTransaction
 	// Get invoice from storage.
 	storagei, err := s.storage.Invoice.GetByID(*params.ID)
 	if err != nil {
+		s.logger.Printf("storage.Invoice.GetByID() error: %s\n", err)
 		return nil, err
 	}
 
@@ -449,6 +461,7 @@ func (s *Service) UpdateForTransaction(params *proto.InvoiceUpdateForTransaction
 	// Update the invoice.
 	storagei, err = s.storage.Invoice.Update(storagei)
 	if err != nil {
+		s.logger.Printf("storage.Invoice.Update() error: %s\n", err)
 		return nil, err
 	}
 
@@ -464,7 +477,7 @@ func (s *Service) Delete(id uint) error {
 			return serverrors.ErrInvoiceNotFound
 		}
 
-		// Log here.
+		s.logger.Printf("storage.Invoice.Delete() error: %s\n", err)
 		return err
 	}
 
@@ -481,6 +494,7 @@ func (s *Service) Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, 
 	// Get the invoice.
 	storagei, err := s.storage.Invoice.GetByID(id)
 	if err != nil {
+		s.logger.Printf("storage.Invoice.GetByID() error: %s\n", err)
 		return nil, err
 	}
 
@@ -502,6 +516,7 @@ func (s *Service) Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, 
 
 	storagei, err = s.storage.Invoice.Update(storagei)
 	if err != nil {
+		s.logger.Printf("storage.Invoice.Update() error: %s\n", err)
 		return nil, err
 	}
 

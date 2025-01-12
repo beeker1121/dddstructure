@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"database/sql"
+	"log"
 	"testing"
 
 	"dddstructure/proto"
@@ -14,7 +15,7 @@ func TestProcess(t *testing.T) {
 	store := mock.New(&sql.DB{})
 
 	// Create a new service.
-	serv := service.New(store)
+	serv := service.New(store, &log.Logger{})
 
 	// Create a user.
 	u, err := serv.User.Create(&proto.UserCreateParams{

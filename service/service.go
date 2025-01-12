@@ -1,6 +1,8 @@
 package service
 
 import (
+	"log"
+
 	"dddstructure/service/interfaces"
 	"dddstructure/service/invoice"
 	"dddstructure/service/transaction"
@@ -28,12 +30,12 @@ func (s *Service) SetServices(services *interfaces.Service) {
 }
 
 // New creates a new service.
-func New(s *storage.Storage) *Service {
+func New(s *storage.Storage, l *log.Logger) *Service {
 	// Create services.
 	serv := &Service{
-		User:        user.New(s),
-		Invoice:     invoice.New(s),
-		Transaction: transaction.New(s),
+		User:        user.New(s, l),
+		Invoice:     invoice.New(s, l),
+		Transaction: transaction.New(s, l),
 	}
 
 	// Create services interface.
