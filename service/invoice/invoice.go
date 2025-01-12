@@ -51,7 +51,6 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 			Description: v.Description,
 			Quantity:    v.Quantity,
 			Price:       v.Price,
-			Subtotal:    v.Subtotal,
 		}
 
 		lineItems = append(lineItems, lineItem)
@@ -368,7 +367,6 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, err
 				Description: v.Description,
 				Quantity:    v.Quantity,
 				Price:       v.Price,
-				Subtotal:    v.Subtotal,
 			}
 
 			lineItems = append(lineItems, lineItem)
@@ -385,21 +383,6 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, err
 	// Handle tax rate.
 	if params.TaxRate != nil {
 		storagei.TaxRate = *params.TaxRate
-	}
-
-	// Handle amount due.
-	if params.AmountDue != nil {
-		storagei.AmountDue = *params.AmountDue
-	}
-
-	// Handle amount paid.
-	if params.AmountPaid != nil {
-		storagei.AmountPaid = *params.AmountPaid
-	}
-
-	// Handle status.
-	if params.Status != nil {
-		storagei.Status = *params.Status
 	}
 
 	// Calculate invoice amounts.
@@ -435,6 +418,43 @@ func (s *Service) UpdateByIDAndUserID(params *proto.InvoiceUpdateParams) (*proto
 	return s.Update(params)
 }
 
+// UpdateForTransaction handles updating an invoice for a transaction.
+func (s *Service) UpdateForTransaction(params *proto.InvoiceUpdateForTransactionParams) (*proto.Invoice, error) {
+	// Validate parameters.
+	if err := s.ValidateUpdateForTransactionParams(params); err != nil {
+		return nil, err
+	}
+
+	// Get invoice from storage.
+	storagei, err := s.storage.Invoice.GetByID(*params.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Handle amount due.
+	if params.AmountDue != nil {
+		storagei.AmountDue = *params.AmountDue
+	}
+
+	// Handle amount paid.
+	if params.AmountPaid != nil {
+		storagei.AmountPaid = *params.AmountPaid
+	}
+
+	// Handle status.
+	if params.Status != nil {
+		storagei.Status = *params.Status
+	}
+
+	// Update the invoice.
+	storagei, err = s.storage.Invoice.Update(storagei)
+	if err != nil {
+		return nil, err
+	}
+
+	return storageToProto(storagei), nil
+}
+
 // Delete deletes an invoice by the given ID.
 func (s *Service) Delete(id uint) error {
 	// Delete invoice by ID.
@@ -459,14 +479,14 @@ func (s *Service) Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, 
 	}
 
 	// Get the invoice.
-	servicei, err := s.GetByID(id)
+	storagei, err := s.storage.Invoice.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
 
 	// Pay the invoice using the transaction service.
 	t, err := s.services.Transaction.Process(&proto.TransactionProcessParams{
-		UserID:    servicei.UserID,
+		UserID:    storagei.UserID,
 		Type:      "sale",
 		Amount:    params.Amount,
 		InvoiceID: id,
@@ -476,21 +496,16 @@ func (s *Service) Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, 
 	}
 
 	// Update the invoice.
-	servicei.AmountPaid = t.AmountCaptured
-	servicei.AmountDue -= t.AmountCaptured
-	servicei.Status = "paid"
+	storagei.AmountPaid = t.AmountCaptured
+	storagei.AmountDue -= t.AmountCaptured
+	storagei.Status = "paid"
 
-	_, err = s.Update(&proto.InvoiceUpdateParams{
-		ID:         &servicei.ID,
-		AmountDue:  &servicei.AmountDue,
-		AmountPaid: &servicei.AmountPaid,
-		Status:     &servicei.Status,
-	})
+	storagei, err = s.storage.Invoice.Update(storagei)
 	if err != nil {
 		return nil, err
 	}
 
-	return servicei, nil
+	return storageToProto(storagei), nil
 }
 
 // storageLineItemsToProto handles mappings the storage invoice line items type
@@ -503,7 +518,6 @@ func storageLineItemsToProto(li []invoice.LineItem) []proto.InvoiceLineItem {
 			Description: v.Description,
 			Quantity:    v.Quantity,
 			Price:       v.Price,
-			Subtotal:    v.Subtotal,
 		}
 
 		lineItems = append(lineItems, lineItem)

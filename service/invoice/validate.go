@@ -11,9 +11,9 @@ func (s *Service) ValidateCreateParams(params *proto.InvoiceCreateParams) error 
 	pes := errors.NewParamErrors()
 
 	// Check amount.
-	if params.AmountDue > 1000000 {
-		pes.Add(errors.NewParamError("amount_due", errors.ErrInvoiceAmountDueLimit))
-	}
+	// if params.AmountDue > 1000000 {
+	// 	pes.Add(errors.NewParamError("amount_due", errors.ErrInvoiceAmountDueLimit))
+	// }
 
 	// Return if there were parameter errors.
 	if pes.Length() > 0 {
@@ -40,6 +40,26 @@ func (s *Service) ValidateGetParams(params *proto.InvoiceGetParams) error {
 
 // ValidateUpdateParams validates the update parameters.
 func (s *Service) ValidateUpdateParams(params *proto.InvoiceUpdateParams) error {
+	// Create a new ParamErrors.
+	pes := errors.NewParamErrors()
+
+	// Check amount.
+	// if params.AmountDue != nil {
+	// 	if *params.AmountDue > 1000000 {
+	// 		pes.Add(errors.NewParamError("amount_due", errors.ErrInvoiceAmountDueLimit))
+	// 	}
+	// }
+
+	// Return if there were parameter errors.
+	if pes.Length() > 0 {
+		return pes
+	}
+
+	return nil
+}
+
+// ValidateUpdateForTransactionParams validates the update parameters.
+func (s *Service) ValidateUpdateForTransactionParams(params *proto.InvoiceUpdateForTransactionParams) error {
 	// Create a new ParamErrors.
 	pes := errors.NewParamErrors()
 

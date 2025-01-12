@@ -38,7 +38,6 @@ type InvoiceLineItem struct {
 	Description string
 	Quantity    uint
 	Price       uint
-	Subtotal    uint
 }
 
 // Invoice defines an invoice.
@@ -75,7 +74,6 @@ type InvoiceCreateParams struct {
 	LineItems      []InvoiceLineItem
 	PaymentMethods []string
 	TaxRate        string
-	AmountDue      uint
 }
 
 // InvoiceGetParamsCreatedAt defines a created at datetime range.
@@ -138,9 +136,15 @@ type InvoiceUpdateParams struct {
 	LineItems      *[]InvoiceLineItem
 	PaymentMethods *[]string
 	TaxRate        *string
-	AmountDue      *uint
-	AmountPaid     *uint
-	Status         *string
+}
+
+// InvoiceUpdateForTransactionParams defines the invoice update for transaction
+// parameters.
+type InvoiceUpdateForTransactionParams struct {
+	ID         *uint
+	AmountDue  *uint
+	AmountPaid *uint
+	Status     *string
 }
 
 // InvoicePayParams defines the invoice pay parameters.

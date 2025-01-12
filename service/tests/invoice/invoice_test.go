@@ -36,7 +36,12 @@ func TestPay(t *testing.T) {
 			FirstName: "John",
 			LastName:  "Doe",
 		},
-		AmountDue: 100,
+		LineItems: []proto.InvoiceLineItem{
+			{
+				Quantity: 1,
+				Price:    100,
+			},
+		},
 	})
 	if err != nil {
 		t.Fatal(err)

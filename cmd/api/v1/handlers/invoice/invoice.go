@@ -64,7 +64,6 @@ type LineItem struct {
 	Description string `json:"description"`
 	Quantity    uint   `json:"quantity"`
 	Price       uint   `json:"price"`
-	Subtotal    uint   `json:"subtotal"`
 }
 
 // DueDate defines an invoice due date.
@@ -122,7 +121,6 @@ type RequestPost struct {
 	LineItems      []LineItem `json:"line_items"`
 	PaymentMethods []string   `json:"payment_methods"`
 	TaxRate        string     `json:"tax_rate"`
-	AmountDue      uint       `json:"amount_due"`
 }
 
 // ResultPost defines the response data for the HandlePost handler.
@@ -155,7 +153,6 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 				Description: v.Description,
 				Quantity:    v.Quantity,
 				Price:       v.Price,
-				Subtotal:    v.Subtotal,
 			}
 
 			lineItems = append(lineItems, lineItem)
@@ -198,7 +195,6 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 			LineItems:      lineItems,
 			PaymentMethods: req.PaymentMethods,
 			TaxRate:        req.TaxRate,
-			AmountDue:      req.AmountDue,
 		})
 		if pes, ok := err.(*serverrors.ParamErrors); ok && err != nil {
 			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
@@ -529,7 +525,6 @@ func HandlePostUpdate(ac *apictx.Context) http.HandlerFunc {
 			Message:        req.Message,
 			PaymentMethods: req.PaymentMethods,
 			TaxRate:        req.TaxRate,
-			AmountDue:      req.AmountDue,
 		}
 
 		// Handle due date.
@@ -579,7 +574,6 @@ func HandlePostUpdate(ac *apictx.Context) http.HandlerFunc {
 					Description: v.Description,
 					Quantity:    v.Quantity,
 					Price:       v.Price,
-					Subtotal:    v.Subtotal,
 				}
 
 				lineItems = append(lineItems, lineItem)
@@ -669,7 +663,6 @@ func protoToInvoice(i *proto.Invoice) Invoice {
 			Description: v.Description,
 			Quantity:    v.Quantity,
 			Price:       v.Price,
-			Subtotal:    v.Subtotal,
 		}
 
 		lineItems = append(lineItems, lineItem)
