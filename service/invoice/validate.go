@@ -10,10 +10,17 @@ func (s *Service) ValidateCreateParams(params *proto.InvoiceCreateParams) error 
 	// Create a new ParamErrors.
 	pes := errors.NewParamErrors()
 
-	// Check amount.
-	// if params.AmountDue > 1000000 {
-	// 	pes.Add(errors.NewParamError("amount_due", errors.ErrInvoiceAmountDueLimit))
-	// }
+	// Check payment methods.
+	if len(params.PaymentMethods) == 0 {
+		pes.Add(errors.NewParamError("payment_methods", errors.ErrInvoicePaymentMethodRequired))
+	}
+
+	for _, v := range params.PaymentMethods {
+		if v != "card" && v != "ach" {
+			pes.Add(errors.NewParamError("payment_methods", errors.ErrInvoicePaymentMethodInvalid))
+			break
+		}
+	}
 
 	// Return if there were parameter errors.
 	if pes.Length() > 0 {
@@ -43,12 +50,19 @@ func (s *Service) ValidateUpdateParams(params *proto.InvoiceUpdateParams) error 
 	// Create a new ParamErrors.
 	pes := errors.NewParamErrors()
 
-	// Check amount.
-	// if params.AmountDue != nil {
-	// 	if *params.AmountDue > 1000000 {
-	// 		pes.Add(errors.NewParamError("amount_due", errors.ErrInvoiceAmountDueLimit))
-	// 	}
-	// }
+	// Check payment methods.
+	if params.PaymentMethods != nil {
+		if len(*params.PaymentMethods) == 0 {
+			pes.Add(errors.NewParamError("payment_methods", errors.ErrInvoicePaymentMethodRequired))
+		}
+
+		for _, v := range *params.PaymentMethods {
+			if v != "card" && v != "ach" {
+				pes.Add(errors.NewParamError("payment_methods", errors.ErrInvoicePaymentMethodInvalid))
+				break
+			}
+		}
+	}
 
 	// Return if there were parameter errors.
 	if pes.Length() > 0 {

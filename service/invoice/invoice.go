@@ -71,6 +71,11 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 	}
 
 	// Create an invoice.
+	paymentMethods := []string{}
+	for _, v := range params.PaymentMethods {
+		paymentMethods = append(paymentMethods, string(v))
+	}
+
 	storagei, err := s.storage.Invoice.Create(&invoice.Invoice{
 		ID:            params.ID,
 		UserID:        params.UserID,
@@ -106,7 +111,7 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 			Phone:        params.PayTo.Phone,
 		},
 		LineItems:      lineItems,
-		PaymentMethods: params.PaymentMethods,
+		PaymentMethods: paymentMethods,
 		TaxRate:        params.TaxRate,
 		AmountDue:      amounts.AmountDue,
 		AmountPaid:     0,
@@ -386,7 +391,12 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, err
 
 	// Handle payment methods.
 	if params.PaymentMethods != nil {
-		storagei.PaymentMethods = *params.PaymentMethods
+		paymentMethods := []string{}
+		for _, v := range *params.PaymentMethods {
+			paymentMethods = append(paymentMethods, string(v))
+		}
+
+		storagei.PaymentMethods = paymentMethods
 	}
 
 	// Handle tax rate.
@@ -547,6 +557,11 @@ func storageToProto(s *invoice.Invoice) *proto.Invoice {
 	// Handle line items.
 	lineItems := storageLineItemsToProto(s.LineItems)
 
+	paymentMethods := []proto.InvoicePaymentMethod{}
+	for _, v := range s.PaymentMethods {
+		paymentMethods = append(paymentMethods, proto.InvoicePaymentMethod(v))
+	}
+
 	return &proto.Invoice{
 		ID:            s.ID,
 		UserID:        s.UserID,
@@ -582,7 +597,7 @@ func storageToProto(s *invoice.Invoice) *proto.Invoice {
 			Phone:        s.PayTo.Phone,
 		},
 		LineItems:      lineItems,
-		PaymentMethods: s.PaymentMethods,
+		PaymentMethods: paymentMethods,
 		TaxRate:        s.TaxRate,
 		AmountDue:      s.AmountDue,
 		AmountPaid:     s.AmountPaid,

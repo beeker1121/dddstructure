@@ -2,6 +2,14 @@ package proto
 
 import "time"
 
+// InvoicePaymentMethod defines an invoice payment method.
+type InvoicePaymentMethod string
+
+const (
+	InvoicePaymentMethodCard InvoicePaymentMethod = "card"
+	InvoicePaymentMethodACH  InvoicePaymentMethod = "ach"
+)
+
 // InvoiceBillTo defines the invoice billing information.
 type InvoiceBillTo struct {
 	FirstName    string
@@ -52,7 +60,7 @@ type Invoice struct {
 	BillTo         InvoiceBillTo
 	PayTo          InvoicePayTo
 	LineItems      []InvoiceLineItem
-	PaymentMethods []string
+	PaymentMethods []InvoicePaymentMethod
 	TaxRate        string
 	AmountDue      uint
 	AmountPaid     uint
@@ -72,7 +80,7 @@ type InvoiceCreateParams struct {
 	BillTo         InvoiceBillTo
 	PayTo          InvoicePayTo
 	LineItems      []InvoiceLineItem
-	PaymentMethods []string
+	PaymentMethods []InvoicePaymentMethod
 	TaxRate        string
 }
 
@@ -134,7 +142,7 @@ type InvoiceUpdateParams struct {
 	BillTo         *InvoiceBillToUpdate
 	PayTo          *InvoicePayToUpdate
 	LineItems      *[]InvoiceLineItem
-	PaymentMethods *[]string
+	PaymentMethods *[]InvoicePaymentMethod
 	TaxRate        *string
 }
 

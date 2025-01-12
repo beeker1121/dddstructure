@@ -91,36 +91,36 @@ func (dd DueDate) MarshalJSON() ([]byte, error) {
 
 // Invoice defines an invoice.
 type Invoice struct {
-	ID             uint       `json:"id"`
-	UserID         uint       `json:"user_id"`
-	InvoiceNumber  string     `json:"invoice_number"`
-	PONumber       string     `json:"po_number"`
-	Currency       string     `json:"currency"`
-	DueDate        DueDate    `json:"due_date"`
-	Message        string     `json:"message"`
-	BillTo         BillTo     `json:"bill_to"`
-	PayTo          PayTo      `json:"pay_to"`
-	LineItems      []LineItem `json:"line_items"`
-	PaymentMethods []string   `json:"payment_methods"`
-	TaxRate        string     `json:"tax_rate"`
-	AmountDue      uint       `json:"amount_due"`
-	AmountPaid     uint       `json:"amount_paid"`
-	Status         string     `json:"status"`
-	CreatedAt      time.Time  `json:"created_at"`
+	ID             uint                         `json:"id"`
+	UserID         uint                         `json:"user_id"`
+	InvoiceNumber  string                       `json:"invoice_number"`
+	PONumber       string                       `json:"po_number"`
+	Currency       string                       `json:"currency"`
+	DueDate        DueDate                      `json:"due_date"`
+	Message        string                       `json:"message"`
+	BillTo         BillTo                       `json:"bill_to"`
+	PayTo          PayTo                        `json:"pay_to"`
+	LineItems      []LineItem                   `json:"line_items"`
+	PaymentMethods []proto.InvoicePaymentMethod `json:"payment_methods"`
+	TaxRate        string                       `json:"tax_rate"`
+	AmountDue      uint                         `json:"amount_due"`
+	AmountPaid     uint                         `json:"amount_paid"`
+	Status         string                       `json:"status"`
+	CreatedAt      time.Time                    `json:"created_at"`
 }
 
 // RequestPost defines the request data for the HandlePost handler.
 type RequestPost struct {
-	InvoiceNumber  string     `json:"invoice_number"`
-	PONumber       string     `json:"po_number"`
-	Currency       string     `json:"currency"`
-	DueDate        DueDate    `json:"due_date"`
-	Message        string     `json:"message"`
-	BillTo         BillTo     `json:"bill_to"`
-	PayTo          PayTo      `json:"pay_to"`
-	LineItems      []LineItem `json:"line_items"`
-	PaymentMethods []string   `json:"payment_methods"`
-	TaxRate        string     `json:"tax_rate"`
+	InvoiceNumber  string                       `json:"invoice_number"`
+	PONumber       string                       `json:"po_number"`
+	Currency       string                       `json:"currency"`
+	DueDate        DueDate                      `json:"due_date"`
+	Message        string                       `json:"message"`
+	BillTo         BillTo                       `json:"bill_to"`
+	PayTo          PayTo                        `json:"pay_to"`
+	LineItems      []LineItem                   `json:"line_items"`
+	PaymentMethods []proto.InvoicePaymentMethod `json:"payment_methods"`
+	TaxRate        string                       `json:"tax_rate"`
 }
 
 // ResultPost defines the response data for the HandlePost handler.
@@ -471,17 +471,17 @@ type PayToUpdate struct {
 
 // RequestPostUpdate defines the request data for the HandlePostUpdate handler.
 type RequestPostUpdate struct {
-	InvoiceNumber  *string       `json:"invoice_number"`
-	PONumber       *string       `json:"po_number"`
-	Currency       *string       `json:"currency"`
-	DueDate        *DueDate      `json:"due_date"`
-	Message        *string       `json:"message"`
-	BillTo         *BillToUpdate `json:"bill_to"`
-	PayTo          *PayToUpdate  `json:"pay_to"`
-	LineItems      *[]LineItem   `json:"line_items"`
-	PaymentMethods *[]string     `json:"payment_methods"`
-	TaxRate        *string       `json:"tax_rate"`
-	AmountDue      *uint         `json:"amount_due"`
+	InvoiceNumber  *string                       `json:"invoice_number"`
+	PONumber       *string                       `json:"po_number"`
+	Currency       *string                       `json:"currency"`
+	DueDate        *DueDate                      `json:"due_date"`
+	Message        *string                       `json:"message"`
+	BillTo         *BillToUpdate                 `json:"bill_to"`
+	PayTo          *PayToUpdate                  `json:"pay_to"`
+	LineItems      *[]LineItem                   `json:"line_items"`
+	PaymentMethods *[]proto.InvoicePaymentMethod `json:"payment_methods"`
+	TaxRate        *string                       `json:"tax_rate"`
+	AmountDue      *uint                         `json:"amount_due"`
 }
 
 // ResultPostUpdate defines the response data for the HandlePostUpdate handler.
