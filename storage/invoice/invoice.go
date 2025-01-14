@@ -8,6 +8,7 @@ type Database interface {
 	Get(params *GetParams) ([]*Invoice, error)
 	GetCount(params *GetParams) (uint, error)
 	GetByID(id uint) (*Invoice, error)
+	GetByPublicHash(hash string) (*Invoice, error)
 	Update(i *Invoice) (*Invoice, error)
 	Delete(id uint) error
 }
@@ -54,6 +55,7 @@ type LineItem struct {
 type Invoice struct {
 	ID             uint
 	UserID         uint
+	PublicHash     string
 	InvoiceNumber  string
 	PONumber       string
 	Currency       string

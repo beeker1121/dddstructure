@@ -41,6 +41,7 @@ type Invoice interface {
 	GetCount(params *proto.InvoiceGetParams) (uint, error)
 	GetByID(id uint) (*proto.Invoice, error)
 	GetByIDAndUserID(id, userID uint) (*proto.Invoice, error)
+	GetByPublicHash(hash string) (*proto.Invoice, error)
 	Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, error)
 	UpdateByIDAndUserID(params *proto.InvoiceUpdateParams) (*proto.Invoice, error)
 	UpdateForTransaction(params *proto.InvoiceUpdateForTransactionParams) (*proto.Invoice, error)

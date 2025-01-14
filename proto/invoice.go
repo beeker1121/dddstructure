@@ -52,6 +52,7 @@ type InvoiceLineItem struct {
 type Invoice struct {
 	ID             uint
 	UserID         uint
+	PublicHash     string
 	InvoiceNumber  string
 	PONumber       string
 	Currency       string

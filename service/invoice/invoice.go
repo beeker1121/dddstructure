@@ -9,6 +9,8 @@ import (
 	"dddstructure/storage"
 	"dddstructure/storage/invoice"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // idCounter handles increasing the ID.
@@ -79,6 +81,7 @@ func (s *Service) Create(params *proto.InvoiceCreateParams) (*proto.Invoice, err
 	storagei, err := s.storage.Invoice.Create(&invoice.Invoice{
 		ID:            params.ID,
 		UserID:        params.UserID,
+		PublicHash:    uuid.New().String(),
 		InvoiceNumber: params.InvoiceNumber,
 		PONumber:      params.PONumber,
 		Currency:      params.Currency,
@@ -254,6 +257,22 @@ func (s *Service) GetByIDAndUserID(id, userID uint) (*proto.Invoice, error) {
 	// Check user ID.
 	if storagei.UserID != userID {
 		return nil, serverrors.ErrInvoiceNotFound
+	}
+
+	return storageToProto(storagei), nil
+}
+
+// GetByPublicHash gets an invoice by the given public hash.
+func (s *Service) GetByPublicHash(hash string) (*proto.Invoice, error) {
+	// Get invoice by ID.
+	storagei, err := s.storage.Invoice.GetByPublicHash(hash)
+	if err != nil {
+		if err == invoice.ErrInvoiceNotFound {
+			return nil, serverrors.ErrInvoiceNotFound
+		}
+
+		s.logger.Printf("storage.Invoice.GetByPublicHash() error: %s\n", err)
+		return nil, err
 	}
 
 	return storageToProto(storagei), nil
@@ -565,6 +584,7 @@ func storageToProto(s *invoice.Invoice) *proto.Invoice {
 	return &proto.Invoice{
 		ID:            s.ID,
 		UserID:        s.UserID,
+		PublicHash:    s.PublicHash,
 		InvoiceNumber: s.InvoiceNumber,
 		PONumber:      s.PONumber,
 		Currency:      s.Currency,

@@ -82,6 +82,17 @@ func (db *Database) GetByID(id uint) (*invoice.Invoice, error) {
 	return i, nil
 }
 
+// GetByPublicHash gets an invoice by the given public hash.
+func (db *Database) GetByPublicHash(hash string) (*invoice.Invoice, error) {
+	for _, i := range invoiceMap {
+		if i.PublicHash == hash {
+			return i, nil
+		}
+	}
+
+	return nil, invoice.ErrInvoiceNotFound
+}
+
 // Update updates an invoice.
 func (db *Database) Update(i *invoice.Invoice) (*invoice.Invoice, error) {
 	invoiceMap[i.ID] = i

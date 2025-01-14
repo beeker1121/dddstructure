@@ -8,6 +8,7 @@ CREATE TABLE `users` (
 CREATE TABLE `invoices` (
     `id` int UNSIGNED NOT NULL,
     `user_id` int UNSIGNED NOT NULL,
+    `public_hash` char(36) NOT NULL,
     `invoice_number` varchar(50) NOT NULL,
     `po_number` varchar(50) NOT NULL,
     `currency` char(3) NOT NULL,

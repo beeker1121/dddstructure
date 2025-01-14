@@ -119,6 +119,24 @@ func (db *Database) GetByID(id uint) (*invoice.Invoice, error) {
 	return &i, nil
 }
 
+// GetByPublicHash gets an invoice by the given public hash.
+func (db *Database) GetByPublicHash(hash string) (*invoice.Invoice, error) {
+	model, err := models.Invoices(qm.Where("public_hash=?", hash)).One(context.Background(), db.db)
+	if err == sql.ErrNoRows {
+		return nil, invoice.ErrInvoiceNotFound
+	} else if err != nil {
+		return nil, err
+	}
+
+	// Map to invoice type.
+	i, err := modelToStorage(model)
+	if err != nil {
+		return nil, err
+	}
+
+	return &i, nil
+}
+
 // Update updates an invoice.
 func (db *Database) Update(i *invoice.Invoice) (*invoice.Invoice, error) {
 	// Map to model.
@@ -182,6 +200,7 @@ func storageToModel(i *invoice.Invoice) (models.Invoice, error) {
 	return models.Invoice{
 		ID:                 i.ID,
 		UserID:             i.UserID,
+		PublicHash:         i.PublicHash,
 		InvoiceNumber:      i.InvoiceNumber,
 		PoNumber:           i.PONumber,
 		Currency:           i.Currency,
@@ -237,6 +256,7 @@ func modelToStorage(i *models.Invoice) (invoice.Invoice, error) {
 	return invoice.Invoice{
 		ID:            i.ID,
 		UserID:        i.UserID,
+		PublicHash:    i.PublicHash,
 		InvoiceNumber: i.InvoiceNumber,
 		PONumber:      i.PoNumber,
 		Currency:      i.Currency,
