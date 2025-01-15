@@ -527,6 +527,11 @@ func (s *Service) Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, 
 		return nil, err
 	}
 
+	// Check invoice status.
+	if storagei.Status != "pending" {
+		return nil, serverrors.ErrInvoiceStatusNotPending
+	}
+
 	// Pay the invoice using the transaction service.
 	t, err := s.services.Transaction.Process(&proto.TransactionProcessParams{
 		UserID:    storagei.UserID,

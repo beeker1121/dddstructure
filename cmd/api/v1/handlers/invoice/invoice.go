@@ -24,6 +24,7 @@ func New(ac *apictx.Context, router *httprouter.Router) {
 	router.POST("/api/v1/invoice", auth.AuthenticateEndpoint(ac, HandlePost(ac)))
 	router.GET("/api/v1/invoice", auth.AuthenticateEndpoint(ac, HandleGet(ac)))
 	router.GET("/api/v1/public/invoice/:hash", HandleGetPublicInvoice(ac))
+	router.POST("/api/v1/public/invoice/:hash/pay", HandlePayInvoice(ac))
 	router.GET("/api/v1/invoice/:id", auth.AuthenticateEndpoint(ac, HandleGetInvoice(ac)))
 	router.POST("/api/v1/invoice/:id", auth.AuthenticateEndpoint(ac, HandlePostUpdate(ac)))
 	router.DELETE("/api/v1/invoice/:id", auth.AuthenticateEndpoint(ac, HandleDelete(ac)))
@@ -412,6 +413,70 @@ func HandleGetPublicInvoice(ac *apictx.Context) http.HandlerFunc {
 
 		// Create a new result.
 		result := ResultGetInvoice{
+			Data: protoToInvoice(invoice),
+		}
+
+		// Respond with JSON.
+		if err := response.JSON(w, true, result); err != nil {
+			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+	}
+}
+
+// RequestPayInvoice defines the request data for the HandlePayInvoice handler.
+type RequestPayInvoice struct {
+	Amount *uint `json:"amount"`
+}
+
+// ResultPayInvoice defines the response data for the HandlePayInvoice handler.
+type ResultPayInvoice struct {
+	Data Invoice `json:"data"`
+}
+
+// HandlePayInvoice handles the /api/v1/invoice/:id POST route of the API.
+func HandlePayInvoice(ac *apictx.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Parse the parameters from the request body.
+		var req RequestPayInvoice
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			errors.Default(ac.Logger, w, errors.ErrBadRequest)
+			return
+		}
+
+		// Try to get the invoice public hash.
+		hash := httprouter.GetParam(r, "hash")
+
+		// Get the invoice.
+		invoice, err := ac.Service.Invoice.GetByPublicHash(hash)
+		if err == serverrors.ErrInvoiceNotFound {
+			errors.Default(ac.Logger, w, errors.New(http.StatusNotFound, "", err.Error()))
+			return
+		} else if err != nil {
+			ac.Logger.Printf("invoice.GetByPublicHash() service error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Pay the invoice.
+		invoice, err = ac.Service.Invoice.Pay(invoice.ID, &proto.InvoicePayParams{
+			Amount: *req.Amount,
+		})
+		if pes, ok := err.(*serverrors.ParamErrors); ok && err != nil {
+			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
+			return
+		} else if err == serverrors.ErrInvoiceStatusNotPending {
+			errors.Default(ac.Logger, w, errors.New(http.StatusBadRequest, "", err.Error()))
+			return
+		} else if err != nil {
+			ac.Logger.Printf("invoice.Pay() error: %s\n", err)
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Create a new Result.
+		result := ResultPayInvoice{
 			Data: protoToInvoice(invoice),
 		}
 

@@ -21,4 +21,8 @@ var (
 	// ErrInvoiceCalculatingAmounts is returned when there was an error
 	// calculating the invoice amounts.
 	ErrInvoiceCalculatingAmounts = errors.New("error calculating invoice amounts")
+
+	// ErrInvoiceStatusNotPending is returned when an invoice is trying to be
+	// paid and is not in pending status.
+	ErrInvoiceStatusNotPending = errors.New("invoice is not in pending status")
 )
