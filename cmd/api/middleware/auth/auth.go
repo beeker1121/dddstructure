@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -82,17 +83,18 @@ func AuthenticateEndpoint(ac *apictx.Context, h http.HandlerFunc) http.HandlerFu
 			// Try authorization via JWT Authorization Bearer header first.
 			u, err = GetUserFromJWT(ac, authHeader[1])
 			if err == ErrJWTUnauthorized {
-				ac.Logger.Println("API authorization via JWT failure")
+				ac.Logger.Error("API authorization via JWT failure")
 				errors.Default(ac.Logger, w, errors.New(http.StatusUnauthorized, "", err.Error()))
 				return
 			} else if err != nil {
-				ac.Logger.Printf("auth.GetUserFromJWT() error: %s\n", err)
+				ac.Logger.Error("auth.GetUserFromJWT() error",
+					slog.Any("error", err))
 				errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 				return
 			}
 		} else {
 			// Get the user from the API key.
-			ac.Logger.Println("API key authorization not implemented")
+			ac.Logger.Error("API key authorization not implemented")
 			errors.Default(ac.Logger, w, errors.New(http.StatusUnauthorized, "", "API key authorization not implemented"))
 			return
 		}

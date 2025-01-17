@@ -1,7 +1,7 @@
 package user
 
 import (
-	"log"
+	"log/slog"
 
 	"dddstructure/proto"
 	serverrors "dddstructure/service/errors"
@@ -19,7 +19,7 @@ var idCounter uint = 1
 type Service struct {
 	storage  *storage.Storage
 	services *interfaces.Service
-	logger   *log.Logger
+	logger   *slog.Logger
 }
 
 // SetServices sets the services interface.
@@ -28,7 +28,7 @@ func (s *Service) SetServices(services *interfaces.Service) {
 }
 
 // New creates a new service.
-func New(s *storage.Storage, l *log.Logger) *Service {
+func New(s *storage.Storage, l *slog.Logger) *Service {
 	return &Service{
 		storage: s,
 		logger:  l,
@@ -48,7 +48,8 @@ func (s *Service) Create(params *proto.UserCreateParams) (*proto.User, error) {
 	if err == nil {
 		pes.Add(serverrors.NewParamError("email", serverrors.ErrUserEmailExists))
 	} else if err != nil && err != user.ErrUserNotFound {
-		s.logger.Printf("storage.User.GetByEmail() error: %s\n", err)
+		s.logger.Error("storage.User.GetByEmail() error",
+			slog.Any("error", err))
 		return nil, err
 	}
 
@@ -66,7 +67,8 @@ func (s *Service) Create(params *proto.UserCreateParams) (*proto.User, error) {
 	// Hash the password.
 	pwHash, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcrypt.DefaultCost)
 	if err != nil {
-		s.logger.Printf("error generating password hash: %s\n", err)
+		s.logger.Error("error generating password hash",
+			slog.Any("error", err))
 		return nil, err
 	}
 
@@ -77,7 +79,8 @@ func (s *Service) Create(params *proto.UserCreateParams) (*proto.User, error) {
 		Password: string(pwHash),
 	})
 	if err != nil {
-		s.logger.Printf("storage.User.Create() error: %s\n", err)
+		s.logger.Error("storage.User.Create() error",
+			slog.Any("error", err))
 		return nil, err
 	}
 
@@ -103,7 +106,8 @@ func (s *Service) Login(params *proto.UserLoginParams) (*proto.User, error) {
 	if err == user.ErrUserNotFound {
 		return nil, serverrors.ErrUserInvalidLogin
 	} else if err != nil {
-		s.logger.Printf("storage.User.GetByEmail() error: %s\n", err)
+		s.logger.Error("storage.User.GetByEmail() error",
+			slog.Any("error", err))
 		return nil, err
 	}
 
@@ -131,7 +135,8 @@ func (s *Service) GetByID(id uint) (*proto.User, error) {
 			return nil, serverrors.ErrUserNotFound
 		}
 
-		s.logger.Printf("storage.User.GetByID() error: %s\n", err)
+		s.logger.Error("storage.User.GetByID() error",
+			slog.Any("error", err))
 		return nil, err
 	}
 
@@ -165,7 +170,8 @@ func (s *Service) Update(params *proto.UserUpdateParams) (*proto.User, error) {
 		if err == nil {
 			pes.Add(serverrors.NewParamError("email", serverrors.ErrUserEmailExists))
 		} else if err != nil && err != user.ErrUserNotFound {
-			s.logger.Printf("storage.User.GetByEmail() error: %s\n", err)
+			s.logger.Error("storage.User.GetByEmail() error",
+				slog.Any("error", err))
 			return nil, err
 		}
 	}
@@ -178,7 +184,8 @@ func (s *Service) Update(params *proto.UserUpdateParams) (*proto.User, error) {
 	// Get user from storage.
 	storageu, err := s.storage.User.GetByID(*params.ID)
 	if err != nil {
-		s.logger.Printf("storage.User.GetByID() error: %s\n", err)
+		s.logger.Error("storage.User.GetByID() error",
+			slog.Any("error", err))
 		return nil, err
 	}
 
@@ -191,7 +198,8 @@ func (s *Service) Update(params *proto.UserUpdateParams) (*proto.User, error) {
 	if params.Password != nil {
 		pwHash, err := bcrypt.GenerateFromPassword([]byte(*params.Password), bcrypt.DefaultCost)
 		if err != nil {
-			s.logger.Printf("error generating password hash: %s\n", err)
+			s.logger.Error("error generating password hash",
+				slog.Any("error", err))
 			return nil, err
 		}
 
@@ -201,7 +209,8 @@ func (s *Service) Update(params *proto.UserUpdateParams) (*proto.User, error) {
 	// Update the user.
 	storageu, err = s.storage.User.Update(storageu)
 	if err != nil {
-		s.logger.Printf("storage.User.Update() error: %s\n", err)
+		s.logger.Error("storage.User.Update() error",
+			slog.Any("error", err))
 		return nil, err
 	}
 

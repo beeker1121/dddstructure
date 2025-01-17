@@ -3,7 +3,7 @@ package errors
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 
 	serverrors "dddstructure/service/errors"
@@ -71,18 +71,18 @@ type ErrorsWrap struct {
 //
 // The default error response will look like:
 //
-// {
-//   errors: [
-//     {
-//       status: 404,
-//       detail: "The given endpoint could not be found"
-//     }
-//   ]
-// }
+//	{
+//	  errors: [
+//	    {
+//	      status: 404,
+//	      detail: "The given endpoint could not be found"
+//	    }
+//	  ]
+//	}
 //
 // If the Param field is not blank, this will also be included in the error
 // response, used to signify specific parameter errors.
-func Default(logger *log.Logger, w http.ResponseWriter, e *Error) {
+func Default(logger *slog.Logger, w http.ResponseWriter, e *Error) {
 	// Wrap the error in top level errors array.
 	wrap := ErrorsWrap{&Errors{e}}
 
@@ -101,13 +101,14 @@ func Default(logger *log.Logger, w http.ResponseWriter, e *Error) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	if err := enc.Encode(wrap); err != nil {
-		logger.Printf("errors.Default() render.JSON() error: %s\n", err)
+		logger.Error("errors.Default() render.JSON() error",
+			slog.Any("error", err))
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }
 
 // Multiple renders multiple API errors.
-func Multiple(logger *log.Logger, w http.ResponseWriter, status int, es *Errors) {
+func Multiple(logger *slog.Logger, w http.ResponseWriter, status int, es *Errors) {
 	// Wrap the error in top level errors array.
 	wrap := ErrorsWrap{es}
 
@@ -126,7 +127,8 @@ func Multiple(logger *log.Logger, w http.ResponseWriter, status int, es *Errors)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	if err := enc.Encode(wrap); err != nil {
-		logger.Printf("errors.Default() render.JSON() error: %s\n", err)
+		logger.Error("errors.Default() render.JSON() error",
+			slog.Any("error", err))
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }
@@ -135,7 +137,7 @@ func Multiple(logger *log.Logger, w http.ResponseWriter, status int, es *Errors)
 //
 // This is a helper function used by the API endpoint handlers to make it
 // easier to render parameter errors returned from services.
-func Params(logger *log.Logger, w http.ResponseWriter, status int, pes *serverrors.ParamErrors) {
+func Params(logger *slog.Logger, w http.ResponseWriter, status int, pes *serverrors.ParamErrors) {
 	// Create new Errors.
 	errs := &Errors{}
 

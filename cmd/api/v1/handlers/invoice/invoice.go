@@ -3,6 +3,7 @@ package invoice
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -203,7 +204,8 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
 			return
 		} else if err != nil {
-			ac.Logger.Printf("invoice.Create() error: %s\n", err)
+			ac.Logger.Error("invoice.Create() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -215,7 +217,8 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 
 		// Respond with JSON.
 		if err := response.JSON(w, true, result); err != nil {
-			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			ac.Logger.Error("response.JSON() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -328,7 +331,8 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
 			return
 		} else if err != nil {
-			ac.Logger.Printf("invoice.Get() service error: %s\n", err)
+			ac.Logger.Error("invoice.Get() service error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -339,7 +343,8 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
 			return
 		} else if err != nil {
-			ac.Logger.Printf("invoice.GetCount() service error: %s\n", err)
+			ac.Logger.Error("invoice.GetCount() service error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -386,7 +391,8 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 
 		// Respond with JSON.
 		if err := response.JSON(w, true, result); err != nil {
-			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			ac.Logger.Error("response.JSON() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -406,7 +412,8 @@ func HandleGetPublicInvoice(ac *apictx.Context) http.HandlerFunc {
 			errors.Default(ac.Logger, w, errors.New(http.StatusNotFound, "", err.Error()))
 			return
 		} else if err != nil {
-			ac.Logger.Printf("invoice.GetByPublicHash() service error: %s\n", err)
+			ac.Logger.Error("invoice.GetByPublicHash() service error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -418,7 +425,8 @@ func HandleGetPublicInvoice(ac *apictx.Context) http.HandlerFunc {
 
 		// Respond with JSON.
 		if err := response.JSON(w, true, result); err != nil {
-			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			ac.Logger.Error("response.JSON() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -454,7 +462,8 @@ func HandlePayInvoice(ac *apictx.Context) http.HandlerFunc {
 			errors.Default(ac.Logger, w, errors.New(http.StatusNotFound, "", err.Error()))
 			return
 		} else if err != nil {
-			ac.Logger.Printf("invoice.GetByPublicHash() service error: %s\n", err)
+			ac.Logger.Error("invoice.GetByPublicHash() service error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -470,7 +479,8 @@ func HandlePayInvoice(ac *apictx.Context) http.HandlerFunc {
 			errors.Default(ac.Logger, w, errors.New(http.StatusBadRequest, "", err.Error()))
 			return
 		} else if err != nil {
-			ac.Logger.Printf("invoice.Pay() error: %s\n", err)
+			ac.Logger.Error("invoice.Pay() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -482,7 +492,8 @@ func HandlePayInvoice(ac *apictx.Context) http.HandlerFunc {
 
 		// Respond with JSON.
 		if err := response.JSON(w, true, result); err != nil {
-			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			ac.Logger.Error("response.JSON() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -519,7 +530,8 @@ func HandleGetInvoice(ac *apictx.Context) http.HandlerFunc {
 			errors.Default(ac.Logger, w, errors.New(http.StatusNotFound, "", err.Error()))
 			return
 		} else if err != nil {
-			ac.Logger.Printf("invoice.GetByIDAndUserID() service error: %s\n", err)
+			ac.Logger.Error("invoice.GetByIDAndUserID() service error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -531,7 +543,8 @@ func HandleGetInvoice(ac *apictx.Context) http.HandlerFunc {
 
 		// Respond with JSON.
 		if err := response.JSON(w, true, result); err != nil {
-			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			ac.Logger.Error("response.JSON() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -687,7 +700,8 @@ func HandlePostUpdate(ac *apictx.Context) http.HandlerFunc {
 			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
 			return
 		} else if err != nil {
-			ac.Logger.Printf("user.Update() error: %s\n", err)
+			ac.Logger.Error("user.Update() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -699,7 +713,8 @@ func HandlePostUpdate(ac *apictx.Context) http.HandlerFunc {
 
 		// Respond with JSON.
 		if err := response.JSON(w, true, result); err != nil {
-			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			ac.Logger.Error("response.JSON() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -731,7 +746,8 @@ func HandleDelete(ac *apictx.Context) http.HandlerFunc {
 			errors.Default(ac.Logger, w, errors.New(http.StatusNotFound, "", err.Error()))
 			return
 		} else if err != nil {
-			ac.Logger.Printf("invoice.GetByIDAndUserID() service error: %s\n", err)
+			ac.Logger.Error("invoice.GetByIDAndUserID() service error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -742,7 +758,8 @@ func HandleDelete(ac *apictx.Context) http.HandlerFunc {
 			errors.Default(ac.Logger, w, errors.New(http.StatusNotFound, "", err.Error()))
 			return
 		} else if err != nil {
-			ac.Logger.Printf("invoice.GetByIDAndUserID() service error: %s\n", err)
+			ac.Logger.Error("invoice.GetByIDAndUserID() service error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}

@@ -1,7 +1,7 @@
 package transaction
 
 import (
-	"log"
+	"log/slog"
 	"strings"
 
 	"dddstructure/proto"
@@ -17,7 +17,7 @@ var idCounter uint = 1
 type Service struct {
 	storage  *storage.Storage
 	services *interfaces.Service
-	logger   *log.Logger
+	logger   *slog.Logger
 }
 
 // SetServices sets the services interface.
@@ -26,7 +26,7 @@ func (s *Service) SetServices(services *interfaces.Service) {
 }
 
 // New creates a new service.
-func New(s *storage.Storage, l *log.Logger) *Service {
+func New(s *storage.Storage, l *slog.Logger) *Service {
 	return &Service{
 		storage: s,
 		logger:  l,
@@ -65,7 +65,8 @@ func (s *Service) Process(params *proto.TransactionProcessParams) (*proto.Transa
 		Status:         "approved",
 	})
 	if err != nil {
-		s.logger.Printf("storage.Invoice.Get() error: %s\n", err)
+		s.logger.Error("storage.Transaction.Create() error",
+			slog.Any("error", err))
 		return nil, err
 	}
 
@@ -88,6 +89,8 @@ func (s *Service) Process(params *proto.TransactionProcessParams) (*proto.Transa
 			AmountPaid: &servicei.AmountPaid,
 			Status:     &servicei.Status,
 		}); err != nil {
+			s.logger.Error("storage.Invoice.UpdateForTransaction() error",
+				slog.Any("error", err))
 			return nil, err
 		}
 	}

@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 
 	"dddstructure/proto"
@@ -15,7 +15,7 @@ func main() {
 	fmt.Println("running...")
 
 	// Create a new logger.
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile)
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	// Create a new mock storage implementation.
 	fmt.Println("[+] Creating new mock storage implementation...")

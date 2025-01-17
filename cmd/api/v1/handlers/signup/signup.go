@@ -2,6 +2,7 @@ package signup
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	apictx "dddstructure/cmd/api/context"
@@ -50,7 +51,8 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
 			return
 		} else if err != nil {
-			ac.Logger.Printf("user.Create() service error: %s\n", err)
+			ac.Logger.Error("user.Create() service error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -58,7 +60,8 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 		// Issue a new JWT for this user.
 		token, err := auth.NewJWT(ac, user.Password, user.ID)
 		if err != nil {
-			ac.Logger.Printf("auth.NewJWT() error: %s\n", err)
+			ac.Logger.Error("auth.NewJWT() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -70,7 +73,8 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 
 		// Respond with JSON.
 		if err := response.JSON(w, true, result); err != nil {
-			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			ac.Logger.Error("response.JSON() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}

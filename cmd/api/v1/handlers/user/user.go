@@ -2,6 +2,7 @@ package user
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	apictx "dddstructure/cmd/api/context"
@@ -45,7 +46,8 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 		// Get the user.
 		serviceu, err := ac.Service.User.GetByID(user.ID)
 		if err != nil {
-			ac.Logger.Printf("user.GetByID() service error: %s\n", err)
+			ac.Logger.Error("user.GetByID() service error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -60,7 +62,8 @@ func HandleGet(ac *apictx.Context) http.HandlerFunc {
 
 		// Respond with JSON.
 		if err := response.JSON(w, true, result); err != nil {
-			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			ac.Logger.Error("response.JSON() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -105,7 +108,8 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
 			return
 		} else if err != nil {
-			ac.Logger.Printf("user.Update() error: %s\n", err)
+			ac.Logger.Error("user.Update() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -120,7 +124,8 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 
 		// Respond with JSON.
 		if err := response.JSON(w, true, result); err != nil {
-			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			ac.Logger.Error("response.JSON() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}

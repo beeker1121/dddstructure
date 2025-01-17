@@ -1,7 +1,7 @@
 package service
 
 import (
-	"log"
+	"log/slog"
 
 	"dddstructure/service/interfaces"
 	"dddstructure/service/invoice"
@@ -30,7 +30,7 @@ func (s *Service) SetServices(services *interfaces.Service) {
 }
 
 // New creates a new service.
-func New(s *storage.Storage, l *log.Logger) *Service {
+func New(s *storage.Storage, l *slog.Logger) *Service {
 	// Create services.
 	serv := &Service{
 		User:        user.New(s, l),

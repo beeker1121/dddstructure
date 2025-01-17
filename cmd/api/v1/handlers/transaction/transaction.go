@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	apictx "dddstructure/cmd/api/context"
@@ -93,7 +94,8 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
 			return
 		} else if err != nil {
-			ac.Logger.Printf("transaction.Process() error: %s\n", err)
+			ac.Logger.Error("transaction.Process() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
@@ -113,7 +115,8 @@ func HandlePost(ac *apictx.Context) http.HandlerFunc {
 
 		// Respond with JSON.
 		if err := response.JSON(w, true, result); err != nil {
-			ac.Logger.Printf("response.JSON() error: %s\n", err)
+			ac.Logger.Error("response.JSON() error",
+				slog.Any("error", err))
 			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
