@@ -43,7 +43,7 @@ type Invoice interface {
 	GetByIDAndUserID(id, userID uint) (*proto.Invoice, error)
 	GetByPublicHash(hash string) (*proto.Invoice, error)
 	Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, error)
-	UpdateByIDAndUserID(params *proto.InvoiceUpdateParams) (*proto.Invoice, error)
+	UpdateForUser(params *proto.InvoiceUpdateParams) (*proto.Invoice, error)
 	UpdateForTransaction(params *proto.InvoiceUpdateForTransactionParams) (*proto.Invoice, error)
 	Delete(id uint) error
 	Pay(id uint, params *proto.InvoicePayParams) (*proto.Invoice, error)

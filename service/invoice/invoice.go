@@ -456,8 +456,8 @@ func (s *Service) Update(params *proto.InvoiceUpdateParams) (*proto.Invoice, err
 	return storageToProto(storagei), nil
 }
 
-// UpdateByIDAndUserID handles updating an invoice by given ID and User ID.
-func (s *Service) UpdateByIDAndUserID(params *proto.InvoiceUpdateParams) (*proto.Invoice, error) {
+// UpdateForUser handles updating an invoice for a user.
+func (s *Service) UpdateForUser(params *proto.InvoiceUpdateParams) (*proto.Invoice, error) {
 	// Get by ID and user ID.
 	_, err := s.GetByIDAndUserID(*params.ID, *params.UserID)
 	if err != nil {

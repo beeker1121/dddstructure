@@ -695,7 +695,7 @@ func HandlePostUpdate(ac *apictx.Context) http.HandlerFunc {
 		}
 
 		// Update the invoice.
-		invoice, err := ac.Service.Invoice.UpdateByIDAndUserID(params)
+		invoice, err := ac.Service.Invoice.UpdateForUser(params)
 		if pes, ok := err.(*serverrors.ParamErrors); ok && err != nil {
 			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
 			return
