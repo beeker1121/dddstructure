@@ -6,6 +6,9 @@ var (
 	// ErrInvoiceNotFound is returned when an invoice could not be found.
 	ErrInvoiceNotFound = errors.New("invoice not found")
 
+	// ErrInvoiceLineItemRequired is returned when no line items are passed in.
+	ErrInvoiceLineItemRequired = errors.New("at least one line item is required")
+
 	// ErrInvoicePaymentMethodRequired is returned when no payment methods are
 	// passed in.
 	ErrInvoicePaymentMethodRequired = errors.New("at least one payment method is required")

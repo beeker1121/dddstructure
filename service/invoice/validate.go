@@ -17,6 +17,11 @@ func (s *Service) ValidateCreateParams(params *proto.InvoiceCreateParams) error 
 		pes.Add(serverrors.NewParamError("bill_to.first_name", errors.New("first name must be less than 255 characters")))
 	}
 
+	// Check line items.
+	if len(params.LineItems) == 0 {
+		pes.Add(serverrors.NewParamError("line_items", serverrors.ErrInvoiceLineItemRequired))
+	}
+
 	// Check payment methods.
 	if len(params.PaymentMethods) == 0 {
 		pes.Add(serverrors.NewParamError("payment_methods", serverrors.ErrInvoicePaymentMethodRequired))
@@ -56,6 +61,13 @@ func (s *Service) ValidateGetParams(params *proto.InvoiceGetParams) error {
 func (s *Service) ValidateUpdateParams(params *proto.InvoiceUpdateParams) error {
 	// Create a new ParamErrors.
 	pes := serverrors.NewParamErrors()
+
+	// Check line items.
+	if params.LineItems != nil {
+		if len(*params.LineItems) == 0 {
+			pes.Add(serverrors.NewParamError("line_items", serverrors.ErrInvoiceLineItemRequired))
+		}
+	}
 
 	// Check payment methods.
 	if params.PaymentMethods != nil {
