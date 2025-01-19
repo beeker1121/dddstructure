@@ -45,10 +45,6 @@ func main() {
 	if cfg.APIEnvironment == config.APIEnvironmentDevelop {
 		logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	} else if cfg.APIEnvironment == config.APIEnvironmentProduction {
-		// TODO: Need to replace this with production logging to the
-		//       config log file, using a package that does log rotation,
-		//       compression, etc. Could update the creek package to use
-		//       modules and use that instead of os.Stdout.
 		logger = slog.New(slog.NewJSONHandler(creek.New(cfg.LogFile, 10), nil))
 	} else {
 		panic("invalid API environment")
