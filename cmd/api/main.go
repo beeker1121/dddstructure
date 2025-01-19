@@ -35,8 +35,23 @@ func main() {
 	cfg.APIPort = os.Getenv("API_PORT")
 	cfg.JWTSecret = os.Getenv("JWT_SECRET")
 
+	if os.Getenv("API_ENVIRONMENT") != "" {
+		cfg.APIEnvironment = config.APIEnvironment(os.Getenv("API_ENVIRONMENT"))
+	}
+
 	// Create a new logger.
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	var logger *slog.Logger
+	if cfg.APIEnvironment == config.APIEnvironmentDevelop {
+		logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	} else if cfg.APIEnvironment == config.APIEnvironmentProduction {
+		// TODO: Need to replace this with production logging to the
+		//       config log file, using a package that does log rotation,
+		//       compression, etc. Could update the creek package to use
+		//       modules and use that instead of os.Stdout.
+		logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	} else {
+		panic("invalid API environment")
+	}
 
 	/* // Create a new mock storage implementation.
 	fmt.Println("[+] Creating new mock storage implementation...")

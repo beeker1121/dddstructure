@@ -6,6 +6,7 @@
 	"db_pass": "",
 	"api_host": "",
 	"api_port": "",
+	"api_environment": "DEVELOP",
 	"log_file": "",
 	"jwt_secret": "",
 	"jwt_expiry_time": 10080,
