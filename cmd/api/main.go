@@ -14,6 +14,7 @@ import (
 	"dddstructure/service"
 	storagemysql "dddstructure/storage/mysql"
 
+	"github.com/beeker1121/creek"
 	"github.com/beeker1121/httprouter"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -48,7 +49,7 @@ func main() {
 		//       config log file, using a package that does log rotation,
 		//       compression, etc. Could update the creek package to use
 		//       modules and use that instead of os.Stdout.
-		logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		logger = slog.New(slog.NewJSONHandler(creek.New(cfg.LogFile, 10), nil))
 	} else {
 		panic("invalid API environment")
 	}
