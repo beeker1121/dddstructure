@@ -31,12 +31,12 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
 RUN useradd -M -s /sbin/nologin app
 RUN usermod -aG app app
 
-# Copy the binary and config to the production image from the builder stage.
+# Copy the binary and config to the image from the builder stage.
 COPY --from=builder /app/dddstructure /app/dddstructure
 COPY --from=builder /app/cmd/api/config.json /app/config.json
 
 # Give app user permissions to run dddstructure app.
-RUN chown app /app/dddstructure
+RUN chown -R app /app/dddstructure
 
 # Expose port 8080 on container (the port it listens on).
 # This is more metadata, it does not automatically publish
@@ -46,5 +46,8 @@ EXPOSE 8080
 # Switch to app user.
 USER app
 
+# Change to app directory
+WORKDIR /app
+
 # Run the app on container startup.
-CMD ["/app/dddstructure"]
+CMD ["./dddstructure"]

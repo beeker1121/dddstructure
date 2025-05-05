@@ -120,6 +120,8 @@ You can view the default configuration with:
 
 `kubectl config view`
 
+Which should be empty given we just downloaded it and have not started minikube, or created any contexts to a cluster.
+
 Once we run `minikube start --driver docker`, `minikube` will modify the default configuration to include a context we can use for it. This allows us to switch between `minikube` and a remote cluster. Review documentation for `$HOME/.kube/config` and contexts for more information. Also look into `KUBECONFIG` environment variable.
 
 Can view the config names via `grep 'name:' ~/.kube/config` (should show `minikube` after starting it), and for example to switch to it `minikube` context you would do `kubectl config use-context minikube`. Now all `kubectl` commands will run on the `minikube` cluster.

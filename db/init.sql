@@ -1,3 +1,7 @@
+CREATE DATABASE IF NOT EXISTS `dddstructure`;
+
+USE `dddstructure`;
+
 CREATE TABLE `users` (
     `id` int UNSIGNED NOT NULL,
     `email` varchar(255) NOT NULL,
