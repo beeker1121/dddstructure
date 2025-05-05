@@ -448,7 +448,20 @@ http://10.244.0.23:8080/api/v1/signup
 
 Notice we're using the `10.244.0.23` IP, and the port the container is listening on of `8080`.
 
-If we set up everything correctly, we should get back a success response:
+If we set up everything correctly, we should get back a successful response with a JWT:
+
+```sh
+~ $ curl -X POST \
+>     -H 'Content-Type: application/json' \
+>     -d '{
+>     "email": "test@test.com",
+>     "password": "TestPassword123"
+> }' \
+> http://10.244.0.23:8080/api/v1/signup
+{
+  "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3NDcwMjEwNTgsImlhdCI6MTc0NjQxNjI1OH0.xlV4eZDc5NDRjttw267aCXsyzZiLtNwzIg0PHNOQDt4"
+}
+```
 
 ###### Debugging API Deployment
 
