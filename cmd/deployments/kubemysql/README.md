@@ -1,6 +1,6 @@
 # Deploy App and MySQL in Kubernetes
 
-This will explain how to deploy the application with both the application and the MySQL database hosted inside a Kubernetes cluster. We will use `minikube` to test our Kubernetes configuration and that everything runs correctly, and eventually use GKE (Google Kubernetes Engine) to host a near production ready deployment of the application.
+This will explain how to deploy the API application with both the application and the MySQL database hosted inside of a Kubernetes cluster. We will use `minikube` to test our Kubernetes configuration and that everything runs correctly, and eventually use GKE (Google Kubernetes Engine) to host a near production ready deployment of the application.
 
 ## Minikube
 
@@ -426,7 +426,7 @@ dddstructure-api-deployment-5869cbf996-78lrw     1/1     Running   0          11
 dddstructure-mysql-deployment-848b8cdfb5-frr64   1/1     Running   0          4m37s   10.244.0.22   minikube   <none>           <none>
 ```
 
-We can see the internal IP of our API Deployment in the cluster is `10.244.0.23` - this is the IP we'll use from a Pod within the cluster to issue a `curl` command.
+We can see the internal IP of our API Deployment Pod in the cluster is `10.244.0.23` - this is the IP we'll use to issue a `curl` command.
 
 Spin up a new Pod within the cluster that has `curl` installed, and when we exit, the shell will be removed:
 
@@ -463,6 +463,67 @@ If we set up everything correctly, we should get back a successful response with
 }
 ```
 
+###### API External Service
+
+Now that our API application is running within our `minikube` cluster and it's able to communicate our MySQL deployment internally, we want to make our API application available externally to the outside internet. In order to do this, we'll want to create a new Service for our API Deployment.
+
+To break it down a bit, a "service" is defined as the combination of a group of Pod(s), and a policy to access them. A service needs three things - a name (myapp-service), a way to identify the Pod(s) in its group (typically a label like app=myapp), and a way to access those Pod(s) (port 3333 via TCP).
+
+Once a service has been established, Kubernetes assigns it a ClusterIP, which is an internal IP address accessible only within the Kubernetes cluster. Now, other containers in the cluster can access the service through its ClusterIP (or hostname, that resolves to it).
+
+The root Service type in Kubernetes is `ClusterIP`, and this will be the type of the Service if no type is explicitly defined.
+
+There's a few Service types we can use, for example:
+
+**ClusterIP**: This is the default Service type. It creates an internal IP that can be reached from inside the cluster - there is no external access.
+
+**NodePort**: Exposes a Service on a port on each worker node in the cluster, and each node redirects traffic to the given Pod(s) of the Service. Cluster networking handles routing the traffic to the target Service's Pod(s). This is the most basic way to expose a service externally, and does not support anything fancy such as SSL/TLS, load balancing, etc. You would connect to this using the node's IP address and the specified port.
+
+**LoadBalancer**: Exposes a service using a cloud-native Load Balancer. It uses a single IP address of an external load balancer and routes traffic to the Service(s) Pod(s).
+
+**Ingress**: *Not a service type, but a rule to chart external access to services*
+
+Ingress works in conjunction with Services and exposes HTTP and HTTPS routes from outside the cluster to Service(s) within the cluster. Traffic routing is controlled by rules defined on the Ingress resource/component. Ingress may also be configured to give Service(s) externally-reachable URLs, load balance traffic, handle SSL/TLS, etc.
+
+1. Let's create a new `LoadBalancer` Service for our API application:
+
+`kubectl apply -f dddstructure-api-service.yaml`
+
+Get the current services:
+
+`kubectl get services`
+
+Which should show:
+
+```sh
+NAME                         TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+dddstructure-api-service     LoadBalancer   10.106.197.53   <pending>     8080:30000/TCP   4s
+dddstructure-mysql-service   ClusterIP      10.106.44.32    <none>        3306/TCP         20h
+kubernetes                   ClusterIP      10.96.0.1       <none>        443/TCP          20h
+```
+
+We can now see our API Service is running, with the internal IP on port `8080` and the external IP on port `30000`.
+
+2. Get the external IP.
+
+If we were using a cloud cluster, we could use this command:
+
+`kubectl describe services dddstructure-api-service`
+
+Which would give us the IP listed next to `LoadBalancer Ingress`.
+
+Since we're using `minikube` for this example, we can use the following command:
+
+`minikube service dddstructure-api-service --url`
+
+Which should show:
+
+```sh
+http://192.168.49.2:30000
+```
+
+We can now access our API application via the IP address and port via our terminal, or other tools like Postman, etc.
+
 ###### Debugging API Deployment
 
 We shouldn't run into any issues, but knowing these commands can help debug why a Deployment/Pod isn't starting.
@@ -498,6 +559,8 @@ Also, we could try getting a bash terminal for the Pod:
 Delete the deployment, service, persistent volume, and persistent volume claim:
 
 ```sh
+kubectl delete service dddstructure-api-deployment
+kubectl delete service dddstructure-api-service
 kubectl delete deployment dddstructure-mysql-deployment
 kubectl delete service dddstructure-mysql-service
 kubectl delete pvc mysql-initdb-pv-claim
