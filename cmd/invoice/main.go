@@ -37,7 +37,7 @@ func main() {
 	// Create an invoice.
 	i, err := serv.Invoice.Create(&proto.InvoiceCreateParams{
 		UserID:         u.ID,
-		PaymentMethods: []proto.InvoicePaymentMethod{"card"},
+		PaymentMethods: []proto.InvoicePaymentMethod{proto.InvoicePaymentMethodCard},
 		BillTo: proto.InvoiceBillTo{
 			FirstName: "Bill",
 			LastName:  "Smith",
