@@ -1,13 +1,24 @@
 package context
 
-import "dddstructure/service"
+import (
+	"log/slog"
 
+	"dddstructure/cmd/api/config"
+	"dddstructure/service"
+)
+
+// Context defines the API context.
 type Context struct {
+	Config  *config.Config
+	Logger  *slog.Logger
 	Service *service.Service
 }
 
-func New(s *service.Service) *Context {
+// New returns a new API context.
+func New(config *config.Config, logger *slog.Logger, services *service.Service) *Context {
 	return &Context{
-		Service: s,
+		Config:  config,
+		Logger:  logger,
+		Service: services,
 	}
 }

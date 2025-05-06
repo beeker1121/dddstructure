@@ -1,9 +1,15 @@
 package user
 
 import (
+	"log/slog"
+
 	"dddstructure/proto"
+	serverrors "dddstructure/service/errors"
+	"dddstructure/service/interfaces"
 	"dddstructure/storage"
 	"dddstructure/storage/user"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // idCounter handles increasing the ID.
@@ -11,39 +17,110 @@ var idCounter uint = 1
 
 // Service defines the user service.
 type Service struct {
-	s *storage.Storage
+	storage  *storage.Storage
+	services *interfaces.Service
+	logger   *slog.Logger
+}
+
+// SetServices sets the services interface.
+func (s *Service) SetServices(services *interfaces.Service) {
+	s.services = services
 }
 
 // New creates a new service.
-func New(s *storage.Storage) *Service {
+func New(s *storage.Storage, l *slog.Logger) *Service {
 	return &Service{
-		s: s,
+		storage: s,
+		logger:  l,
 	}
 }
 
 // Create creates a new user.
-func (s *Service) Create(u *proto.User) (*proto.User, error) {
+func (s *Service) Create(params *proto.UserCreateParams) (*proto.User, error) {
+	// Validate parameters.
+	if err := s.ValidateCreateParams(params); err != nil {
+		return nil, err
+	}
+
+	// Handle email.
+	pes := serverrors.NewParamErrors()
+	_, err := s.storage.User.GetByEmail(params.Email)
+	if err == nil {
+		pes.Add(serverrors.NewParamError("email", serverrors.ErrUserEmailExists))
+	} else if err != nil && err != user.ErrUserNotFound {
+		s.logger.Error("storage.User.GetByEmail() error",
+			slog.Any("error", err))
+		return nil, err
+	}
+
+	// Return if there were parameter errors.
+	if pes.Length() > 0 {
+		return nil, pes
+	}
+
 	// Handle ID.
-	if u.ID == 0 {
-		u.ID = idCounter
+	if params.ID == 0 {
+		params.ID = idCounter
 		idCounter++
 	}
 
+	// Hash the password.
+	pwHash, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcrypt.DefaultCost)
+	if err != nil {
+		s.logger.Error("error generating password hash",
+			slog.Any("error", err))
+		return nil, err
+	}
+
 	// Create a user.
-	use, err := s.s.User.Create(&user.User{
-		ID:            u.ID,
-		AccountTypeID: u.AccountTypeID,
-		Username:      u.Username,
+	storageu, err := s.storage.User.Create(&user.User{
+		ID:       params.ID,
+		Email:    params.Email,
+		Password: string(pwHash),
 	})
 	if err != nil {
+		s.logger.Error("storage.User.Create() error",
+			slog.Any("error", err))
 		return nil, err
 	}
 
 	// Map to service type.
 	serviceu := &proto.User{
-		ID:            use.ID,
-		AccountTypeID: use.AccountTypeID,
-		Username:      use.Username,
+		ID:       storageu.ID,
+		Email:    storageu.Email,
+		Password: storageu.Password,
+	}
+
+	return serviceu, nil
+}
+
+// Login checks if a user exists in the database and can log in.
+func (s *Service) Login(params *proto.UserLoginParams) (*proto.User, error) {
+	// Validate parameters.
+	if err := s.ValidateLoginParams(params); err != nil {
+		return nil, err
+	}
+
+	// Try to pull this user from the database by email.
+	storageu, err := s.storage.User.GetByEmail(params.Email)
+	if err == user.ErrUserNotFound {
+		return nil, serverrors.ErrUserInvalidLogin
+	} else if err != nil {
+		s.logger.Error("storage.User.GetByEmail() error",
+			slog.Any("error", err))
+		return nil, err
+	}
+
+	// Validate the password.
+	if err := bcrypt.CompareHashAndPassword([]byte(storageu.Password), []byte(params.Password)); err != nil {
+		return nil, serverrors.ErrUserInvalidLogin
+	}
+
+	// Map to service type.
+	serviceu := &proto.User{
+		ID:       storageu.ID,
+		Email:    storageu.Email,
+		Password: storageu.Password,
 	}
 
 	return serviceu, nil
@@ -52,16 +129,96 @@ func (s *Service) Create(u *proto.User) (*proto.User, error) {
 // GetByID gets a user by the given ID.
 func (s *Service) GetByID(id uint) (*proto.User, error) {
 	// Get user by ID.
-	u, err := s.s.User.GetByID(id)
+	storageu, err := s.storage.User.GetByID(id)
 	if err != nil {
+		if err == user.ErrUserNotFound {
+			return nil, serverrors.ErrUserNotFound
+		}
+
+		s.logger.Error("storage.User.GetByID() error",
+			slog.Any("error", err))
 		return nil, err
 	}
 
 	// Map to service type.
 	serviceu := &proto.User{
-		ID:            u.ID,
-		AccountTypeID: u.AccountTypeID,
-		Username:      u.Username,
+		ID:       storageu.ID,
+		Email:    storageu.Email,
+		Password: storageu.Password,
+	}
+
+	return serviceu, nil
+}
+
+// Update handles updating a user.
+func (s *Service) Update(params *proto.UserUpdateParams) (*proto.User, error) {
+	// Validate parameters.
+	if err := s.ValidateUpdateParams(params); err != nil {
+		return nil, err
+	}
+
+	// Get the user.
+	serviceu, err := s.GetByID(*params.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check email.
+	pes := serverrors.NewParamErrors()
+	if params.Email != nil && *params.Email != serviceu.Email {
+		_, err := s.storage.User.GetByEmail(*params.Email)
+		if err == nil {
+			pes.Add(serverrors.NewParamError("email", serverrors.ErrUserEmailExists))
+		} else if err != nil && err != user.ErrUserNotFound {
+			s.logger.Error("storage.User.GetByEmail() error",
+				slog.Any("error", err))
+			return nil, err
+		}
+	}
+
+	// Return if there were parameter errors.
+	if pes.Length() > 0 {
+		return nil, pes
+	}
+
+	// Get user from storage.
+	storageu, err := s.storage.User.GetByID(*params.ID)
+	if err != nil {
+		s.logger.Error("storage.User.GetByID() error",
+			slog.Any("error", err))
+		return nil, err
+	}
+
+	// Handle email.
+	if params.Email != nil && *params.Email != serviceu.Email {
+		storageu.Email = *params.Email
+	}
+
+	// Hash the password.
+	if params.Password != nil {
+		pwHash, err := bcrypt.GenerateFromPassword([]byte(*params.Password), bcrypt.DefaultCost)
+		if err != nil {
+			s.logger.Error("error generating password hash",
+				slog.Any("error", err))
+			return nil, err
+		}
+
+		storageu.Password = string(pwHash)
+	}
+
+	// Update the user.
+	storageu, err = s.storage.User.Update(storageu)
+	if err != nil {
+		s.logger.Error("storage.User.Update() error",
+			slog.Any("error", err))
+		return nil, err
+	}
+
+	// Map to service type.
+	serviceu = &proto.User{
+		ID:       storageu.ID,
+		Email:    storageu.Email,
+		Password: storageu.Password,
 	}
 
 	return serviceu, nil

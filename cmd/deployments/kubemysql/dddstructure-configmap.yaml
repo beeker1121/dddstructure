@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dddstructure-configmap
+data:
+  db-host: dddstructure-mysql-service
+  db-port: '3306'

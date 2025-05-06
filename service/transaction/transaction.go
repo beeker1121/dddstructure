@@ -1,8 +1,11 @@
 package transaction
 
 import (
-	"dddstructure/dep"
+	"log/slog"
+	"strings"
+
 	"dddstructure/proto"
+	"dddstructure/service/interfaces"
 	"dddstructure/storage"
 	"dddstructure/storage/transaction"
 )
@@ -12,67 +15,95 @@ var idCounter uint = 1
 
 // Service defines the transaction service.
 type Service struct {
-	s *storage.Storage
+	storage  *storage.Storage
+	services *interfaces.Service
+	logger   *slog.Logger
+}
+
+// SetServices sets the services interface.
+func (s *Service) SetServices(services *interfaces.Service) {
+	s.services = services
 }
 
 // New creates a new service.
-func New(s *storage.Storage) *Service {
+func New(s *storage.Storage, l *slog.Logger) *Service {
 	return &Service{
-		s: s,
+		storage: s,
+		logger:  l,
 	}
 }
 
 // Process handles processing a transaction.
-func (s *Service) Process(t *proto.Transaction) (*proto.Transaction, error) {
+func (s *Service) Process(params *proto.TransactionProcessParams) (*proto.Transaction, error) {
+	// Validate parameters.
+	if err := s.ValidateProcessParams(params); err != nil {
+		return nil, err
+	}
+
 	// Handle ID.
-	if t.ID == 0 {
-		t.ID = idCounter
+	if params.ID == 0 {
+		params.ID = idCounter
 		idCounter++
 	}
 
-	// Get the processor.
-	p, err := dep.Processor.GetProcessor(t)
-	if err != nil {
-		return nil, err
+	// Get card type.
+	cardType := "unknown"
+	if params.PaymentMethod.Card != nil {
+		if strings.HasPrefix(params.PaymentMethod.Card.Number, "411111") {
+			cardType = "visa"
+		}
 	}
 
-	// Process the transaction.
-	if err := p.Process(t); err != nil {
-		return nil, err
-	}
-
-	// Save new transaction.
-	_, err = s.s.Transaction.Create(&transaction.Transaction{
-		ID:             t.ID,
-		MerchantID:     t.MerchantID,
-		Type:           t.Type,
-		ProcessorType:  t.ProcessorType,
-		CardType:       t.CardType,
-		AmountCaptured: t.AmountCaptured,
-		InvoiceID:      t.InvoiceID,
+	// Create a transaction.
+	storaget, err := s.storage.Transaction.Create(&transaction.Transaction{
+		ID:             params.ID,
+		UserID:         params.UserID,
+		Type:           params.Type,
+		CardType:       cardType,
+		AmountCaptured: params.Amount,
+		InvoiceID:      params.InvoiceID,
+		Status:         "approved",
 	})
 	if err != nil {
+		s.logger.Error("storage.Transaction.Create() error",
+			slog.Any("error", err))
 		return nil, err
 	}
 
 	// Update an invoice.
-	if t.Type == "refund" {
+	if params.Type == "refund" {
 		// Get the invoice.
-		i, err := dep.Invoice.GetByID(t.InvoiceID)
+		servicei, err := s.services.Invoice.GetByID(params.InvoiceID)
 		if err != nil {
 			return nil, err
 		}
 
 		// Change amounts and status.
-		i.AmountDue += t.AmountCaptured
-		i.AmountPaid -= t.AmountCaptured
-		i.Status = "pending"
+		servicei.AmountDue += storaget.AmountCaptured
+		servicei.AmountPaid -= storaget.AmountCaptured
+		servicei.Status = "pending"
 
-		// Update the invoice.
-		if err := dep.Invoice.Update(i); err != nil {
+		if _, err := s.services.Invoice.UpdateForTransaction(&proto.InvoiceUpdateForTransactionParams{
+			ID:         &servicei.ID,
+			AmountDue:  &servicei.AmountDue,
+			AmountPaid: &servicei.AmountPaid,
+			Status:     &servicei.Status,
+		}); err != nil {
+			s.logger.Error("storage.Invoice.UpdateForTransaction() error",
+				slog.Any("error", err))
 			return nil, err
 		}
 	}
 
-	return t, nil
+	ret := &proto.Transaction{
+		ID:             storaget.ID,
+		UserID:         storaget.UserID,
+		Type:           storaget.Type,
+		CardType:       storaget.CardType,
+		AmountCaptured: storaget.AmountCaptured,
+		InvoiceID:      storaget.InvoiceID,
+		Status:         storaget.Status,
+	}
+
+	return ret, nil
 }

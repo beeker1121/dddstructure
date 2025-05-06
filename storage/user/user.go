@@ -4,11 +4,13 @@ package user
 type Database interface {
 	Create(u *User) (*User, error)
 	GetByID(id uint) (*User, error)
+	GetByEmail(email string) (*User, error)
+	Update(u *User) (*User, error)
 }
 
 // User defines a user.
 type User struct {
-	ID            uint
-	AccountTypeID uint
-	Username      string
+	ID       uint
+	Email    string
+	Password string
 }

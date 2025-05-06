@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-initdb-pv-volume
+  labels:
+    app: mysql
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Mi
+  accessModes:
+  - ReadOnlyMany
+  hostPath:
+    path: "/app/dddstructure/db"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-initdb-pv-claim
+  labels:
+    app: mysql
+spec:
+  storageClassName: manual
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Mi

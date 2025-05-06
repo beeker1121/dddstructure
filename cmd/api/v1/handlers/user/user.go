@@ -1,55 +1,133 @@
 package user
 
 import (
-	"fmt"
+	"encoding/json"
+	"log/slog"
 	"net/http"
-	"strconv"
 
 	apictx "dddstructure/cmd/api/context"
+	"dddstructure/cmd/api/errors"
+	"dddstructure/cmd/api/middleware/auth"
 	"dddstructure/cmd/api/response"
+	"dddstructure/proto"
+	serverrors "dddstructure/service/errors"
 
 	"github.com/beeker1121/httprouter"
 )
 
-type User struct {
-	ID            uint   `json:"id"`
-	AccountTypeID uint   `json:"account_type_id"`
-	Username      string `json:"username"`
-}
-
+// New creates the routes for the user endpoints of the API.
 func New(ac *apictx.Context, router *httprouter.Router) {
 	// Handle the routes.
-	router.GET("/api/v1/user/:id", HandleGetUser(ac))
+	router.GET("/api/v1/user", auth.AuthenticateEndpoint(ac, HandleGet(ac)))
+	router.POST("/api/v1/user", auth.AuthenticateEndpoint(ac, HandlePost(ac)))
 }
 
-func HandleGetUser(ac *apictx.Context) http.HandlerFunc {
+// User defines a user.
+type User struct {
+	ID    uint   `json:"id"`
+	Email string `json:"email"`
+}
+
+// ResultGet defines the response data for the HandleGet handler.
+type ResultGet struct {
+	Data User `json:"data"`
+}
+
+// HandleGet handles the /api/v1/user GET route of the API.
+func HandleGet(ac *apictx.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Get the user ID.
-		var id uint
-		idu64, err := strconv.ParseUint(httprouter.GetParam(r, "id"), 10, 32)
+		// Get this user from the request context.
+		user, err := auth.GetUserFromRequest(r)
 		if err != nil {
-			w.Write([]byte(err.Error()))
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
-		id = uint(idu64)
 
 		// Get the user.
-		servu, err := ac.Service.User.GetByID(id)
+		serviceu, err := ac.Service.User.GetByID(user.ID)
 		if err != nil {
-			w.Write([]byte(err.Error()))
+			ac.Logger.Error("user.GetByID() service error",
+				slog.Any("error", err))
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
 			return
 		}
 
-		// Map to API user response.
-		u := &User{
-			ID:            servu.ID,
-			AccountTypeID: servu.AccountTypeID,
-			Username:      servu.Username,
+		// Create a new Result.
+		result := ResultGet{
+			Data: User{
+				ID:    serviceu.ID,
+				Email: serviceu.Email,
+			},
 		}
 
 		// Respond with JSON.
-		if err := response.JSON(w, true, u); err != nil {
-			fmt.Printf("error in handler: %v\n", err)
+		if err := response.JSON(w, true, result); err != nil {
+			ac.Logger.Error("response.JSON() error",
+				slog.Any("error", err))
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+	}
+}
+
+// RequestPost defines the request data for the HandlePost handler.
+type RequestPost struct {
+	Email    *string `json:"email"`
+	Password *string `json:"password"`
+}
+
+// ResultPost defines the response data for the HandlePost handler.
+type ResultPost struct {
+	Data User `json:"data"`
+}
+
+// HandlePost handles the /api/v1/user POST route of the API.
+func HandlePost(ac *apictx.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Parse the parameters from the request body.
+		var req RequestPost
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			errors.Default(ac.Logger, w, errors.ErrBadRequest)
+			return
+		}
+
+		// Get this user from the request context.
+		user, err := auth.GetUserFromRequest(r)
+		if err != nil {
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Update the user.
+		user, err = ac.Service.User.Update(&proto.UserUpdateParams{
+			ID:       &user.ID,
+			Email:    req.Email,
+			Password: req.Password,
+		})
+		if pes, ok := err.(*serverrors.ParamErrors); ok && err != nil {
+			errors.Params(ac.Logger, w, http.StatusBadRequest, pes)
+			return
+		} else if err != nil {
+			ac.Logger.Error("user.Update() error",
+				slog.Any("error", err))
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
+		}
+
+		// Create a new Result.
+		result := ResultPost{
+			Data: User{
+				ID:    user.ID,
+				Email: user.Email,
+			},
+		}
+
+		// Respond with JSON.
+		if err := response.JSON(w, true, result); err != nil {
+			ac.Logger.Error("response.JSON() error",
+				slog.Any("error", err))
+			errors.Default(ac.Logger, w, errors.ErrInternalServerError)
+			return
 		}
 	}
 }

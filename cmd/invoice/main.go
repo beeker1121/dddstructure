@@ -3,49 +3,54 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
+	"os"
 
-	"dddstructure/dep"
 	"dddstructure/proto"
 	"dddstructure/service"
-	"dddstructure/storage/mysql"
+	"dddstructure/storage/mock"
 )
 
 func main() {
 	fmt.Println("running...")
 
-	// Create a new MySQL storage implementation.
-	fmt.Println("[+] Creating new MySQL storage implementation...")
-	store := mysql.New(&sql.DB{})
+	// Create a new logger.
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+
+	// Create a new mock storage implementation.
+	fmt.Println("[+] Creating new mock storage implementation...")
+	store := mock.New(&sql.DB{})
 
 	// Create a new service.
 	fmt.Println("[+] Creating new service...")
-	serv := service.New(store)
+	serv := service.New(store, logger)
 
-	// Register dependencies.
-	fmt.Println("[+] Registering dependencies...")
-	dep.RegisterMerchant(serv.Merchant)
-	dep.RegisterUser(serv.User)
-	dep.RegisterInvoice(serv.Invoice)
-	dep.RegisterProcessor(serv.Processor)
-	dep.RegisterTransaction(serv.Transaction)
-
-	// Create a merchant.
-	fmt.Println("[+] Creating merchant...")
-	m, err := serv.Merchant.Create(&proto.Merchant{
-		Name:  "John Doe",
-		Email: "johndoe@gmail.com",
+	// Create a user.
+	u, err := serv.User.Create(&proto.UserCreateParams{
+		Email:    "johndoe@gmail.com",
+		Password: "TestPassword123",
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	// Create an invoice.
-	fmt.Println("[+] Creating invoice...")
-	i, err := serv.Invoice.Create(&proto.Invoice{
-		MerchantID:    m.ID,
-		ProcessorType: "achcom",
-		BillTo:        "Bill Smith",
-		PayTo:         m.Name,
-		AmountDue:     100,
-		AmountPaid:    0,
-		Status:        "pending",
+	i, err := serv.Invoice.Create(&proto.InvoiceCreateParams{
+		UserID: u.ID,
+		BillTo: proto.InvoiceBillTo{
+			FirstName: "Bill",
+			LastName:  "Smith",
+		},
+		PayTo: proto.InvoicePayTo{
+			FirstName: "John",
+			LastName:  "Doe",
+		},
+		LineItems: []proto.InvoiceLineItem{
+			{
+				Quantity: 1,
+				Price:    100,
+			},
+		},
 	})
 	if err != nil {
 		panic(err)
@@ -53,30 +58,27 @@ func main() {
 	fmt.Printf("[+] New invoice: %+v\n", *i)
 
 	// Pay an invoice, will call transaction.Process service.
-	fmt.Println("[+] Paying invoice...")
-	i, err = serv.Invoice.Pay(i.ID)
+	i, err = serv.Invoice.Pay(i.ID, &proto.InvoicePayParams{
+		Amount: 100,
+	})
 	if err != nil {
 		panic(err)
 	}
 	fmt.Printf("[+] Paid invoice: %+v\n", *i)
 
 	// Process a transaction, will call invoice.Update service.
-	fmt.Println("[+] Processing a separate transaction...")
-	t, err := serv.Transaction.Process(&proto.Transaction{
-		MerchantID:     i.MerchantID,
-		Type:           "refund",
-		ProcessorType:  "achcom",
-		CardType:       "visa",
-		AmountCaptured: 100,
-		InvoiceID:      i.ID,
+	t, err := serv.Transaction.Process(&proto.TransactionProcessParams{
+		UserID:    i.UserID,
+		Type:      "refund",
+		Amount:    100,
+		InvoiceID: i.ID,
 	})
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("[+] Separate transaction processed: %+v\n", *t)
+	fmt.Printf("[+] New transaction processed: %+v\n", *t)
 
 	// Get the invoice again.
-	fmt.Println("[+] Getting invoice...")
 	i, err = serv.Invoice.GetByID(i.ID)
 	if err != nil {
 		panic(err)
