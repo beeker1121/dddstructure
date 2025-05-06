@@ -11,9 +11,21 @@ Original concepts for this idea go back to my [gotodo](https://github.com/beeker
 
 ## Preview
 
+**Login**
+
 ![Login page](https://raw.githubusercontent.com/beeker1121/dddstructure/master/preview/login.png)
 
-![No invoices page](https://raw.githubusercontent.com/beeker1121/dddstructure/master/preview/invoices-none.png)
+**Invoices**
+
+![Invoices page](https://raw.githubusercontent.com/beeker1121/dddstructure/master/preview/invoices-none.png)
+
+**Create new invoice**
+
+![Invoices page](https://raw.githubusercontent.com/beeker1121/dddstructure/master/preview/invoice-new.png)
+
+**Pay invoice**
+
+![Pay invoice](https://raw.githubusercontent.com/beeker1121/dddstructure/master/preview/invoice-pay.png)
 
 # Structure
 
@@ -166,6 +178,10 @@ Then run SQLBoiler to update the models based on the MySQL database schema:
 3. Run `sqlboiler mysql` in a terminal in the root folder (where `sqlboiler.toml` is).
 
 4. The output will be to the `./storage/mysql/models` folder.
+
+# Deployments
+
+A guide on how to deploy this application using Kubernetes can be found in the README at `cmd/deployments/kubemysql/README.md`. It uses the `minikube` application to test a local cluster, running the backend API, MySQL database, and frontend.
 
 # TODO
 
