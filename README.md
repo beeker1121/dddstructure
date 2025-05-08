@@ -2,7 +2,7 @@
 
 DDDStructure is an example SaaS application for invoicing. It includes a full backend API application built in Golang and a full frontend application built in Vue.
 
-There are a few goals with this project:
+The main goals of this project are:
 
 1. Showcase a mix of DDD and SOA principles for how to structure a Golang backend application/API.
 2. Provide a baseline codebase for both backend and frontend applications that others can use to build from.
