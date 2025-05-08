@@ -1,13 +1,13 @@
 # DDDStructure
 
-DDDStructure is an example SaaS application for invoicing. It includes a fully built and structured backend API built in Golang, and a fully built frontend application built in Vue.
+DDDStructure is an example SaaS application for invoicing. It includes a full backend API application built in Golang and a full frontend application built in Vue.
 
 There are a few goals with this project:
 
 1. Showcase a mix of DDD and SOA principles for how to structure a Golang backend application/API.
-2. Provide a baseline codebase, for both the frontend and backend of the application, where others can build from it.
+2. Provide a baseline codebase for both backend and frontend applications that others can use to build from.
 
-Original concepts for this idea go back to my [gotodo](https://github.com/beeker1121/gotodo) project. This new project is a more fleshed out example of those same concepts, with examples of how to handle problems like sharing services, deploying with Kubernetes, etc.
+Original concepts go back to the [gotodo](https://github.com/beeker1121/gotodo) project. This new project is a more fleshed out example of those same concepts, with examples of how to handle problems like sharing services, deploying with Kubernetes, etc.
 
 ## Preview
 
@@ -33,7 +33,7 @@ This project uses a mix of DDD (Domain Driven Design) and SOA (Service Oriented 
 
 Mainly, we want to think of our project and the packages contained therein in terms of their responsibilities, or 'domains'.
 
-For example, we main goal of this project is to provide an HTTP based API. The API should be viewed as its own 'domain' - it should really only care about routing, handling incoming HTTP requests, sending back responses, so on and so forth. For this reason, all API specific logic is within the `cmd/api` package. It's in the `cmd` folder since ultimately, our API will be a binary we run.
+For example, the main goal of this project is to provide an HTTP based API. The API should be viewed as its own 'domain' - it should really only care about routing, handling incoming HTTP requests, sending back responses, so on and so forth. For this reason, all API specific logic is within the `cmd/api` package. It's in the `cmd` folder since ultimately our API will be a binary we run.
 
 All business logic then is handled within the `services` package or 'domain'. The API does not care at all about our business logic, it just cares about which service method to call that implements the business logic. For example, if we have a `POST` endpoint for `/api/v1/signup` to create a new user, the API creates this route to handle the incoming requests and then calls the `services.User.Create` service.
 
