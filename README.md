@@ -61,7 +61,7 @@ One solution, which is implemented in this example, is to create interfaces for 
 
 With this 'dependency' idea implemented, we can call top level service methods within other top level service methods. While we have to worry about infinite recursion, ie function A calls function B which also may call function A again, this would be present in any flat package structure.
 
-This basically gives us the ability to keep services separated into their own packages, whill still being able to essnetially cyclically import top level services so we're not duplicating already built business logic.
+This basically gives us the ability to keep services separated into their own packages, while still being able to, essentially, cyclically import top level services so we're not duplicating already built business logic.
 
 # Concerns
 
